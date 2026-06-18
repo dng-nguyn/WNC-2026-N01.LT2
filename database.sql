@@ -12,6 +12,54 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-INSERT INTO users (id, username, password, full_name, phone, role, is_active) VALUES
-(UUID(), 'admin', '123456', 'Nguyễn Việt Cường', '0987654321', 'MANAGER', TRUE),
-(UUID(), 'nhanvien01', '123456', 'Nguyễn Đình Anh Dũng', '0912345678', 'STAFF', TRUE);
+
+-- MODULE 1: MENU (THỰC ĐƠN)
+
+CREATE TABLE categories (
+    id VARCHAR(36) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE products (
+    id VARCHAR(36) PRIMARY KEY,
+    category_id VARCHAR(36) NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL, -- Using decimal for financial accuracy
+    is_available BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- MODULE 2: TABLE & ORDER (BÀN & ORDER)
+
+CREATE TABLE tables (
+    id VARCHAR(36) PRIMARY KEY,
+    table_number VARCHAR(20) NOT NULL UNIQUE,
+    status ENUM('EMPTY', 'OCCUPIED', 'RESERVED') DEFAULT 'EMPTY',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE orders (
+    id VARCHAR(36) PRIMARY KEY,
+    table_id VARCHAR(36), -- Nullable to allow for Takeaway orders
+    user_id VARCHAR(36) NOT NULL, -- Link to your existing 'users' table
+    status ENUM('PENDING', 'PAID', 'CANCELLED') DEFAULT 'PENDING',
+    total_amount DECIMAL(10, 2) DEFAULT 0.00,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (table_id) REFERENCES tables(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE order_items (
+    id VARCHAR(36) PRIMARY KEY,
+    order_id VARCHAR(36) NOT NULL,
+    product_id VARCHAR(36) NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    price DECIMAL(10, 2) NOT NULL, -- Captures the item price at the exact moment of order
+    note VARCHAR(255), -- For special requests (e.g., "no sugar", "more ice")
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
