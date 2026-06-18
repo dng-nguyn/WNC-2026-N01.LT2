@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { OrderModule } from './orders/order.module';
 
 @Module({
   controllers: [AppController],
@@ -21,8 +22,9 @@ import { AppService } from './app.service';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       autoLoadEntities: true, // Automatically registers entities in your modules
-      synchronize: false,    // Set to false since you already defined your SQL schema manually
+      synchronize: true,
     }),
+    OrderModule,
   ],
 })
 export class AppModule {}

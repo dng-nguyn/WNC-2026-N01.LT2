@@ -2,8 +2,54 @@
 
 ## Run
 
-1. Install dependencies: `npm install`
-2. Set up your `.env` file from `.env.example`
-3. Start development server: `npm run start:dev`
+1. cài deps: `npm install`
+2. cài `.env` từ `.env.example`
+3. chạy `npm run start:dev`
 
-The app listens on port `3000` by default.
+port mặc định :3000
+
+## CRUD Order
+
+Dự án này đã được thêm một đối tượng `Order` với đầy đủ CRUD bằng NestJS + TypeORM.
+
+### Cấu trúc dữ liệu Order
+
+- `id`: mã đơn hàng tự tăng
+- `customerName`: tên khách hàng
+- `itemName`: tên món hàng hoặc sản phẩm
+- `quantity`: số lượng
+- `totalPrice`: tổng tiền
+- `status`: trạng thái đơn hàng, gồm `pending`, `confirmed`, `completed`, `cancelled`
+- `createdAt`: thời gian tạo
+- `updatedAt`: thời gian cập nhật
+
+### API CRUD
+
+- `POST /orders`: tạo đơn hàng mới
+- `GET /orders`: lấy danh sách đơn hàng
+- `GET /orders/:id`: lấy chi tiết một đơn hàng
+- `PATCH /orders/:id`: cập nhật một phần hoặc toàn bộ đơn hàng
+- `DELETE /orders/:id`: xóa đơn hàng
+
+### Ví dụ tạo order
+
+```json
+{
+	"customerName": "Nguyen Van A",
+	"itemName": "Ca phe sua da",
+	"quantity": 2,
+	"totalPrice": "50000",
+	"status": "pending"
+}
+```
+
+### Cách chạy thử
+
+1. Khởi động MySQL và kiểm tra file `.env`
+2. Chạy ứng dụng bằng `npm run start:dev`
+3. Dùng Postman, Insomnia hoặc cURL để gọi các endpoint bên trên
+
+### Lưu ý
+
+- Dự án đang bật `synchronize: true` để tự tạo bảng `orders` trong môi trường dev.
+- Khi chạy lần đầu, TypeORM sẽ tự tạo bảng nếu database đã tồn tại và cấu hình kết nối đúng.
