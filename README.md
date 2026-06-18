@@ -1,6 +1,7 @@
 # WNC-2026-N01.LT2
+# Bài làm Nguyễn Đình Anh Dũng - 24100331
 
-## Run
+## Chạy
 
 1. cài deps: `npm install`
 2. cài `.env` từ `.env.example`
@@ -48,6 +49,10 @@ Dự án này đã được thêm một đối tượng `Order` với đầy đ�
 1. Khởi động MySQL và kiểm tra file `.env`
 2. Chạy ứng dụng bằng `npm run start:dev`
 3. Dùng Postman, Insomnia hoặc cURL để gọi các endpoint bên trên
+
+### Activity Diagram phần orders
+<img width="681" height="753" alt="Biểu đồ không có tiêu đề drawio" src="https://github.com/user-attachments/assets/0ff21045-5632-4f57-b35b-a699343371c4" />
+
 
 ### Lưu ý
 
