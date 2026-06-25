@@ -1,5 +1,4 @@
 # WNC-2026-N01.LT2
-# Bài làm Nguyễn Đình Anh Dũng - 24100331
 
 This project is a NestJS backend for a coffee shop management system. The implemented CRUD examples are for `categories`, `employees`, and `orders`.
 
