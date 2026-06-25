@@ -35,6 +35,75 @@ The app listens on port `3000` by default.
 - `PATCH /orders/:id` - update order
 - `DELETE /orders/:id` - delete order
 
+## Authentication & Authorization
+
+The project uses **JWT** (JSON Web Token) for authentication, with **HTTP-only cookies** for secure token storage and **express-session** for session management. Passwords are hashed with **argon2id**.
+
+### Auth endpoints
+
+| Method | Endpoint | Auth Required | Description |
+|--------|----------|:---:|-------------|
+| POST | `/auth/register` | No | Register a new user with `username` and `password` (min 6 chars) |
+| POST | `/auth/login` | No | Login with `username` and `password`, receive JWT token |
+| GET | `/auth/profile` | Yes | Get the profile info of the currently authenticated user |
+
+### Register example
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"username": "yourname", "password": "yourpassword"}'
+```
+
+**Response:**
+```json
+{
+  "message": "Registration successful",
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": 1,
+    "username": "yourname",
+    "createdAt": "2026-06-25T00:00:00.000Z"
+  }
+}
+```
+
+### Login example
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username": "yourname", "password": "yourpassword"}'
+```
+
+### Profile example (authenticated)
+
+```bash
+curl http://localhost:3000/auth/profile \
+  -H "Authorization: Bearer <your-access-token>"
+```
+
+**Response:**
+```json
+{
+  "message": "Authenticated user profile",
+  "user": {
+    "id": 1,
+    "username": "yourname"
+  },
+  "session": null
+}
+```
+
+### .env configuration
+
+Add the following to your `.env` file:
+
+```env
+JWT_SECRET=your-jwt-secret-key
+SESSION_SECRET=your-session-secret-key
+```
+
 ## Activity Diagram
 
 - Category CRUD flow: [docs/category-crud-activity-diagram.md](docs/category-crud-activity-diagram.md)
