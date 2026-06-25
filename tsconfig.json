@@ -15,7 +15,8 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "types": ["node"]
+    "types": ["node"],
+    "strictPropertyInitialization": false
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
