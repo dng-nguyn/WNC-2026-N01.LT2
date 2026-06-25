@@ -17,13 +17,13 @@ export class Employee {
   @Column({ unique: true, length: 100 })
   email: string;
 
-  @Column({ length: 15, nullable: true })
+  @Column({ length: 15, nullable: true, type: 'varchar' })
   phone: string | null;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ length: 50, nullable: true, type: 'varchar' })
   position: string | null;
 
-  @Column({ length: 50, nullable: true })
+  @Column({ length: 50, nullable: true, type: 'varchar' })
   department: string | null;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
