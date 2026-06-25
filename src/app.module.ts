@@ -3,9 +3,11 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './categories/category.module';
 import { EmployeeModule } from './employees/employee.module';
 import { OrderModule } from './orders/order.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   controllers: [AppController],
@@ -24,11 +26,13 @@ import { OrderModule } from './orders/order.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       autoLoadEntities: true,
-      synchronize: false,
+      synchronize: true,
     }),
     CategoryModule,
     EmployeeModule,
     OrderModule,
+    UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
