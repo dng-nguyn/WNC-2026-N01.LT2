@@ -3,8 +3,10 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+<<<<<<< HEAD
 import { CategoryModule } from './categories/category.module';
 import { EmployeeModule } from './employees/employee.module';
+import { OrderModule } from './orders/order.module';
 
 @Module({
   controllers: [AppController],
@@ -22,11 +24,13 @@ import { EmployeeModule } from './employees/employee.module';
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
+<<<<<<< HEAD
       autoLoadEntities: true,
       synchronize: false,
     }),
     CategoryModule,
     EmployeeModule,
+    OrderModule,
   ],
 })
 export class AppModule {}

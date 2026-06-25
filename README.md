@@ -1,6 +1,7 @@
 # WNC-2026-N01.LT2
+# Bài làm Nguyễn Đình Anh Dũng - 24100331
 
-This project is a NestJS backend for a coffee shop management system. The implemented CRUD examples are for the `categories` and `employees` objects.
+This project is a NestJS backend for a coffee shop management system. The implemented CRUD examples are for `categories`, `employees`, and `orders`.
 
 ## Run
 
@@ -25,6 +26,14 @@ The app listens on port `3000` by default.
 - `GET /employees/:id` - get employee by id
 - `PATCH /employees/:id` - update employee
 - `DELETE /employees/:id` - delete employee
+
+## Order CRUD API
+
+- `POST /orders` - create a new order
+- `GET /orders` - get all orders
+- `GET /orders/:id` - get order by id
+- `PATCH /orders/:id` - update order
+- `DELETE /orders/:id` - delete order
 
 ## Activity Diagram
 
