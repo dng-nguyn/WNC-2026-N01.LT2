@@ -3,7 +3,7 @@
 ## Tổng Quan Kiến Trúc
 
 Backend được xây dựng bằng **NestJS 11** + **TypeORM** + **MySQL**, mã nguồn đặt tại `backend/src/`.
-Các module chính: Auth, Users, Menu, MenuItem, Table, Order, Employee.
+Các module chính: Auth, Users, Menu, MenuItem, Table, Order, Employee, Payment.
 
 ```
 request → Controller → Service → Repository → MySQL
@@ -343,9 +343,105 @@ Quản lý hồ sơ nhân viên quán (thông tin hành chính — **khác với
 | PATCH | `/employees/:id` | Cập nhật |
 | DELETE | `/employees/:id` | Xóa |
 
+
 ---
 
-## 8. Module Gốc: App (`app.module.ts`)
+## 8. Module Payment (Thanh Toán QR) — `payments/`
+
+Tích hợp thanh toán qua mã QR VietQR và xác minh giao dịch qua SePay API.
+
+### Entity: `Payment` → Bảng `payment_requests`
+
+Lưu yêu cầu thanh toán QR cho đơn hàng.
+
+| Trường | Kiểu | Ghi chú |
+|---|---|---|
+| `id` | UUID (PK) | |
+| `order` | → Order (FK: `order_id`, CASCADE) | Đơn hàng cần thanh toán |
+| `code` | VARCHAR(12) | Mã xác minh 12 ký tự, duy nhất |
+| `amount` | DECIMAL(12,0) | Số tiền (VND), làm tròn từ totalAmount |
+| `status` | ENUM('PENDING','COMPLETED','FAILED','EXPIRED') | Trạng thái thanh toán |
+| `qrUrl` | TEXT | URL ảnh VietQR đã tạo |
+| `sepayTransactionId` | VARCHAR(36) | UUID giao dịch SePay (sau khi xác minh) |
+| `createdAt` | TIMESTAMP | |
+| `updatedAt` | TIMESTAMP | |
+
+### Enum: `PaymentStatus`
+
+| Giá trị | Ý nghĩa |
+|---|---|
+| PENDING | Chờ thanh toán |
+| COMPLETED | Đã thanh toán (đã xác minh qua SePay) |
+| FAILED | Thanh toán thất bại |
+| EXPIRED | Hết hạn |
+
+### Service: `PaymentService`
+
+- `create(orderId)` — Tạo QR thanh toán:
+  1. Tìm Order → kiểm tra không bị hủy
+  2. Sinh mã xác minh 12 ký tự (chữ hoa + số, dùng `crypto.randomBytes`)
+  3. Tính `amount = Math.round(order.totalAmount)` (VND)
+  4. Tạo URL VietQR công khai:
+     ```
+     https://vietqr.app/img?acc={account}&bank={bank}
+     &amount={amount}&des={code}&template=compact&showinfo=true
+     ```
+  → Trả về Payment kèm `qrUrl` và `code`
+
+- `findById(id)` — Tra cứu payment (kèm Order)
+- `findByOrder(orderId)` — Tất cả payment của một đơn (mới nhất trước)
+- `verify(paymentId)` — Xác minh qua SePay:
+  1. Gọi `GET /v2/transactions?transaction_content={code}&transfer_type=in&per_page=10`
+  2. Auth: `Authorization: Bearer {SEPAY_API_KEY}`
+  3. Tìm giao dịch có `amount_in === payment.amount`
+  4. Nếu khớp → `status = COMPLETED`, lưu `sepayTransactionId`
+
+### DTOs
+
+- **CreatePaymentDto**: `{ orderId (UUID) }`
+
+### Endpoints
+
+| Method | Route | Auth | Mô tả |
+|---|---|---|---|
+| POST | `/payments/qr` | public | Tạo QR thanh toán cho đơn hàng |
+| GET | `/payments/:id` | public | Chi tiết payment |
+| GET | `/payments/order/:orderId` | public | Danh sách payment của đơn |
+| POST | `/payments/:id/verify` | public | Xác minh thanh toán (gọi Sepay) |
+
+### Flow thanh toán QR
+
+```
+Client                     Server                             Sepay
+  │                          │                                  │
+  ├─ POST /payments/qr ────→ │ Tìm Order                        │
+  │   { orderId }            │ Sinh mã 12 ký tự                  │
+  │                          │ Tạo URL VietQR (công khai)        │
+  │ ←─ { qrUrl, code,        │ Lưu Payment (PENDING)             │
+  │      amount }            │                                  │
+  │                          │                                  │
+  │ Khách quét QR,           │                                  │
+  │ chuyển khoản với nội     │                                  │
+  │ dung = mã code           │                                  │
+  │                          │                                  │
+  ├─ POST /payments/:id/     │                                  │
+  │   verify ───────────────→│ GET /v2/transactions ────────────→│
+  │                          │   ?transaction_content={code}     │
+  │                          │   &transfer_type=in               │
+  │                          │ ←─ { transactions: [...] }       │
+  │                          │ Khớp code + amount                │
+  │ ←─ { status: COMPLETED } │                                  │
+```
+
+### Biến môi trường cần thêm
+
+| Biến | Mô tả |
+|---|---|
+| `SEPAY_ACCOUNT_NUMBER` | Số tài khoản ngân hàng (hiển thị trên QR) |
+| `SEPAY_BANK_NAME` | Tên ngân hàng viết tắt (VD: MBBank, ACB, VPB) |
+| `SEPAY_API_KEY` | API key SePay để xác minh giao dịch |
+
+## 9. Module Gốc: App (`app.module.ts`)
 
 Module gốc load toàn bộ ứng dụng:
 
@@ -390,6 +486,7 @@ OrderItem (order_items)  │ N
          │
          │ N        1
          └──→ User (users) ─── nhân viên tạo đơn
+Order (orders) ──1──→ Payment (payment_requests) — thanh toán QR
 
 Employee (employees) — độc lập, không FK với bảng nào
 ```
@@ -404,6 +501,7 @@ Employee (employees) — độc lập, không FK với bảng nào
 | Table | `tables` | tables | |
 | Order | `orders` | orders | |
 | OrderItem | `order_items` | order_items | |
+| Payment | `payment_requests` | payment_requests | |
 | Employee | `employees` | employees | |
 
 ---
@@ -463,6 +561,9 @@ Client                     Server
 | `DB_DATABASE` | — | Tên database |
 | `JWT_SECRET` | `default-secret-change-me` | Khóa ký JWT |
 | `SESSION_SECRET` | `session-secret-change-me` | Khóa session |
+| `SEPAY_ACCOUNT_NUMBER` | — | Số tài khoản ngân hàng (hiển thị trên QR) |
+| `SEPAY_BANK_NAME` | — | Tên ngân hàng (VD: MBBank, ACB, VPB) |
+| `SEPAY_API_KEY` | — | API key SePay để xác minh giao dịch |
 | `PORT` | `3000` | Cổng server |
 | `NODE_ENV` | — | `production` = bật secure cookie |
 

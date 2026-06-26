@@ -10,8 +10,8 @@ describe('Cafe Backend E2E', () => {
   let menuId: string;
   let menuItemId: string;
   let tableId: string;
+  let paymentId: string;
   let orderId: string;
-
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -454,6 +454,96 @@ describe('Cafe Backend E2E', () => {
         .expect(201);
 
       expect(res.body.table).toBeNull();
+    });
+  });
+
+  // ── Payments ──────────────────────────────────────────
+
+  describe('Payments', () => {
+    let paymentOrderId: string;
+    let paymentMenuId: string;
+    let paymentMenuItemId: string;
+
+    beforeAll(async () => {
+      // Create prerequisites for payment tests
+      const menuRes = await request(app.getHttpServer())
+        .post('/menus')
+        .send({ name: `PayMenu_${Date.now()}` });
+      paymentMenuId = menuRes.body.id;
+
+      const itemRes = await request(app.getHttpServer())
+        .post('/menu-items')
+        .send({ menuId: paymentMenuId, name: 'Espresso', price: 2.5 });
+      paymentMenuItemId = itemRes.body.id;
+
+      const orderRes = await request(app.getHttpServer())
+        .post('/orders')
+        .send({
+          userId,
+          items: [{ menuItemId: paymentMenuItemId, quantity: 3 }],
+        })
+        .expect(201);
+      paymentOrderId = orderRes.body.id;
+    });
+
+    it('POST /payments/qr — creates QR payment for an order', async () => {
+      const res = await request(app.getHttpServer())
+        .post('/payments/qr')
+        .send({ orderId: paymentOrderId })
+        .expect(201);
+
+      expect(res.body.id).toBeTruthy();
+      expect(res.body.code).toHaveLength(12);
+      expect(res.body.amount).toBeGreaterThan(0);
+      expect(res.body.status).toBe('PENDING');
+      expect(res.body.qrUrl).toContain('vietqr.app/img');
+      expect(res.body.qrUrl).toContain('template=compact');
+      expect(res.body.qrUrl).toContain('showinfo=true');
+      expect(res.body.qrUrl).toContain(encodeURIComponent(res.body.code));
+      expect(res.body.order.id).toBe(paymentOrderId);
+      paymentId = res.body.id;
+    });
+
+    it('GET /payments/:id — returns payment details', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/${paymentId}`)
+        .expect(200);
+
+      expect(res.body.id).toBe(paymentId);
+      expect(res.body.code).toHaveLength(12);
+      expect(res.body.status).toBe('PENDING');
+      expect(res.body.order.id).toBe(paymentOrderId);
+    });
+
+    it('GET /payments/order/:orderId — returns payments for order', async () => {
+      const res = await request(app.getHttpServer())
+        .get(`/payments/order/${paymentOrderId}`)
+        .expect(200);
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBeGreaterThanOrEqual(1);
+      expect(res.body[0].id).toBe(paymentId);
+    });
+
+    it('POST /payments/:id/verify — fails when Sepay unreachable', async () => {
+      // Sepay API is unreachable without valid credentials — expect 400
+      await request(app.getHttpServer())
+        .post(`/payments/${paymentId}/verify`)
+        .expect(400);
+    });
+
+    it('POST /payments/qr — 404 for non-existent order', async () => {
+      await request(app.getHttpServer())
+        .post('/payments/qr')
+        .send({ orderId: '00000000-0000-0000-0000-000000000000' })
+        .expect(404);
+    });
+
+    it('POST /payments/qr — rejects missing orderId', async () => {
+      await request(app.getHttpServer())
+        .post('/payments/qr')
+        .send({})
+        .expect(400);
     });
   });
 
