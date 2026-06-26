@@ -173,10 +173,9 @@ export class PaymentService {
 
   private generateCode(length: number): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    const bytes = crypto.randomBytes(length);
     let result = '';
     for (let i = 0; i < length; i++) {
-      result += chars[bytes[i] % chars.length];
+      result += chars[crypto.randomInt(chars.length)];
     }
     return result;
   }
