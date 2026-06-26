@@ -37,7 +37,7 @@ export class PaymentService {
     const amountVnd = Math.round(Number(order.totalAmount));
 
     const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '0000000000';
-    const bankName = this.configService.get<string>('SEPAY_BANK_NAME') || 'DEMO';
+    const bankName = this.configService.get<string>('SEPAY_BANK_NAME') || 'MBBank';
 
     const qrUrl =
       `https://vietqr.app/img` +

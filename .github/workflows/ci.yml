@@ -49,5 +49,5 @@ jobs:
           # Dummy Sepay values for E2E smoke tests (QR is public, verify gracefully fails)
           SEPA_API_KEY: ci-dummy-key
           SEPA_ACCOUNT_NUMBER: '0000000000'
-          SEPA_BANK_NAME: DEMO
+          SEPA_BANK_NAME: MBBank
         run: npm test
