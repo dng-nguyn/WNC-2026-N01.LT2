@@ -21,6 +21,8 @@ export class AuthService {
     const user = await this.usersService.create({
       username: registerDto.username,
       password: hashedPassword,
+      fullName: registerDto.fullName,
+      phone: registerDto.phone,
     });
 
     // Generate JWT token
@@ -62,7 +64,7 @@ export class AuthService {
     };
   }
 
-  async validateUser(userId: number) {
+  async validateUser(userId: string) {
     return this.usersService.findById(userId);
   }
 }

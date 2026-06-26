@@ -1,33 +1,49 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { OrderStatus } from './order-status.enum';
+import { OrderItem } from './order-item.entity';
+import { Table } from '../tables/table.entity';
+import { User } from '../users/user.entity';
 
-@Entity({ name: 'orders' })
+@Entity('orders')
 export class Order {
-  @PrimaryGeneratedColumn()
-  id!: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
-  @Column({ length: 150 })
-  customerName!: string;
+  @ManyToOne(() => Table, { nullable: true })
+  @JoinColumn({ name: 'table_id' })
+  table: Table | null;
 
-  @Column({ length: 150 })
-  itemName!: string;
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
-  @Column({ type: 'int' })
-  quantity!: number;
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  totalPrice!: string;
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
+  status: OrderStatus;
 
   @Column({
-    type: 'enum',
-    enum: OrderStatus,
-    default: OrderStatus.PENDING,
+    name: 'total_amount',
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
   })
-  status!: OrderStatus;
+  totalAmount: number;
 
-  @CreateDateColumn()
-  createdAt!: Date;
+  @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
+  items: OrderItem[];
 
-  @UpdateDateColumn()
-  updatedAt!: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

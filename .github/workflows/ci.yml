@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main, cafe-backend-expansion]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpass
+          MYSQL_DATABASE: Quan_Ly_Quan_Cafe
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - name: Run E2E tests
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: testpass
+          DB_DATABASE: Quan_Ly_Quan_Cafe
+          JWT_SECRET: ci-jwt-secret
+          SESSION_SECRET: ci-session-secret
+          NODE_ENV: test
+        run: npm test
