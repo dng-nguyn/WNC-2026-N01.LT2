@@ -2,9 +2,9 @@ require('dotenv').config();
 
 module.exports = {
   preset: 'ts-jest',
-  testMatch: ['<rootDir>/test/**/*.spec.ts', '<rootDir>/test/**/*.e2e-spec.ts'],
+  testMatch: ['<rootDir>/backend/test/**/*.spec.ts', '<rootDir>/backend/test/**/*.e2e-spec.ts'],
   testEnvironment: 'node',
-  roots: ['<rootDir>/test'],
+  roots: ['<rootDir>/backend/test'],
   moduleFileExtensions: ['js', 'json', 'ts'],
   transform: {
     '^.+\\.ts$': ['ts-jest', {
