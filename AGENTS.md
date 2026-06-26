@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-NestJS backend for a coffee shop management system. MySQL-backed REST API with JWT authentication, 6 domain modules (menus, menu-items, tables, employees, orders, users), and full CRUD with relational data. TypeORM with `synchronize: true` for dev schema management.
+NestJS backend for a coffee shop management system. MySQL-backed REST API with JWT authentication, **7 domain modules** (menus, menu-items, tables, employees, orders, users, payments), and full CRUD with relational data. TypeORM with `synchronize: true` for dev schema management. **VietQR online payments** integrated: QR generation via public VietQR URL (no auth), transaction verification via Sepay v2 API (Bearer token).
 
 ## Architecture & Data Flow
 
@@ -30,8 +30,8 @@ AppModule
 ├── TableModule ────────── exports TypeOrmModule
 ├── EmployeeModule
 ├── OrderModule ────────── imports MenuItemModule, UsersModule, TableModule
-├── UsersModule ────────── exports UsersService + TypeOrmModule
 └── AuthModule ─────────── imports UsersModule, exports AuthService
+└── PaymentModule ──────── registers Payment + Order repos, exports PaymentService
 ```
 
 Modules that are consumed by `OrderModule` MUST export `TypeOrmModule` so the consuming module can `@InjectRepository()` cross-module entities.
@@ -49,13 +49,14 @@ src/
   tables/              — Table entity, TableStatus enum, CRUD
   employees/           — Employee entity, CRUD
   orders/              — Order + OrderItem entities, relational CRUD, addItem
+  payments/            — Payment entity (DB table: payment_requests), VietQR QR, Sepay verify
 test/
-  app.e2e-spec.ts      — 45 E2E tests via supertest
-docs/                  — Mermaid activity diagrams per module
-database.sql           — Reference SQL schema (7 tables)
-.env.example           — Required environment variables
-jest.config.js         — ts-jest + dotenv preload
-.github/workflows/ci.yml  — CI with MySQL 8 service container
+  app.e2e-spec.ts      — 51 E2E tests via supertest (45 baseline + 6 payment smoke tests)
+docs/
+  tai-lieu-backend.md  — Vietnamese docs: architecture, entity tables, flows, env vars
+database.sql           — Reference SQL schema (8 tables including payment_requests)
+.env.example           — Required environment variables (DB_*, JWT_*, SESSION_*, SEPAY_*)
+.github/workflows/ci.yml  — MySQL 8 service + dummy SEPAY_* env vars for E2E
 ```
 
 ## Development Commands
@@ -65,7 +66,7 @@ npm install              # install dependencies
 npm run build            # nest build (TypeScript compile to dist/)
 npm run start:dev        # nest start --watch (port 3000)
 npm run start:prod       # node dist/main.js
-npm test                 # jest --forceExit --detectOpenHandles (45 E2E tests)
+npm test                 # jest --forceExit --detectOpenHandles (51 E2E tests)
 ```
 
 ## Code Conventions & Common Patterns
@@ -226,7 +227,6 @@ export class ThingModule {}
 - Passwords hashed with `argon2id` via `argon2.hash(password, { type: argon2.argon2id })`
 - JWT issued with `{ sub: user.id, username: user.username }` (1-day expiry)
 - `JwtStrategy` reads `JWT_SECRET` from `ConfigService` with fallback `'default-secret-change-me'`
-- `JwtAuthGuard` extends `AuthGuard('jwt')` — apply with `@UseGuards(JwtAuthGuard)`
 
 ## Important Files
 
@@ -237,7 +237,8 @@ export class ThingModule {}
 | `src/auth/auth.service.ts` | `register()` creates user via `UsersService`, signs JWT. `login()` verifies password, signs JWT. |
 | `src/auth/strategies/jwt.strategy.ts` | Validates JWT payload. `sub: string` (UUID). |
 | `src/orders/orders.service.ts` | Most complex service. Multi-repository injection. `create()` fetches User, Table, MenuItem; captures prices; computes `totalAmount`. `addItem()` appends item and recalculates. |
-| `test/app.e2e-spec.ts` | E2E test suite. Bootstraps AppModule via `Test.createTestingModule`. Uses `supertest` for HTTP. 45 tests in ordered describe blocks. |
+| `src/payments/payment.service.ts` | QR generation (public VietQR URL + dummy env fallback) and Sepay v2 transaction verification (Bearer token). |
+| `test/app.e2e-spec.ts` | E2E test suite. Bootstraps AppModule via `Test.createTestingModule`. Uses `supertest` for HTTP. **51 tests** in ordered describe blocks (Auth → Menus → MenuItems → Tables → Orders → Payments → Edge cases). |
 | `jest.config.js` | `require('dotenv').config()` at top (loaded BEFORE any test file). ts-jest with decorator metadata enabled. 120s timeout. |
 | `.github/workflows/ci.yml` | MySQL 8 service container. Runs `npm ci` → `npm run build` → `npm test`. Env vars set via `env:` block. |
 | `database.sql` | Reference SQL schema. Note: `categories` table = `Menu` entity, `products` table = `MenuItem` entity. |
@@ -264,12 +265,12 @@ export class ThingModule {}
 - **Timeout**: 120s (cloud MySQL may be slow)
 - **Test structure**:
   - Single `beforeAll` bootstraps `Test.createTestingModule({ imports: [AppModule] })`
-  - `describe` blocks per module, ordered: Auth → Menus → MenuItems → Tables → Orders → Edge cases
+  - `describe` blocks per module, ordered: Auth → Menus → MenuItems → Tables → Orders → Payments → Edge cases
   - Variables (`token`, `userId`, `menuId`, etc.) shared across tests via closure
   - Each test creates unique data using `Date.now()` suffixes
   - Tests cascade: register user → get token → use token in subsequent auth tests
   - `afterAll` calls `app.close()`
-- **Env vars for tests**: `JWT_SECRET`, `SESSION_SECRET`, `DB_*`, `NODE_ENV=test`
+- **Env vars for tests**: `JWT_SECRET`, `SESSION_SECRET`, `DB_*`, `NODE_ENV=test`, plus dummy `SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, `SEPAY_BANK_NAME` (graceful fallback in service)
 
 ## Entity-to-Table Mapping
 
@@ -282,5 +283,5 @@ export class ThingModule {}
 | `Order` | `orders` | `orders` |
 | `OrderItem` | `order_items` | `order_items` |
 | `Employee` | `employees` | `employees` |
-
-Note the deliberate mismatch: `Menu` maps to `categories` table and `MenuItem` maps to `products` table. This is because the SQL schema uses those names but the NestJS API uses `menus`/`menu-items` routes.
+| `Payment` | `payment_requests` | `payment_requests` |
+Note the deliberate mismatch: `Menu` maps to `categories` table, `MenuItem` maps to `products` table, **Payment maps to `payment_requests`**. The SQL schema uses those names but the NestJS API uses `menus`/`menu-items`/`payments` routes.
