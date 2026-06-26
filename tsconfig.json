@@ -10,14 +10,14 @@
     "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
-    "incremental": true,
+    "incremental": false,
     "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node10",
     "types": ["node"],
     "strictPropertyInitialization": false,
-    "ignoreDeprecations": "6.0",
+    "ignoreDeprecations": "6.0"
   },
   "include": ["backend/src/**/*.ts"],
   "exclude": ["node_modules", "dist", "backend/test", "**/*.spec.ts"]
