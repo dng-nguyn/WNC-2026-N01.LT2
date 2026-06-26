@@ -36,14 +36,8 @@ export class PaymentService {
     const code = this.generateCode(12);
     const amountVnd = Math.round(Number(order.totalAmount));
 
-    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') ?? '';
-    const bankName = this.configService.get<string>('SEPAY_BANK_NAME') ?? '';
-
-    if (!accountNumber || !bankName) {
-      throw new BadRequestException(
-        'SEPAY_ACCOUNT_NUMBER and SEPA_BANK_NAME must be set in environment',
-      );
-    }
+    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '0000000000';
+    const bankName = this.configService.get<string>('SEPAY_BANK_NAME') || 'DEMO';
 
     const qrUrl =
       `https://vietqr.app/img` +
