@@ -1,27 +1,22 @@
-import { IsEnum, IsInt, IsNotEmpty, IsNumberString, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { OrderStatus } from '../order-status.enum';
+import {
+  ArrayMinSize,
+  IsOptional,
+  IsUUID,
+  ValidateNested,
+} from 'class-validator';
+import { CreateOrderItemDto } from './create-order-item.dto';
 
 export class CreateOrderDto {
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(150)
-  customerName!: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @MaxLength(150)
-  itemName!: string;
-
-  @Type(() => Number)
-  @IsInt()
-  @Min(1)
-  quantity!: number;
-
-  @IsNumberString()
-  totalPrice!: string;
-
   @IsOptional()
-  @IsEnum(OrderStatus)
-  status?: OrderStatus;
+  @IsUUID()
+  tableId?: string;
+
+  @IsUUID()
+  userId: string;
+
+  @ArrayMinSize(1)
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderItemDto)
+  items: CreateOrderItemDto[];
 }

@@ -1,6 +1,6 @@
 # WNC-2026-N01.LT2
 
-This project is a NestJS backend for a coffee shop management system. The implemented CRUD examples are for `categories`, `employees`, and `orders`.
+This project is a NestJS backend for a coffee shop management system. Implemented CRUD modules: `menus`, `menu-items`, `tables`, `employees`, and `orders`.
 
 ## Run
 
@@ -10,13 +10,29 @@ This project is a NestJS backend for a coffee shop management system. The implem
 
 The app listens on port `3000` by default.
 
-## Category CRUD API
+## Menu CRUD API
 
-- `POST /categories` - create a new category
-- `GET /categories` - get all categories
-- `GET /categories/:id` - get category by id
-- `PATCH /categories/:id` - update category
-- `DELETE /categories/:id` - delete category
+- `POST /menus` - create a new menu
+- `GET /menus` - get all menus
+- `GET /menus/:id` - get menu by id
+- `PATCH /menus/:id` - update menu
+- `DELETE /menus/:id` - delete menu
+
+## Menu Item CRUD API
+
+- `POST /menu-items` - create a new menu item
+- `GET /menu-items` - get all menu items
+- `GET /menu-items/:id` - get menu item by id
+- `PATCH /menu-items/:id` - update menu item
+- `DELETE /menu-items/:id` - delete menu item
+
+## Table CRUD API
+
+- `POST /tables` - create a new table
+- `GET /tables` - get all tables
+- `GET /tables/:id` - get table by id
+- `PATCH /tables/:id` - update table
+- `DELETE /tables/:id` - delete table
 
 ## Employee CRUD API
 
@@ -28,11 +44,12 @@ The app listens on port `3000` by default.
 
 ## Order CRUD API
 
-- `POST /orders` - create a new order
+- `POST /orders` - create a new order (with items)
 - `GET /orders` - get all orders
 - `GET /orders/:id` - get order by id
-- `PATCH /orders/:id` - update order
+- `PATCH /orders/:id` - update order status or table
 - `DELETE /orders/:id` - delete order
+- `POST /orders/:id/items` - add item to an existing order
 
 ## Authentication & Authorization
 
@@ -60,7 +77,7 @@ curl -X POST http://localhost:3000/auth/register \
   "message": "Registration successful",
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
   "user": {
-    "id": 1,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "username": "yourname",
     "createdAt": "2026-06-25T00:00:00.000Z"
   }
@@ -87,7 +104,7 @@ curl http://localhost:3000/auth/profile \
 {
   "message": "Authenticated user profile",
   "user": {
-    "id": 1,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
     "username": "yourname"
   },
   "session": null
@@ -105,5 +122,7 @@ SESSION_SECRET=your-session-secret-key
 
 ## Activity Diagram
 
-- Category CRUD flow: [docs/category-crud-activity-diagram.md](docs/category-crud-activity-diagram.md)
+- Menu CRUD flow: [docs/menu-crud-activity-diagram.md](docs/menu-crud-activity-diagram.md)
+- Menu Item CRUD flow: [docs/menu-item-crud-activity-diagram.md](docs/menu-item-crud-activity-diagram.md)
+- Table CRUD flow: [docs/table-crud-activity-diagram.md](docs/table-crud-activity-diagram.md)
 - Employee CRUD flow: [docs/employee-crud-activity-diagram.md](docs/employee-crud-activity-diagram.md)

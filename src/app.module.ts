@@ -4,9 +4,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { CategoryModule } from './categories/category.module';
+import { MenuModule } from './menus/menu.module';
 import { EmployeeModule } from './employees/employee.module';
+import { MenuItemModule } from './menu-items/menu-item.module';
 import { OrderModule } from './orders/order.module';
+import { TableModule } from './tables/table.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -27,12 +29,18 @@ import { UsersModule } from './users/users.module';
       database: process.env.DB_DATABASE,
       autoLoadEntities: true,
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false,
+      },
+      connectTimeout: 10000,
     }),
-    CategoryModule,
+    MenuModule,
     EmployeeModule,
     OrderModule,
     UsersModule,
+    MenuItemModule,
     AuthModule,
+    TableModule,
   ],
 })
 export class AppModule {}
