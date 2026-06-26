@@ -82,7 +82,7 @@ export class OrdersService {
 
   async findAll(): Promise<Order[]> {
     return this.ordersRepository.find({
-      relations: ['table', 'user', 'items', 'items.menuItem'],
+      relations: { table: true, user: true, items: { menuItem: true } },
       order: { createdAt: 'DESC' },
     });
   }
@@ -90,7 +90,7 @@ export class OrdersService {
   async findOne(id: string): Promise<Order> {
     const order = await this.ordersRepository.findOne({
       where: { id },
-      relations: ['table', 'user', 'items', 'items.menuItem'],
+      relations: { table: true, user: true, items: { menuItem: true } },
     });
     if (!order) {
       throw new NotFoundException(`Order with id ${id} not found`);

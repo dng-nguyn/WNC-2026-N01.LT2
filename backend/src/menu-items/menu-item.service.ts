@@ -34,7 +34,7 @@ export class MenuItemService {
 
   async findAll(): Promise<MenuItem[]> {
     return this.menuItemRepository.find({
-      relations: ['menu'],
+      relations: { menu: true },
       order: { createdAt: 'DESC' },
     });
   }
@@ -42,7 +42,7 @@ export class MenuItemService {
   async findOne(id: string): Promise<MenuItem> {
     const menuItem = await this.menuItemRepository.findOne({
       where: { id },
-      relations: ['menu'],
+      relations: { menu: true },
     });
     if (!menuItem) {
       throw new NotFoundException(`MenuItem with id ${id} not found`);
