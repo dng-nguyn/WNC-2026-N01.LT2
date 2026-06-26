@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": "./backend/src",
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -14,9 +15,10 @@
     "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node10",
     "types": ["node"],
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "ignoreDeprecations": "6.0",
   },
   "include": ["backend/src/**/*.ts"],
   "exclude": ["node_modules", "dist", "backend/test", "**/*.spec.ts"]
