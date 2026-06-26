@@ -46,4 +46,8 @@ jobs:
           JWT_SECRET: ci-jwt-secret
           SESSION_SECRET: ci-session-secret
           NODE_ENV: test
+          # Dummy Sepay values for E2E smoke tests (QR is public, verify gracefully fails)
+          SEPAY_API_KEY: ci-dummy-key
+          SEPAY_ACCOUNT_NUMBER: '0000000000'
+          SEPAY_BANK_NAME: MBBank
         run: npm test
