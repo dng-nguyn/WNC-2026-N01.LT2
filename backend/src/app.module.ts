@@ -9,6 +9,7 @@ import { EmployeeModule } from './employees/employee.module';
 import { MenuItemModule } from './menu-items/menu-item.module';
 import { OrderModule } from './orders/order.module';
 import { TableModule } from './tables/table.module';
+import { PaymentModule } from './payments/payment.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -36,6 +37,7 @@ import { UsersModule } from './users/users.module';
     }),
     MenuModule,
     EmployeeModule,
+    PaymentModule,
     OrderModule,
     UsersModule,
     MenuItemModule,
