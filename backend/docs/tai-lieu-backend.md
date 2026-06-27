@@ -597,4 +597,4 @@ Client                     Server
 - **ClassSerializerInterceptor** global — tự serialize response DTO
 - **Payment service** dùng `@nestjs/axios` HttpModule (thay vì raw `node:https`)
 - **RBAC** — `@Roles(UserRole.MANAGER)` + `RolesGuard`
-- Không có auth guard trên CRUD endpoints (chỉ `/auth/profile` cần JWT)
+- RBAC bảo vệ endpoint nhạy cảm; JWT bắt buộc cho các route được guard
