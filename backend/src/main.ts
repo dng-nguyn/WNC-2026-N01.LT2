@@ -1,13 +1,25 @@
 import 'reflect-metadata';
 import 'dotenv/config';
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Swagger / OpenAPI docs
+  const config = new DocumentBuilder()
+    .setTitle('Coffee Shop API')
+    .setDescription('NestJS backend for coffee shop management')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
 
   // CORS for frontend access
   app.enableCors({
@@ -15,6 +27,12 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   });
+
+  // Global exception filter
+  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Global serializer interceptor
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   // Cookie parser middleware
   app.use(cookieParser());
