@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,6 +17,10 @@ import { UsersModule } from './users/users.module';
   controllers: [AppController],
   providers: [AppService],
   imports: [
+    // Rate limiting - 10 requests per minute globally
+    ThrottlerModule.forRoot({
+      throttlers: [{ ttl: 60000, limit: 10 }],
+    }),
     // Load .env file
     ConfigModule.forRoot({
       isGlobal: true,
@@ -31,7 +36,7 @@ import { UsersModule } from './users/users.module';
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV !== 'production',
       ssl: process.env.DB_SSL_CA
-        ? { ca: process.env.DB_SSL_CA, reject true }
+        ? { ca: process.env.DB_SSL_CA, rejectUnauthorized: true }
         : undefined,
       extra: {
         ssl: process.env.DB_SSL_CA
