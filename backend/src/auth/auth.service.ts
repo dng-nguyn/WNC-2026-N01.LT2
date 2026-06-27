@@ -43,7 +43,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByUsername(loginDto.username);
+    const user = await this.usersService.findByUsernameWithPassword(loginDto.username);
 
     // Verify password
     const isPasswordValid = await argon2.verify(user.password, loginDto.password);
