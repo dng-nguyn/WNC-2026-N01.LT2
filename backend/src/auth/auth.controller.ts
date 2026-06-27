@@ -78,6 +78,65 @@ export class AuthController {
     return result;
   }
 
+  @Post('refresh')
+  async refresh(@Req() req: Request) {
+    const refreshToken = req.cookies?.refresh_token;
+    if (!refreshToken) {
+      return { message: 'No refresh token provided', accessToken: null, refreshToken: null };
+    }
+
+    const result = await this.authService.refresh(refreshToken);
+
+    // Store new JWT in secure HTTP-only cookie (15 min access token)
+    req.res?.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Store new refresh token in secure HTTP-only cookie (7 days)
+    req.res?.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return result;
+  }
+
+  @Post('logout')
+  async logout(@Req() req: Request) {
+    const result = await this.authService.logout();
+
+    // Clear access token cookie
+    req.res?.clearCookie('access_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    // Clear refresh token cookie
+    req.res?.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+
+    // Destroy session
+    if (req.session) {
+      await new Promise<void>((resolve, reject) => {
+        req.session.destroy((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }
+
+    return result;
+  }
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Req() req: Request) {

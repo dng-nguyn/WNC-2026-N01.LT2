@@ -45,7 +45,7 @@ CREATE TABLE orders (
     id VARCHAR(36) PRIMARY KEY,
     table_id VARCHAR(36), -- Nullable to allow for Takeaway orders
     user_id VARCHAR(36) NOT NULL, -- Link to your existing 'users' table
-    status ENUM('PENDING', 'PAID', 'CANCELLED') DEFAULT 'PENDING',
+    status ENUM('PENDING', 'CONFIRMED', 'PREPARING', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING',
     total_amount DECIMAL(10, 2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
