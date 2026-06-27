@@ -1,6 +1,5 @@
 export enum UserRole {
   ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
   STAFF = 'STAFF',
 }
 
@@ -19,6 +18,8 @@ export interface Menu {
   id: string;
   name: string;
   description?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface MenuItem {
@@ -27,8 +28,10 @@ export interface MenuItem {
   description?: string;
   price: number;
   imageUrl?: string;
-  menuId: string;   // category id
-  menu?: Menu;      // optional full category object
+  menuId: string;
+  menu?: Menu;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface OrderItem {
@@ -49,7 +52,6 @@ export interface Order {
   status: string;
   totalAmount: number;
   createdAt: string;
-  updatedAt: string;
 }
 
 export enum OrderStatus {
