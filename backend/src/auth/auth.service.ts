@@ -68,6 +68,34 @@ export class AuthService {
     };
   }
 
+  async refresh(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+      const user = await this.usersService.findById(payload.sub);
+
+      const newPayload = { sub: user.id, username: user.username, role: user.role };
+      const accessToken = this.jwtService.sign(newPayload, { expiresIn: '15m' });
+      const newRefreshToken = this.jwtService.sign(newPayload, { expiresIn: '7d' });
+
+      return {
+        message: 'Token refreshed',
+        accessToken,
+        refreshToken: newRefreshToken,
+        user: {
+          id: user.id,
+          username: user.username,
+          createdAt: user.createdAt,
+        },
+      };
+    } catch {
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
+  async logout() {
+    return { message: 'Logout successful' };
+  }
+
   async validateUser(userId: string) {
     return this.usersService.findById(userId);
   }
