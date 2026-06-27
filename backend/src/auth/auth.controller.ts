@@ -20,40 +20,53 @@ export class AuthController {
   async register(@Body() registerDto: RegisterDto, @Req() req: Request) {
     const result = await this.authService.register(registerDto);
 
-    // Store JWT in secure HTTP-only cookie
+    // Store JWT in secure HTTP-only cookie (15 min access token)
     req.res?.cookie('access_token', result.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Store refresh token in secure HTTP-only cookie (7 days)
+    req.res?.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     // Store user info in session
     if (req.session) {
-      (req.session as any).user = {
+      req.session.user = {
         id: result.user.id,
         username: result.user.username,
       };
     }
-
-    return result;
-  }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Req() req: Request) {
     const result = await this.authService.login(loginDto);
 
-    // Store JWT in secure HTTP-only cookie
+    // Store JWT in secure HTTP-only cookie (15 min access token)
     req.res?.cookie('access_token', result.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    // Store refresh token in secure HTTP-only cookie (7 days)
+    req.res?.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
     // Store user info in session
     if (req.session) {
-      (req.session as any).user = {
+      req.session.user = {
         id: result.user.id,
         username: result.user.username,
       };
@@ -62,9 +75,10 @@ export class AuthController {
     return result;
   }
 
+
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req: any) {
+  getProfile(@Req() req: Request & { user: any; session?: any }) {
     return {
       message: 'Authenticated user profile',
       user: req.user,
