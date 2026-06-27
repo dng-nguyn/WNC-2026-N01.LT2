@@ -55,18 +55,17 @@ Lưu tài khoản nhân viên quán (người dùng hệ thống, **không** ph�
 ---
 
 ## 2. Module Auth (`auth/`)
-
 Module xác thực — dùng **JWT** (Bearer Token) + **argon2id** (hash mật khẩu).
-Token hết hạn sau 1 ngày.
-
+Access token hết hạn sau **15 phút**, refresh token sau **7 ngày**.
+Rate limiting: 10 request/phút toàn cục (ThrottlerModule).
 ### Flow đăng ký
 
 ```
 POST /auth/register
   → RegisterDto (username, password, fullName?, phone?)
-  → argon2.hash(password) → tạo user → JWT.sign({ sub, username })
-  → Set cookie httpOnly + session
-  → Trả về { accessToken, user }
+  → argon2.hash(password) → tạo user → JWT.sign({ sub, username, role })
+  → Set cookie httpOnly (access_token 15m) + cookie httpOnly (refresh_token 7d) + session
+  → Trả về { accessToken, refreshToken, user }
 ```
 
 ### Flow đăng nhập
@@ -75,34 +74,45 @@ POST /auth/register
 POST /auth/login
   → LoginDto (username, password)
   → argon2.verify(password, hash)
-  → JWT.sign({ sub, username })
-  → Set cookie httpOnly + session
-  → Trả về { accessToken, user }
+  → JWT.sign({ sub, username, role })
+  → Set cookie httpOnly (access_token 15m) + cookie httpOnly (refresh_token 7d) + session
+  → Trả về { accessToken, refreshToken, user }
 ```
 
 ### Flow xem profile (cần JWT)
 
 ```
 GET /auth/profile
-  → Header: Authorization: Bearer <token>
+  → Header: Authorization: Bearer <access_token>
   → JwtAuthGuard xác thực
   → Trả về { message, user, session }
+```
+### Flow xem profile (cần JWT)
+
 ```
 
 ### Service: `AuthService`
 
-- `register(dto)` — Hash password + tạo user + sinh JWT
-- `login(dto)` — Kiểm tra user + xác thực password + sinh JWT
-- `validateUser(userId)` — Gọi `UsersService.findById` để verify token payload
+ - `register(dto)` — Hash password + tạo user + sinh JWT access + refresh token
+ - `login(dto)` — Kiểm tra user + xác thực password + sinh JWT access + refresh token
+ - `validateUser(userId)` — Gọi `UsersService.findById` để verify token payload
 
-### Strategy: `JwtStrategy`
+ ### Strategy: `JwtStrategy`
 
-Khai báo với Passport: trích JWT từ `Authorization: Bearer`, giải mã, gắn `{ id, username }` vào `req.user`.
+ Khai báo với Passport: trích JWT từ `Authorization: Bearer`, giải mã, gắn `{ id, username, role }` vào `req.user`.
 
-### Middleware
+ ### Guard: `RolesGuard` + Decorator `@Roles()`
 
-- Cookie parser: đọc cookie `access_token`
-- Session: lưu thông tin user trong session (express-session)
+ - `RolesGuard` đọc metadata `@Roles('MANAGER', 'STAFF')` từ route
+ - So sánh `user.role` (từ JWT) với required roles
+ - Dùng: `@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles(UserRole.MANAGER)` trên controller
+ - Endpoint bảo vệ trả về 403 nếu role không khớp
+
+ ### Middleware
+
+ - Cookie parser: đọc cookie `access_token` và `refresh_token`
+ - Session: lưu thông tin user trong session (express-session)
+
 
 ---
 
@@ -577,4 +587,14 @@ Client                     Server
 - **Price** dùng `DECIMAL(10,2)` — kiểu số thập phân chính xác cho tiền tệ
 - **OrderItem.price** chụp giá tại thời điểm tạo (không thay đổi khi MenuItem thay đổi sau này)
 - **CASCADE** khi xóa Menu → xóa MenuItem; xóa Order → xóa OrderItem
+- **Database transactions** — tạo Order dùng `manager.transaction()` (ACID)
+- **JWT** access token 15m + refresh token 7d, payload chứa `role` cho RBAC
+- **Password hash** ẩn khỏi select mặc định (`select: false` trên cột password)
+- **Rate limiting** — ThrottlerModule (10 req/min global)
+- **CORS** bật sẵn, config qua `FRONTEND_URL`
+- **Swagger/OpenAPI** docs tại `/api/docs` (BearerAuth support)
+- **Global exception filter** — bắt HttpException, QueryFailedError, error không mong đợi
+- **ClassSerializerInterceptor** global — tự serialize response DTO
+- **Payment service** dùng `@nestjs/axios` HttpModule (thay vì raw `node:https`)
+- **RBAC** — `@Roles(UserRole.MANAGER)` + `RolesGuard`
 - Không có auth guard trên CRUD endpoints (chỉ `/auth/profile` cần JWT)
