@@ -148,10 +148,9 @@ export class PaymentService {
       );
 
       return match ? { id: match.id } : null;
-    } catch (error) {
-      throw new BadRequestException(
-        `Sepay API error: ${error.message ?? 'unknown'}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'unknown';
+      throw new BadRequestException(`Sepay API error: ${message}`);
     }
   }
 
