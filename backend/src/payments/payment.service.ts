@@ -1,9 +1,10 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
-import * as https from 'node:https';
+import { firstValueFrom } from 'rxjs';
 import { Payment } from './payment.entity';
 import { PaymentStatus } from './payment-status.enum';
 import { Order } from '../orders/order.entity';
@@ -16,6 +17,7 @@ export class PaymentService {
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
     private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   // ── QR Code Generation (public VietQR — no Sepay token needed) ──
@@ -114,59 +116,43 @@ export class PaymentService {
     code: string,
     amount: number,
   ): Promise<{ id: string } | null> {
-    const txs = await this.sepayApi<{
-      transactions: Array<{
-        id: string;
-        amount_in: number;
-        transaction_content: string;
-        transfer_type: string;
-      }>;
-    }>(apiKey, `/v2/transactions?transaction_content=${encodeURIComponent(code)}&transfer_type=in&per_page=10&timestamp_format=iso8601`);
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get<{
+          transactions: Array<{
+            id: string;
+            amount_in: number;
+            transaction_content: string;
+            transfer_type: string;
+          }>;
+        }>('https://userapi.sepay.vn/v2/transactions', {
+          params: {
+            transaction_content: code,
+            transfer_type: 'in',
+            per_page: 10,
+            timestamp_format: 'iso8601',
+          },
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            Accept: 'application/json',
+          },
+          timeout: 10000,
+        }),
+      );
 
-    if (!txs?.transactions?.length) return null;
+      const txs = response.data;
+      if (!txs?.transactions?.length) return null;
 
-    const match = txs.transactions.find(
-      (tx) => tx.amount_in === amount && tx.transfer_type === 'in',
-    );
+      const match = txs.transactions.find(
+        (tx) => tx.amount_in === amount && tx.transfer_type === 'in',
+      );
 
-    return match ? { id: match.id } : null;
-  }
-
-  private sepayApi<T>(apiKey: string, path: string): Promise<T> {
-    return new Promise((resolve, reject) => {
-      const url = new URL(path, 'https://userapi.sepay.vn');
-      const options: https.RequestOptions = {
-        hostname: url.hostname,
-        port: url.port || 443,
-        path: url.pathname + url.search,
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          Accept: 'application/json',
-        },
-        timeout: 10000,
-      };
-
-      const req = https.request(options, (res) => {
-        const chunks: Buffer[] = [];
-        res.on('data', (chunk: Buffer) => chunks.push(chunk));
-        res.on('end', () => {
-          try {
-            const body = Buffer.concat(chunks).toString('utf-8');
-            resolve(JSON.parse(body) as T);
-          } catch {
-            reject(new BadRequestException(`Sepay API returned non-JSON response`));
-          }
-        });
-      });
-
-      req.on('error', (err) => reject(new BadRequestException(`Sepay API unreachable: ${err.message}`)));
-      req.on('timeout', () => {
-        req.destroy();
-        reject(new BadRequestException('Sepay API timed out'));
-      });
-      req.end();
-    });
+      return match ? { id: match.id } : null;
+    } catch (error) {
+      throw new BadRequestException(
+        `Sepay API error: ${error.message ?? 'unknown'}`,
+      );
+    }
   }
 
   // ── Utilities ──
