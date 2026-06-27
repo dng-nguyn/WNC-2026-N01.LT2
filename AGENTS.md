@@ -31,7 +31,8 @@ AppModule
 ├── EmployeeModule
 ├── OrderModule ────────── imports MenuItemModule, UsersModule, TableModule
 ├── UsersModule ────────── exports UsersService + TypeOrmModule
-└── AuthModule ─────────── imports UsersModule, exports AuthService
+├── AuthModule ─────────── imports UsersModule, exports AuthService
+└── PaymentModule ──────── imports HttpModule, registers Payment + Order entities
 ```
 
 Modules that are consumed by `OrderModule` MUST export `TypeOrmModule` so the consuming module can `@InjectRepository()` cross-module entities.
@@ -49,6 +50,7 @@ src/
   tables/              — Table entity, TableStatus enum, CRUD
   employees/           — Employee entity, CRUD
   orders/              — Order + OrderItem entities, relational CRUD, addItem
+  payments/            — Payment entity, QR generation, Sepay verification
 test/
   app.e2e-spec.ts      — 45 E2E tests via supertest
 docs/                  — Mermaid activity diagrams per module
@@ -224,7 +226,9 @@ export class ThingModule {}
 ### Auth patterns
 
 - Passwords hashed with `argon2id` via `argon2.hash(password, { type: argon2.argon2id })`
-- JWT issued with `{ sub: user.id, username: user.username }` (1-day expiry)
+- Access token: 15 min. Refresh token: 7 days. Both returned in JSON and set as HTTP-only cookies.
+- JWT payload: `{ sub: user.id, username: user.username, role: user.role }`
+- Role-based access: `@Roles(UserRole.MANAGER)` decorator + `RolesGuard` for endpoint-level authorization
 - `JwtStrategy` reads `JWT_SECRET` from `ConfigService` with fallback `'default-secret-change-me'`
 - `JwtAuthGuard` extends `AuthGuard('jwt')` — apply with `@UseGuards(JwtAuthGuard)`
 
@@ -237,6 +241,9 @@ export class ThingModule {}
 | `src/auth/auth.service.ts` | `register()` creates user via `UsersService`, signs JWT. `login()` verifies password, signs JWT. |
 | `src/auth/strategies/jwt.strategy.ts` | Validates JWT payload. `sub: string` (UUID). |
 | `src/orders/orders.service.ts` | Most complex service. Multi-repository injection. `create()` fetches User, Table, MenuItem; captures prices; computes `totalAmount`. `addItem()` appends item and recalculates. |
+| `src/payments/payment.service.ts` | QR generation, Sepay API integration, transaction verification. |
+| `src/common/filters/http-exception.filter.ts` | Global exception filter. Catches HttpException, QueryFailedError, and unhandled errors. |
+| `src/auth/guards/roles.guard.ts` | Role-based access control. Reads `@Roles()` metadata. |
 | `test/app.e2e-spec.ts` | E2E test suite. Bootstraps AppModule via `Test.createTestingModule`. Uses `supertest` for HTTP. 45 tests in ordered describe blocks. |
 | `jest.config.js` | `require('dotenv').config()` at top (loaded BEFORE any test file). ts-jest with decorator metadata enabled. 120s timeout. |
 | `.github/workflows/ci.yml` | MySQL 8 service container. Runs `npm ci` → `npm run build` → `npm test`. Env vars set via `env:` block. |
@@ -282,5 +289,16 @@ export class ThingModule {}
 | `Order` | `orders` | `orders` |
 | `OrderItem` | `order_items` | `order_items` |
 | `Employee` | `employees` | `employees` |
+| `Payment` | `payment_requests` | `payment_requests` |
 
 Note the deliberate mismatch: `Menu` maps to `categories` table and `MenuItem` maps to `products` table. This is because the SQL schema uses those names but the NestJS API uses `menus`/`menu-items` routes.
+
+## New Infrastructure
+
+Recent additions not covered in the original architecture:
+
+- **Rate limiting**: `ThrottlerModule` — 10 requests/minute globally
+- **OpenAPI docs**: Swagger at `/api/docs` via `@nestjs/swagger`
+- **CORS**: enabled for `FRONTEND_URL` with credentials
+- **Global exception filter**: `AllExceptionsFilter` in `common/filters/`
+- **Class serialization**: `ClassSerializerInterceptor` for response DTO scrubbing
