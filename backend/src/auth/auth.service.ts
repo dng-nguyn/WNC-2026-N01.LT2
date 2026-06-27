@@ -25,13 +25,15 @@ export class AuthService {
       phone: registerDto.phone,
     });
 
-    // Generate JWT token
+    // Generate JWT access and refresh tokens
     const payload = { sub: user.id, username: user.username };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
       message: 'Registration successful',
       accessToken,
+      refreshToken,
       user: {
         id: user.id,
         username: user.username,
@@ -49,13 +51,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    // Generate JWT token
+    // Generate JWT access and refresh tokens
     const payload = { sub: user.id, username: user.username };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
       message: 'Login successful',
       accessToken,
+      refreshToken,
       user: {
         id: user.id,
         username: user.username,
