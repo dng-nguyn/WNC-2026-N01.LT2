@@ -39,6 +39,7 @@ import { UsersModule } from './users/users.module';
         ? { ca: process.env.DB_SSL_CA, rejectUnauthorized: true }
         : undefined,
       extra: {
+        decimalNumbers: true,
         ssl: process.env.DB_SSL_CA
           ? { rejectUnauthorized: true }
           : { rejectUnauthorized: false },

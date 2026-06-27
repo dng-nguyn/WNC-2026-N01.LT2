@@ -79,8 +79,8 @@ export class AuthController {
   }
 
   @Post('refresh')
-  async refresh(@Req() req: Request) {
-    const refreshToken = req.cookies?.refresh_token;
+  async refresh(@Req() req: Request, @Body() body: { refreshToken?: string }) {
+    const refreshToken = req.cookies?.refresh_token ?? body.refreshToken;
     if (!refreshToken) {
       return { message: 'No refresh token provided', accessToken: null, refreshToken: null };
     }

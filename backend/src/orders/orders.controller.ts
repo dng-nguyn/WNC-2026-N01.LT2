@@ -10,6 +10,7 @@ import {
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './order.entity';
 
@@ -51,5 +52,22 @@ export class OrdersController {
     @Body() dto: CreateOrderItemDto,
   ): Promise<Order> {
     return this.ordersService.addItem(id, dto);
+  }
+
+  @Patch(':id/items/:itemId')
+  updateItem(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+    @Body() dto: UpdateOrderItemDto,
+  ): Promise<Order> {
+    return this.ordersService.updateItem(id, itemId, dto);
+  }
+
+  @Delete(':id/items/:itemId')
+  removeItem(
+    @Param('id') id: string,
+    @Param('itemId') itemId: string,
+  ): Promise<Order> {
+    return this.ordersService.removeItem(id, itemId);
   }
 }

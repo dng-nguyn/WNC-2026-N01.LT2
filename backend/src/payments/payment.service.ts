@@ -8,6 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { Payment } from './payment.entity';
 import { PaymentStatus } from './payment-status.enum';
 import { Order } from '../orders/order.entity';
+import { OrderStatus } from '../orders/order-status.enum';
 
 @Injectable()
 export class PaymentService {
@@ -106,7 +107,25 @@ export class PaymentService {
 
     payment.status = PaymentStatus.COMPLETED;
     payment.sepayTransactionId = tx.id;
-    return this.paymentRepository.save(payment);
+    await this.paymentRepository.save(payment);
+
+    // Update order status to reflect payment completion
+    const order = await this.orderRepository.findOne({
+      where: { id: payment.order.id },
+    });
+    if (order) {
+      order.status = OrderStatus.COMPLETED;
+      await this.orderRepository.save(order);
+    }
+
+    const updatedPayment = await this.paymentRepository.findOne({
+      where: { id: paymentId },
+      relations: { order: true },
+    });
+    if (!updatedPayment) {
+      throw new NotFoundException(`Payment with id ${paymentId} not found after verification`);
+    }
+    return updatedPayment;
   }
 
   // ── Sepay API Helpers ──
