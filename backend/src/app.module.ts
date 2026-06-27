@@ -29,9 +29,14 @@ import { UsersModule } from './users/users.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       autoLoadEntities: true,
-      synchronize: true,
-      ssl: {
-        rejectUnauthorized: false,
+      synchronize: process.env.NODE_ENV !== 'production',
+      ssl: process.env.DB_SSL_CA
+        ? { ca: process.env.DB_SSL_CA, reject true }
+        : undefined,
+      extra: {
+        ssl: process.env.DB_SSL_CA
+          ? { rejectUnauthorized: true }
+          : { rejectUnauthorized: false },
       },
       connectTimeout: 10000,
     }),
