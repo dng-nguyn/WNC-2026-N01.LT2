@@ -5,8 +5,10 @@ import { Order } from './order.entity';
 import { OrderItem } from './order-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
+import { UpdateOrderItemDto } from './dto/update-order-item.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Table } from '../tables/table.entity';
+import { TableStatus } from '../tables/table-status.enum';
 import { User } from '../users/user.entity';
 import { MenuItem } from '../menu-items/menu-item.entity';
 
@@ -78,14 +80,22 @@ export class OrdersService {
         totalAmount,
       });
 
-      return manager.save(order);
+      const savedOrder = await manager.save(order);
+
+      // Update table status if assigned
+      if (table) {
+        table.status = TableStatus.OCCUPIED;
+        await manager.save(table);
+      }
+
+      return savedOrder;
     });
   }
 
   async findAll(): Promise<Order[]> {
     return this.ordersRepository.find({
-      relations: { table: true, user: true, items: { menuItem: true } },
       order: { createdAt: 'DESC' },
+      relations: { table: true, user: true, items: { menuItem: true } },
     });
   }
 
@@ -150,6 +160,60 @@ export class OrdersService {
       Number(order.totalAmount) +
       orderItem.quantity * Number(orderItem.price);
 
+    return this.ordersRepository.save(order);
+  }
+
+  async updateItem(
+    orderId: string,
+    itemId: string,
+    dto: UpdateOrderItemDto,
+  ): Promise<Order> {
+    const order = await this.findOne(orderId);
+
+    const itemIndex = order.items.findIndex((item) => item.id === itemId);
+    if (itemIndex === -1) {
+      throw new NotFoundException(
+        `OrderItem with id ${itemId} not found in order ${orderId}`,
+      );
+    }
+
+    const item = order.items[itemIndex];
+
+    // Calculate price difference for total amount update
+    const oldSubtotal = item.quantity * Number(item.price);
+
+    if (dto.quantity !== undefined) {
+      item.quantity = dto.quantity;
+    }
+    if (dto.note !== undefined) {
+      item.note = dto.note;
+    }
+
+    const newSubtotal = item.quantity * Number(item.price);
+    order.totalAmount =
+      Number(order.totalAmount) - oldSubtotal + newSubtotal;
+
+    await this.orderItemsRepository.save(item);
+    return this.ordersRepository.save(order);
+  }
+
+  async removeItem(orderId: string, itemId: string): Promise<Order> {
+    const order = await this.findOne(orderId);
+
+    const itemIndex = order.items.findIndex((item) => item.id === itemId);
+    if (itemIndex === -1) {
+      throw new NotFoundException(
+        `OrderItem with id ${itemId} not found in order ${orderId}`,
+      );
+    }
+
+    const item = order.items[itemIndex];
+    const itemSubtotal = item.quantity * Number(item.price);
+
+    order.items.splice(itemIndex, 1);
+    order.totalAmount = Number(order.totalAmount) - itemSubtotal;
+
+    await this.orderItemsRepository.remove(item);
     return this.ordersRepository.save(order);
   }
 

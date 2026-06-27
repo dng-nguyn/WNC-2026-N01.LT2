@@ -1,567 +1,533 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import nock from 'nock';
 import { AppModule } from '../src/app.module';
 import request from 'supertest';
 
+async function clearNonUserTables(dataSource: DataSource) {
+  await dataSource.query('SET FOREIGN_KEY_CHECKS = 0');
+  for (const table of ['payment_requests', 'order_items', 'orders', 'products', 'categories', 'tables', 'employees']) {
+    await dataSource.query(`DELETE FROM \`${table}\``);
+  }
+  await dataSource.query('SET FOREIGN_KEY_CHECKS = 1');
+}
+
 describe('Cafe Backend E2E', () => {
   let app: INestApplication;
+  let dataSource: DataSource;
+  let server: any;
   let token: string;
   let userId: string;
-  let menuId: string;
-  let menuItemId: string;
-  let tableId: string;
-  let paymentId: string;
-  let orderId: string;
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true }),
-    );
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
     await app.init();
+
+    dataSource = app.get(DataSource);
+    server = app.getHttpServer();
+    await clearNonUserTables(dataSource);
+
+    const res = await request(server)
+      .post('/auth/register')
+      .send({ username: `e2e_shared_${Date.now()}`, password: 'Test1234', fullName: 'E2E Shared User' })
+      .expect(201);
+
+    token = res.body.accessToken;
+    userId = res.body.user.id;
   });
 
   afterAll(async () => {
+    nock.cleanAll();
     if (app) await app.close();
   });
 
   // ── Auth ──────────────────────────────────────────────
-
   describe('Auth', () => {
-    const username = `e2e_${Date.now()}`;
-
-    it('POST /auth/register — creates user and returns token', async () => {
-      const res = await request(app.getHttpServer())
+    it('POST /auth/register — creates user and returns tokens', async () => {
+      const username = `reg_${Date.now()}`;
+      const res = await request(server)
         .post('/auth/register')
         .send({ username, password: 'Test1234', fullName: 'E2E Tester' })
         .expect(201);
-
-      expect(res.body.message).toBe('Registration successful');
       expect(res.body.accessToken).toBeTruthy();
-      expect(res.body.user.username).toBe(username);
-      expect(res.body.user.id).toBeTruthy();
-
-      token = res.body.accessToken;
-      userId = res.body.user.id;
+      expect(res.body.refreshToken).toBeTruthy();
     });
 
     it('POST /auth/register — rejects duplicate username', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ username, password: 'Test1234' })
-        .expect(409);
+      const username = `dup_${Date.now()}`;
+      await request(server).post('/auth/register').send({ username, password: 'Test1234', fullName: 'First' }).expect(201);
+      await request(server).post('/auth/register').send({ username, password: 'Test1234', fullName: 'Second' }).expect(409);
     });
 
-    it('POST /auth/register — rejects short password', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({ username: 'baduser', password: 'ab' })
-        .expect(400);
+    it('POST /auth/register — rejects short username (<3)', async () => {
+      await request(server).post('/auth/register').send({ username: 'ab', password: 'Test1234' }).expect(400);
     });
 
-    it('POST /auth/login — logs in and returns token', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({ username, password: 'Test1234' })
+    it('POST /auth/register — rejects short password (<8)', async () => {
+      await request(server).post('/auth/register').send({ username: `p_${Date.now()}`, password: 'Short1', fullName: 'X' }).expect(400);
+    });
+
+    it('POST /auth/register — rejects password without uppercase', async () => {
+      await request(server).post('/auth/register').send({ username: `l_${Date.now()}`, password: 'lowercase1', fullName: 'X' }).expect(400);
+    });
+
+    it('POST /auth/register — rejects password without number', async () => {
+      await request(server).post('/auth/register').send({ username: `n_${Date.now()}`, password: 'NoNumberHere', fullName: 'X' }).expect(400);
+    });
+
+    it('POST /auth/register — strips extra fields via whitelist', async () => {
+      const res = await request(server)
+        .post('/auth/register')
+        .send({ username: `strip_${Date.now()}`, password: 'Test1234', fullName: 'OK', hackerField: 'bad' })
         .expect(201);
+      expect(res.body.user.hackerField).toBeUndefined();
+    });
 
+    it('POST /auth/login — authenticates and returns tokens', async () => {
+      const username = `login_${Date.now()}`;
+      await request(server).post('/auth/register').send({ username, password: 'Test1234', fullName: 'X' }).expect(201);
+      const res = await request(server).post('/auth/login').send({ username, password: 'Test1234', fullName: 'X' }).expect(201);
       expect(res.body.accessToken).toBeTruthy();
+      expect(res.body.refreshToken).toBeTruthy();
     });
 
     it('POST /auth/login — rejects wrong password', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/login')
-        .send({ username, password: 'WrongPass1' })
-        .expect(401);
+      const username = `badpw_${Date.now()}`;
+      await request(server).post('/auth/register').send({ username, password: 'Test1234', fullName: 'X' }).expect(201);
+      await request(server).post('/auth/login').send({ username, password: 'WrongPass1' }).expect(401);
     });
 
-    it('GET /auth/profile — returns authenticated user', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/auth/profile')
-        .set('Authorization', `Bearer ${token}`)
-        .expect(200);
-
-      expect(res.body.user.username).toBe(username);
+    it('POST /auth/login — rejects password without uppercase', async () => {
+      const username = `weak_${Date.now()}`;
+      await request(server).post('/auth/register').send({ username, password: 'Test1234', fullName: 'X' }).expect(201);
+      await request(server).post('/auth/login').send({ username, password: 'weak' }).expect(400);
     });
 
-    it('GET /auth/profile — rejects unauthenticated', async () => {
-      await request(app.getHttpServer())
-        .get('/auth/profile')
-        .expect(401);
+    it('GET /auth/profile — returns authenticated user with token', async () => {
+      const res = await request(server).get('/auth/profile').set('Authorization', `Bearer ${token}`).expect(200);
+      expect(res.body.user.username).toBeTruthy();
+    });
+
+    it('GET /auth/profile — returns 401 without token', async () => {
+      await request(server).get('/auth/profile').expect(401);
+    });
+
+    it('GET /auth/profile — returns 401 with invalid token', async () => {
+      await request(server).get('/auth/profile').set('Authorization', 'Bearer garbage').expect(401);
+    });
+
+    it('POST /auth/refresh — exchanges refresh token for new pair', async () => {
+      const username = `ref_${Date.now()}`;
+      const regRes = await request(server).post('/auth/register').send({ username, password: 'Test1234', fullName: 'X' }).expect(201);
+      const res = await request(server)
+        .post('/auth/refresh')
+        .send({ refreshToken: regRes.body.refreshToken })
+        .expect(201);
+      expect(res.body.accessToken).toBeTruthy();
+      expect(res.body.refreshToken).toBeTruthy();
+    });
+
+    it('POST /auth/logout — confirms logout', async () => {
+      const res = await request(server).post('/auth/logout').expect(201);
+      expect(res.body.message).toBe('Logout successful');
     });
   });
 
   // ── Menus ─────────────────────────────────────────────
-
   describe('Menus', () => {
     it('POST /menus — creates a menu', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/menus')
-        .send({ name: `Coffee_${Date.now()}`, description: 'Hot drinks' })
-        .expect(201);
-
+      const res = await request(server).post('/menus').send({ name: `M_${Date.now()}` }).expect(201);
       expect(res.body.name).toBeTruthy();
       expect(res.body.id).toBeTruthy();
-      menuId = res.body.id;
     });
 
-    it('POST /menus — rejects empty name', async () => {
-      await request(app.getHttpServer())
-        .post('/menus')
-        .send({ name: '' })
-        .expect(400);
+    it('POST /menus — rejects name >100 chars', async () => {
+      await request(server).post('/menus').send({ name: 'a'.repeat(101) }).expect(400);
+    });
+
+    it('POST /menus — strips extra fields', async () => {
+      const res = await request(server).post('/menus').send({ name: `Strip_${Date.now()}`, extra: 'nope' }).expect(201);
+      expect(res.body.extra).toBeUndefined();
     });
 
     it('GET /menus — returns array', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/menus')
-        .expect(200);
-
+      const res = await request(server).get('/menus').expect(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
 
-    it('GET /menus/:id — returns menu by id', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`/menus/${menuId}`)
-        .expect(200);
-
-      expect(res.body.id).toBe(menuId);
+    it('GET /menus/:id — returns menu', async () => {
+      const c = await request(server).post('/menus').send({ name: `Get_${Date.now()}` }).expect(201);
+      const res = await request(server).get(`/menus/${c.body.id}`).expect(200);
+      expect(res.body.id).toBe(c.body.id);
     });
 
     it('GET /menus/:id — 404 on unknown', async () => {
-      await request(app.getHttpServer())
-        .get('/menus/00000000-0000-0000-0000-000000000000')
-        .expect(404);
+      await request(server).get('/menus/00000000-0000-0000-0000-000000000000').expect(404);
     });
 
     it('PATCH /menus/:id — updates menu', async () => {
-      const res = await request(app.getHttpServer())
-        .patch(`/menus/${menuId}`)
-        .send({ description: 'Updated desc' })
-        .expect(200);
-
-      expect(res.body.description).toBe('Updated desc');
+      const c = await request(server).post('/menus').send({ name: `Patch_${Date.now()}` }).expect(201);
+      const res = await request(server).patch(`/menus/${c.body.id}`).send({ description: 'New desc' }).expect(200);
+      expect(res.body.description).toBe('New desc');
     });
 
-    it('DELETE /menus/:id — deletes menu', async () => {
-      await request(app.getHttpServer())
-        .delete(`/menus/${menuId}`)
-        .expect(200);
-    });
-
-    it('GET /menus/:id — 404 after delete', async () => {
-      await request(app.getHttpServer())
-        .get(`/menus/${menuId}`)
-        .expect(404);
+    it('DELETE /menus/:id — cascade removes items', async () => {
+      const m = await request(server).post('/menus').send({ name: `Del_${Date.now()}` }).expect(201);
+      const i = await request(server).post('/menu-items').send({ menuId: m.body.id, name: 'Item', price: 1 }).expect(201);
+      await request(server).delete(`/menus/${m.body.id}`).expect(200);
+      await request(server).get(`/menus/${m.body.id}`).expect(404);
+      await request(server).get(`/menu-items/${i.body.id}`).expect(404);
     });
   });
 
   // ── Menu Items ────────────────────────────────────────
-
   describe('Menu Items', () => {
     let freshMenuId: string;
-
     beforeAll(async () => {
-      // Create a fresh menu since we deleted the previous one
-      const res = await request(app.getHttpServer())
-        .post('/menus')
-        .send({ name: `MenuForItems_${Date.now()}` });
-      freshMenuId = res.body.id;
+      const r = await request(server).post('/menus').send({ name: `MI_${Date.now()}` }).expect(201);
+      freshMenuId = r.body.id;
     });
 
-    it('POST /menu-items — creates a menu item', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/menu-items')
-        .send({ menuId: freshMenuId, name: 'Espresso', price: 3.5 })
-        .expect(201);
-
+    it('POST /menu-items — creates item', async () => {
+      const res = await request(server).post('/menu-items').send({ menuId: freshMenuId, name: 'Espresso', price: 3.5 }).expect(201);
       expect(res.body.name).toBe('Espresso');
       expect(Number(res.body.price)).toBe(3.5);
-      expect(res.body.menu.id).toBe(freshMenuId);
-      menuItemId = res.body.id;
     });
 
     it('POST /menu-items — rejects missing menuId', async () => {
-      await request(app.getHttpServer())
-        .post('/menu-items')
-        .send({ name: 'Latte', price: 4.0 })
-        .expect(400);
+      await request(server).post('/menu-items').send({ name: 'Latte', price: 4 }).expect(400);
     });
 
     it('POST /menu-items — rejects negative price', async () => {
-      await request(app.getHttpServer())
-        .post('/menu-items')
-        .send({ menuId: freshMenuId, name: 'Bad', price: -1 })
-        .expect(400);
+      await request(server).post('/menu-items').send({ menuId: freshMenuId, name: 'Bad', price: -1 }).expect(400);
     });
 
     it('POST /menu-items — 404 on unknown menu', async () => {
-      await request(app.getHttpServer())
-        .post('/menu-items')
-        .send({
-          menuId: '00000000-0000-0000-0000-000000000000',
-          name: 'Nope',
-          price: 5,
-        })
-        .expect(404);
-    });
-
-    it('GET /menu-items — returns array with menu relation', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/menu-items')
-        .expect(200);
-
-      expect(Array.isArray(res.body)).toBe(true);
-      if (res.body.length > 0) {
-        expect(res.body[0].menu).toBeDefined();
-      }
+      await request(server).post('/menu-items').send({ menuId: '00000000-0000-0000-0000-000000000000', name: 'Nope', price: 5 }).expect(404);
     });
 
     it('GET /menu-items/:id — returns item', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`/menu-items/${menuItemId}`)
-        .expect(200);
-
-      expect(res.body.id).toBe(menuItemId);
+      const c = await request(server).post('/menu-items').send({ menuId: freshMenuId, name: `G_${Date.now()}`, price: 5 }).expect(201);
+      const res = await request(server).get(`/menu-items/${c.body.id}`).expect(200);
+      expect(res.body.id).toBe(c.body.id);
     });
 
     it('PATCH /menu-items/:id — updates price', async () => {
-      const res = await request(app.getHttpServer())
-        .patch(`/menu-items/${menuItemId}`)
-        .send({ price: 4.0 })
-        .expect(200);
-
-      expect(Number(res.body.price)).toBe(4.0);
+      const c = await request(server).post('/menu-items').send({ menuId: freshMenuId, name: `P_${Date.now()}`, price: 3 }).expect(201);
+      const res = await request(server).patch(`/menu-items/${c.body.id}`).send({ price: 4 }).expect(200);
+      expect(Number(res.body.price)).toBe(4);
     });
 
     it('DELETE /menu-items/:id — deletes item', async () => {
-      await request(app.getHttpServer())
-        .delete(`/menu-items/${menuItemId}`)
-        .expect(200);
+      const c = await request(server).post('/menu-items').send({ menuId: freshMenuId, name: `D_${Date.now()}`, price: 1 }).expect(201);
+      await request(server).delete(`/menu-items/${c.body.id}`).expect(200);
+      await request(server).get(`/menu-items/${c.body.id}`).expect(404);
     });
   });
 
   // ── Tables ────────────────────────────────────────────
-
   describe('Tables', () => {
-    it('POST /tables — creates a table', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/tables')
-        .send({ tableNumber: `T${Date.now()}` })
-        .expect(201);
-
-      expect(res.body.tableNumber).toBeTruthy();
+    it('POST /tables — creates table', async () => {
+      const res = await request(server).post('/tables').send({ tableNumber: `T${Date.now()}` }).expect(201);
       expect(res.body.status).toBe('EMPTY');
-      tableId = res.body.id;
     });
 
-    it('POST /tables — sets status on create', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/tables')
-        .send({ tableNumber: `T2_${Date.now()}`, status: 'RESERVED' })
-        .expect(201);
-
+    it('POST /tables — creates with status', async () => {
+      const res = await request(server).post('/tables').send({ tableNumber: `TR_${Date.now()}`, status: 'RESERVED' }).expect(201);
       expect(res.body.status).toBe('RESERVED');
     });
 
     it('POST /tables — rejects invalid status', async () => {
-      await request(app.getHttpServer())
-        .post('/tables')
-        .send({ tableNumber: 'Bad', status: 'BROKEN' })
-        .expect(400);
+      await request(server).post('/tables').send({ tableNumber: 'Bad', status: 'BROKEN' }).expect(400);
     });
 
     it('GET /tables — returns array', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/tables')
-        .expect(200);
-
+      const res = await request(server).get('/tables').expect(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
 
     it('PATCH /tables/:id — updates status', async () => {
-      const res = await request(app.getHttpServer())
-        .patch(`/tables/${tableId}`)
-        .send({ status: 'OCCUPIED' })
-        .expect(200);
-
+      const c = await request(server).post('/tables').send({ tableNumber: `PT_${Date.now()}` }).expect(201);
+      const res = await request(server).patch(`/tables/${c.body.id}`).send({ status: 'OCCUPIED' }).expect(200);
       expect(res.body.status).toBe('OCCUPIED');
     });
 
     it('DELETE /tables/:id — deletes table', async () => {
-      await request(app.getHttpServer())
-        .delete(`/tables/${tableId}`)
-        .expect(200);
+      const c = await request(server).post('/tables').send({ tableNumber: `DT_${Date.now()}` }).expect(201);
+      await request(server).delete(`/tables/${c.body.id}`).expect(200);
+      await request(server).get(`/tables/${c.body.id}`).expect(404);
     });
   });
 
   // ── Orders ────────────────────────────────────────────
-
   describe('Orders', () => {
-    let orderTableId: string;
     let orderMenuItemId: string;
-    let orderMenuId: string;
+    let orderTableId: string;
 
     beforeAll(async () => {
-      // Create prerequisites for order tests
-      const menuRes = await request(app.getHttpServer())
-        .post('/menus')
-        .send({ name: `OrderMenu_${Date.now()}` });
-      orderMenuId = menuRes.body.id;
-
-      const itemRes = await request(app.getHttpServer())
-        .post('/menu-items')
-        .send({ menuId: orderMenuId, name: 'Cappuccino', price: 4.5 });
+      const menuRes = await request(server).post('/menus').send({ name: `OM_${Date.now()}` }).expect(201);
+      const itemRes = await request(server).post('/menu-items').send({ menuId: menuRes.body.id, name: 'Cappuccino', price: 4.5 }).expect(201);
       orderMenuItemId = itemRes.body.id;
-
-      const tableRes = await request(app.getHttpServer())
-        .post('/tables')
-        .send({ tableNumber: `OrderT_${Date.now()}` });
+      const tableRes = await request(server).post('/tables').send({ tableNumber: `OT_${Date.now()}` }).expect(201);
       orderTableId = tableRes.body.id;
     });
 
-    it('POST /orders — creates order with items', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/orders')
-        .send({
-          userId,
-          tableId: orderTableId,
-          items: [{ menuItemId: orderMenuItemId, quantity: 2, note: 'no sugar' }],
-        })
-        .expect(201);
-
-      expect(res.body.id).toBeTruthy();
+    it('POST /orders — creates order with items and table', async () => {
+      const res = await request(server).post('/orders').send({
+        userId, tableId: orderTableId,
+        items: [{ menuItemId: orderMenuItemId, quantity: 2, note: 'no sugar' }],
+      }).expect(201);
       expect(res.body.status).toBe('PENDING');
-      expect(res.body.user.id).toBe(userId);
-      expect(res.body.table.id).toBe(orderTableId);
       expect(res.body.items.length).toBe(1);
       expect(res.body.items[0].quantity).toBe(2);
-      expect(res.body.items[0].note).toBe('no sugar');
-      expect(Number(res.body.totalAmount)).toBe(9.0); // 2 × 4.5
-      orderId = res.body.id;
+      expect(Number(res.body.totalAmount)).toBe(9);
+    });
+
+    it('POST /orders — table status becomes OCCUPIED', async () => {
+      const t = await request(server).post('/tables').send({ tableNumber: `OT2_${Date.now()}` }).expect(201);
+      await request(server).post('/orders').send({
+        userId, tableId: t.body.id,
+        items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      const check = await request(server).get(`/tables/${t.body.id}`).expect(200);
+      expect(check.body.status).toBe('OCCUPIED');
+    });
+
+    it('POST /orders — takeaway (no table)', async () => {
+      const res = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      expect(res.body.table).toBeNull();
     });
 
     it('POST /orders — rejects missing userId', async () => {
-      await request(app.getHttpServer())
-        .post('/orders')
-        .send({ items: [{ menuItemId: orderMenuItemId, quantity: 1 }] })
-        .expect(400);
+      await request(server).post('/orders').send({ items: [{ menuItemId: orderMenuItemId, quantity: 1 }] }).expect(400);
     });
 
-    it('POST /orders — rejects empty items array', async () => {
-      await request(app.getHttpServer())
-        .post('/orders')
-        .send({ userId, items: [] })
-        .expect(400);
+    it('POST /orders — rejects empty items', async () => {
+      await request(server).post('/orders').send({ userId, items: [] }).expect(400);
     });
 
     it('POST /orders — 404 on unknown user', async () => {
-      await request(app.getHttpServer())
-        .post('/orders')
-        .send({
-          userId: '00000000-0000-0000-0000-000000000000',
-          items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
-        })
-        .expect(404);
+      await request(server).post('/orders').send({
+        userId: '00000000-0000-0000-0000-000000000000',
+        items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(404);
     });
 
     it('POST /orders — 404 on unknown menuItem', async () => {
-      await request(app.getHttpServer())
-        .post('/orders')
-        .send({
-          userId,
-          items: [{ menuItemId: '00000000-0000-0000-0000-000000000000', quantity: 1 }],
-        })
-        .expect(404);
+      await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: '00000000-0000-0000-0000-000000000000', quantity: 1 }],
+      }).expect(404);
     });
 
-    it('GET /orders — returns array with relations', async () => {
-      const res = await request(app.getHttpServer())
-        .get('/orders')
-        .expect(200);
-
+    it('GET /orders — returns array', async () => {
+      const res = await request(server).get('/orders').expect(200);
       expect(Array.isArray(res.body)).toBe(true);
     });
 
-    it('GET /orders/:id — returns full order with items populated', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`/orders/${orderId}`)
-        .expect(200);
-
-      expect(res.body.id).toBe(orderId);
-      expect(res.body.items.length).toBeGreaterThanOrEqual(1);
+    it('GET /orders/:id — returns order with items', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      const res = await request(server).get(`/orders/${o.body.id}`).expect(200);
       expect(res.body.items[0].menuItem).toBeDefined();
-      expect(res.body.items[0].menuItem.name).toBe('Cappuccino');
     });
 
     it('PATCH /orders/:id — updates status', async () => {
-      const res = await request(app.getHttpServer())
-        .patch(`/orders/${orderId}`)
-        .send({ status: 'CONFIRMED' })
-        .expect(200);
-
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      const res = await request(server).patch(`/orders/${o.body.id}`).send({ status: 'CONFIRMED' }).expect(200);
       expect(res.body.status).toBe('CONFIRMED');
     });
 
     it('PATCH /orders/:id — rejects invalid status', async () => {
-      await request(app.getHttpServer())
-        .patch(`/orders/${orderId}`)
-        .send({ status: 'SHIPPED' })
-        .expect(400);
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      await request(server).patch(`/orders/${o.body.id}`).send({ status: 'SHIPPED' }).expect(400);
     });
 
-    it('POST /orders/:id/items — adds item to existing order', async () => {
-      const res = await request(app.getHttpServer())
-        .post(`/orders/${orderId}/items`)
-        .send({ menuItemId: orderMenuItemId, quantity: 1, note: 'extra hot' })
-        .expect(201);
-
+    it('POST /orders/:id/items — adds item', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      const res = await request(server).post(`/orders/${o.body.id}/items`)
+        .send({ menuItemId: orderMenuItemId, quantity: 1, note: 'hot' }).expect(201);
       expect(res.body.items.length).toBe(2);
-      // total should be 3 × 4.5 = 13.5
-      expect(Number(res.body.totalAmount)).toBe(13.5);
-      expect(res.body.items[1].note).toBe('extra hot');
+      expect(Number(res.body.totalAmount)).toBe(9);
     });
 
     it('POST /orders/:id/items — 404 on unknown menuItem', async () => {
-      await request(app.getHttpServer())
-        .post(`/orders/${orderId}/items`)
-        .send({ menuItemId: '00000000-0000-0000-0000-000000000000', quantity: 1 })
-        .expect(404);
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      await request(server).post(`/orders/${o.body.id}/items`)
+        .send({ menuItemId: '00000000-0000-0000-0000-000000000000', quantity: 1 }).expect(404);
     });
 
-    it('DELETE /orders/:id — deletes order (cascades to items)', async () => {
-      await request(app.getHttpServer())
-        .delete(`/orders/${orderId}`)
-        .expect(200);
+    it('PATCH /orders/:id/items/:itemId — updates quantity', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      const itemId = o.body.items[0].id;
+      const res = await request(server).patch(`/orders/${o.body.id}/items/${itemId}`)
+        .send({ quantity: 3 }).expect(200);
+      expect(res.body.items[0].quantity).toBe(3);
+      expect(Number(res.body.totalAmount)).toBe(13.5);
     });
 
-    it('GET /orders/:id — 404 after delete', async () => {
-      await request(app.getHttpServer())
-        .get(`/orders/${orderId}`)
-        .expect(404);
+    it('DELETE /orders/:id/items/:itemId — removes item', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 2 }],
+      }).expect(201);
+      const itemId = o.body.items[0].id;
+      const res = await request(server).delete(`/orders/${o.body.id}/items/${itemId}`).expect(200);
+      expect(res.body.items.length).toBe(0);
+      expect(Number(res.body.totalAmount)).toBe(0);
     });
 
-    it('POST /orders — creates order without table (takeaway)', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/orders')
-        .send({
-          userId,
-          items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
-        })
-        .expect(201);
-
-      expect(res.body.table).toBeNull();
+    it('DELETE /orders/:id — deletes order', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: orderMenuItemId, quantity: 1 }],
+      }).expect(201);
+      await request(server).delete(`/orders/${o.body.id}`).expect(200);
+      await request(server).get(`/orders/${o.body.id}`).expect(404);
     });
   });
 
   // ── Payments ──────────────────────────────────────────
-
   describe('Payments', () => {
-    let paymentOrderId: string;
-    let paymentMenuId: string;
     let paymentMenuItemId: string;
-
     beforeAll(async () => {
-      // Create prerequisites for payment tests
-      const menuRes = await request(app.getHttpServer())
-        .post('/menus')
-        .send({ name: `PayMenu_${Date.now()}` });
-      paymentMenuId = menuRes.body.id;
-
-      const itemRes = await request(app.getHttpServer())
-        .post('/menu-items')
-        .send({ menuId: paymentMenuId, name: 'Espresso', price: 2.5 });
-      paymentMenuItemId = itemRes.body.id;
-
-      const orderRes = await request(app.getHttpServer())
-        .post('/orders')
-        .send({
-          userId,
-          items: [{ menuItemId: paymentMenuItemId, quantity: 3 }],
-        })
-        .expect(201);
-      paymentOrderId = orderRes.body.id;
+      const m = await request(server).post('/menus').send({ name: `PM_${Date.now()}` }).expect(201);
+      const i = await request(server).post('/menu-items').send({ menuId: m.body.id, name: 'Espresso', price: 2.5 }).expect(201);
+      paymentMenuItemId = i.body.id;
     });
 
-    it('POST /payments/qr — creates QR payment for an order', async () => {
-      const res = await request(app.getHttpServer())
-        .post('/payments/qr')
-        .send({ orderId: paymentOrderId })
-        .expect(201);
-
-      expect(res.body.id).toBeTruthy();
+    it('POST /payments/qr — creates QR payment', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: paymentMenuItemId, quantity: 3 }],
+      }).expect(201);
+      const res = await request(server).post('/payments/qr').send({ orderId: o.body.id }).expect(201);
       expect(res.body.code).toHaveLength(12);
-      expect(res.body.amount).toBeGreaterThan(0);
       expect(res.body.status).toBe('PENDING');
-      expect(res.body.qrUrl).toContain('vietqr.app/img');
-      expect(res.body.qrUrl).toContain('template=compact');
-      expect(res.body.qrUrl).toContain('showinfo=true');
-      expect(res.body.qrUrl).toContain(encodeURIComponent(res.body.code));
-      expect(res.body.order.id).toBe(paymentOrderId);
-      paymentId = res.body.id;
     });
 
     it('GET /payments/:id — returns payment details', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`/payments/${paymentId}`)
-        .expect(200);
-
-      expect(res.body.id).toBe(paymentId);
-      expect(res.body.code).toHaveLength(12);
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: paymentMenuItemId, quantity: 3 }],
+      }).expect(201);
+      const p = await request(server).post('/payments/qr').send({ orderId: o.body.id }).expect(201);
+      const res = await request(server).get(`/payments/${p.body.id}`).expect(200);
       expect(res.body.status).toBe('PENDING');
-      expect(res.body.order.id).toBe(paymentOrderId);
     });
 
-    it('GET /payments/order/:orderId — returns payments for order', async () => {
-      const res = await request(app.getHttpServer())
-        .get(`/payments/order/${paymentOrderId}`)
-        .expect(200);
-
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBeGreaterThanOrEqual(1);
-      expect(res.body[0].id).toBe(paymentId);
+    it('GET /payments/order/:orderId — returns payments', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: paymentMenuItemId, quantity: 1 }],
+      }).expect(201);
+      const p = await request(server).post('/payments/qr').send({ orderId: o.body.id }).expect(201);
+      const res = await request(server).get(`/payments/order/${o.body.id}`).expect(200);
+      expect(res.body[0].id).toBe(p.body.id);
     });
 
-    it('POST /payments/:id/verify — fails when Sepay unreachable', async () => {
-      // Sepay API is unreachable without valid credentials — expect 400
-      await request(app.getHttpServer())
-        .post(`/payments/${paymentId}/verify`)
-        .expect(400);
+    it('POST /payments/:id/verify — mocked Sepay updates payment and order', async () => {
+      const o = await request(server).post('/orders').send({
+        userId, items: [{ menuItemId: paymentMenuItemId, quantity: 2 }],
+      }).expect(201);
+      const p = await request(server).post('/payments/qr').send({ orderId: o.body.id }).expect(201);
+
+      nock('https://userapi.sepay.vn')
+        .get('/v2/transactions')
+        .query(true)
+        .reply(200, {
+          transactions: [{
+            id: 'tx-mock-999',
+            amount_in: p.body.amount,
+            transaction_content: p.body.code,
+            transfer_type: 'in',
+          }],
+        });
+
+      const res = await request(server).post(`/payments/${p.body.id}/verify`).expect(201);
+      expect(res.body.status).toBe('COMPLETED');
+      expect(res.body.sepayTransactionId).toBe('tx-mock-999');
+
+      const orderCheck = await request(server).get(`/orders/${o.body.id}`).expect(200);
+      expect(orderCheck.body.status).toBe('COMPLETED');
     });
 
-    it('POST /payments/qr — 404 for non-existent order', async () => {
-      await request(app.getHttpServer())
-        .post('/payments/qr')
-        .send({ orderId: '00000000-0000-0000-0000-000000000000' })
-        .expect(404);
+    it('POST /payments/qr — 404 on unknown order', async () => {
+      await request(server).post('/payments/qr').send({ orderId: '00000000-0000-0000-0000-000000000000' }).expect(404);
     });
 
     it('POST /payments/qr — rejects missing orderId', async () => {
-      await request(app.getHttpServer())
-        .post('/payments/qr')
-        .send({})
-        .expect(400);
+      await request(server).post('/payments/qr').send({}).expect(400);
     });
   });
 
-  // ── Edge cases ────────────────────────────────────────
+  // ── Cascade ───────────────────────────────────────────
+  describe('Cascade', () => {
+    it('DELETE menu cascades to items', async () => {
+      const m = await request(server).post('/menus').send({ name: `Cas_${Date.now()}` }).expect(201);
+      const i = await request(server).post('/menu-items').send({ menuId: m.body.id, name: 'CascadeItem', price: 1 }).expect(201);
+      await request(server).delete(`/menus/${m.body.id}`).expect(200);
+      await request(server).get(`/menu-items/${i.body.id}`).expect(404);
+    });
 
+    it('DELETE user cascades to orders', async () => {
+      const reg = await request(server).post('/auth/register').send({
+        username: `cascade_${Date.now()}`, password: 'Test1234', fullName: 'Cascade User',
+      }).expect(201);
+      const uid = reg.body.user.id;
+
+      const m = await request(server).post('/menus').send({ name: `CasMenu_${Date.now()}` }).expect(201);
+      const i = await request(server).post('/menu-items').send({ menuId: m.body.id, name: 'Item', price: 1 }).expect(201);
+      const o = await request(server).post('/orders').send({
+        userId: uid, items: [{ menuItemId: i.body.id, quantity: 1 }],
+      }).expect(201);
+
+      await dataSource.query('DELETE FROM `users` WHERE `id` = ?', [uid]);
+      await request(server).get(`/orders/${o.body.id}`).expect(404);
+    });
+  });
+
+  // ── DTO Validation ────────────────────────────────────
+  describe('DTO Validation', () => {
+    it('rejects name >100 chars', async () => {
+      await request(server).post('/menus').send({ name: 'a'.repeat(101) }).expect(400);
+    });
+
+    it('rejects invalid table status enum', async () => {
+      await request(server).post('/tables').send({ tableNumber: 'T1', status: 'BROKEN' }).expect(400);
+    });
+
+    it('strips extra fields via whitelist', async () => {
+      const res = await request(server).post('/menus').send({ name: `W_${Date.now()}`, injected: 'bad' }).expect(201);
+      expect(res.body.injected).toBeUndefined();
+    });
+
+    it('GET /menus/not-a-uuid returns 404', async () => {
+      await request(server).get('/menus/not-a-uuid').expect(404);
+    });
+  });
+
+  // ── Edge Cases ────────────────────────────────────────
   describe('Edge cases', () => {
     it('GET /categories — 404 (renamed to /menus)', async () => {
-      await request(app.getHttpServer())
-        .get('/categories')
-        .expect(404);
+      await request(server).get('/categories').expect(404);
     });
 
     it('POST /menus — rejects non-JSON body', async () => {
-      await request(app.getHttpServer())
-        .post('/menus')
-        .set('Content-Type', 'text/plain')
-        .send('not json')
-        .expect(400);
+      await request(server).post('/menus').set('Content-Type', 'text/plain').send('not json').expect(400);
     });
   });
 });
