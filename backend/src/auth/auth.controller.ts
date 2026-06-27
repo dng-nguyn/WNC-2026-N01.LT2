@@ -38,11 +38,14 @@ export class AuthController {
 
     // Store user info in session
     if (req.session) {
-      req.session.user = {
+      (req.session as unknown as Record<string, unknown>).user = {
         id: result.user.id,
         username: result.user.username,
       };
     }
+
+    return result;
+  }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto, @Req() req: Request) {
@@ -66,7 +69,7 @@ export class AuthController {
 
     // Store user info in session
     if (req.session) {
-      req.session.user = {
+      (req.session as unknown as Record<string, unknown>).user = {
         id: result.user.id,
         username: result.user.username,
       };
@@ -75,14 +78,15 @@ export class AuthController {
     return result;
   }
 
-
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Req() req: Request & { user: any; session?: any }) {
+  getProfile(@Req() req: Request) {
     return {
       message: 'Authenticated user profile',
       user: req.user,
-      session: req.session?.user ?? null,
+      session: req.session && typeof req.session === 'object' && 'user' in req.session
+        ? (req.session as unknown as Record<string, unknown>).user
+        : null,
     };
   }
 }
