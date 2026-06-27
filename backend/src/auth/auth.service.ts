@@ -25,13 +25,15 @@ export class AuthService {
       phone: registerDto.phone,
     });
 
-    // Generate JWT token
-    const payload = { sub: user.id, username: user.username };
-    const accessToken = this.jwtService.sign(payload);
+    // Generate JWT access and refresh tokens
+    const payload = { sub: user.id, username: user.username, role: user.role };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
       message: 'Registration successful',
       accessToken,
+      refreshToken,
       user: {
         id: user.id,
         username: user.username,
@@ -41,7 +43,7 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.usersService.findByUsername(loginDto.username);
+    const user = await this.usersService.findByUsernameWithPassword(loginDto.username);
 
     // Verify password
     const isPasswordValid = await argon2.verify(user.password, loginDto.password);
@@ -49,13 +51,15 @@ export class AuthService {
       throw new UnauthorizedException('Invalid username or password');
     }
 
-    // Generate JWT token
-    const payload = { sub: user.id, username: user.username };
-    const accessToken = this.jwtService.sign(payload);
+    // Generate JWT access and refresh tokens
+    const payload = { sub: user.id, username: user.username, role: user.role };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
       message: 'Login successful',
       accessToken,
+      refreshToken,
       user: {
         id: user.id,
         username: user.username,
