@@ -36,7 +36,7 @@ describe('Cafe Backend E2E', () => {
     it('POST /auth/register — creates user and returns token', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ username, password: 'test1234', fullName: 'E2E Tester' })
+        .send({ username, password: 'Test1234', fullName: 'E2E Tester' })
         .expect(201);
 
       expect(res.body.message).toBe('Registration successful');
@@ -51,7 +51,7 @@ describe('Cafe Backend E2E', () => {
     it('POST /auth/register — rejects duplicate username', async () => {
       await request(app.getHttpServer())
         .post('/auth/register')
-        .send({ username, password: 'test1234' })
+        .send({ username, password: 'Test1234' })
         .expect(409);
     });
 
@@ -65,7 +65,7 @@ describe('Cafe Backend E2E', () => {
     it('POST /auth/login — logs in and returns token', async () => {
       const res = await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ username, password: 'test1234' })
+        .send({ username, password: 'Test1234' })
         .expect(201);
 
       expect(res.body.accessToken).toBeTruthy();
@@ -74,7 +74,7 @@ describe('Cafe Backend E2E', () => {
     it('POST /auth/login — rejects wrong password', async () => {
       await request(app.getHttpServer())
         .post('/auth/login')
-        .send({ username, password: 'wrongpass' })
+        .send({ username, password: 'WrongPass1' })
         .expect(401);
     });
 
