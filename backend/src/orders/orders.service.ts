@@ -26,58 +26,60 @@ export class OrdersService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    const user = await this.usersRepository.findOne({
-      where: { id: createOrderDto.userId },
-    });
-    if (!user) {
-      throw new NotFoundException(
-        `User with id ${createOrderDto.userId} not found`,
-      );
-    }
-
-    let table: Table | null = null;
-    if (createOrderDto.tableId) {
-      table = await this.tablesRepository.findOne({
-        where: { id: createOrderDto.tableId },
+    return this.ordersRepository.manager.transaction(async (manager) => {
+      const user = await manager.findOne(User, {
+        where: { id: createOrderDto.userId },
       });
-      if (!table) {
+      if (!user) {
         throw new NotFoundException(
-          `Table with id ${createOrderDto.tableId} not found`,
-        );
-      }
-    }
-
-    const items: OrderItem[] = [];
-    let totalAmount = 0;
-
-    for (const itemDto of createOrderDto.items) {
-      const menuItem = await this.menuItemsRepository.findOne({
-        where: { id: itemDto.menuItemId },
-      });
-      if (!menuItem) {
-        throw new NotFoundException(
-          `MenuItem with id ${itemDto.menuItemId} not found`,
+          `User with id ${createOrderDto.userId} not found`,
         );
       }
 
-      const orderItem = this.orderItemsRepository.create({
-        menuItem,
-        quantity: itemDto.quantity,
-        price: Number(menuItem.price),
-        note: itemDto.note ?? null,
+      let table: Table | null = null;
+      if (createOrderDto.tableId) {
+        table = await manager.findOne(Table, {
+          where: { id: createOrderDto.tableId },
+        });
+        if (!table) {
+          throw new NotFoundException(
+            `Table with id ${createOrderDto.tableId} not found`,
+          );
+        }
+      }
+
+      const items: OrderItem[] = [];
+      let totalAmount = 0;
+
+      for (const itemDto of createOrderDto.items) {
+        const menuItem = await manager.findOne(MenuItem, {
+          where: { id: itemDto.menuItemId },
+        });
+        if (!menuItem) {
+          throw new NotFoundException(
+            `MenuItem with id ${itemDto.menuItemId} not found`,
+          );
+        }
+
+        const orderItem = manager.create(OrderItem, {
+          menuItem,
+          quantity: itemDto.quantity,
+          price: Number(menuItem.price),
+          note: itemDto.note ?? null,
+        });
+        items.push(orderItem);
+        totalAmount += orderItem.quantity * Number(orderItem.price);
+      }
+
+      const order = manager.create(Order, {
+        user,
+        table,
+        items,
+        totalAmount,
       });
-      items.push(orderItem);
-      totalAmount += orderItem.quantity * Number(orderItem.price);
-    }
 
-    const order = this.ordersRepository.create({
-      user,
-      table,
-      items,
-      totalAmount,
+      return manager.save(order);
     });
-
-    return this.ordersRepository.save(order);
   }
 
   async findAll(): Promise<Order[]> {
