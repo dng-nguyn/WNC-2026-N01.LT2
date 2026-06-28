@@ -1,32 +1,37 @@
-import apiClient from './api';
-import { Order, OrderStatus } from '../types';
+import { get, post, patch, del } from './api';
+import type {
+  Order,
+  CreateOrderDto,
+  CreateOrderItemDto,
+  UpdateOrderDto,
+} from '../types';
 
-export interface CreateOrderPayload {
-  tableId?: string;
-  userId: string;
-  items: { menuItemId: string; quantity: number }[];
+export async function fetchOrders(): Promise<Order[]> {
+  return get<Order[]>('/orders');
 }
 
-export const createOrder = async (data: CreateOrderPayload): Promise<Order> => {
-  const response = await apiClient.post('/orders', data);
-  return response.data;
-};
+export async function fetchOrder(id: string): Promise<Order> {
+  return get<Order>(`/orders/${id}`);
+}
 
-export const getOrders = async (params?: {
-  status?: OrderStatus;
-  userId?: string;
-  tableId?: string;
-}): Promise<Order[]> => {
-  const response = await apiClient.get('/orders', { params });
-  return response.data;
-};
+export async function createOrder(dto: CreateOrderDto): Promise<Order> {
+  return post<Order>('/orders', dto);
+}
 
-export const getOrder = async (id: string): Promise<Order> => {
-  const response = await apiClient.get(`/orders/${id}`);
-  return response.data;
-};
+export async function updateOrder(
+  id: string,
+  dto: UpdateOrderDto,
+): Promise<Order> {
+  return patch<Order>(`/orders/${id}`, dto);
+}
 
-export const updateOrderStatus = async (id: string, status: OrderStatus): Promise<Order> => {
-  const response = await apiClient.patch(`/orders/${id}/status`, { status });
-  return response.data;
-};
+export async function deleteOrder(id: string): Promise<void> {
+  return del(`/orders/${id}`);
+}
+
+export async function addOrderItem(
+  orderId: string,
+  dto: CreateOrderItemDto,
+): Promise<Order> {
+  return post<Order>(`/orders/${orderId}/items`, dto);
+}

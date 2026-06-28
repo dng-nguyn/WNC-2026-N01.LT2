@@ -1,201 +1,264 @@
-import React, { useState, useEffect } from 'react';
-import { Row, Col, Card, Button, InputNumber, Select, message, Table } from 'antd';
-import { getMenuItems } from '../services/menuItem.service';
-import { getMenus } from '../services/menu.service';
+import { useEffect, useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchMenuItems } from '../services/menuitem.service';
+import { fetchTables } from '../services/table.service';
 import { createOrder } from '../services/order.service';
-import { MenuItem, Menu } from '../types';
-import { useAuth } from '../hooks/useAuth';
+import { getLoggedInUser } from '../services/auth.service';
+import type { MenuItem, Table as TableType } from '../types';
 
 interface CartItem {
   menuItem: MenuItem;
   quantity: number;
+  note: string;
 }
 
-const POSPage: React.FC = () => {
-  const { user } = useAuth();
+export default function POSPage() {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [menus, setMenus] = useState<Menu[]>([]);
+  const [tables, setTables] = useState<TableType[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedTable, setSelectedTable] = useState<string | undefined>(undefined);
-  const [tableOptions, setTableOptions] = useState<{ id: string; tableNumber: string }[]>([]);
+  const [selectedTableId, setSelectedTableId] = useState<string>('');
+  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const user = getLoggedInUser();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [items, categories] = await Promise.all([getMenuItems(), getMenus()]);
-        setMenuItems(items);
-        setMenus(categories);
-
-        // Replace with a real table endpoint call when available
-        setTableOptions([
-          { id: '1', tableNumber: '1' },
-          { id: '2', tableNumber: '2' },
-          { id: '3', tableNumber: '3' },
-        ]);
-      } catch {
-        message.error('Failed to load data');
-      }
-    };
-    fetchData();
+    Promise.all([fetchMenuItems(), fetchTables()])
+      .then(([items, tabs]) => {
+        setMenuItems(items.filter((i) => i.isAvailable));
+        setTables(tabs);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load data'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const addToCart = (item: MenuItem) => {
+  // Unique categories from menu items
+  const categories = useMemo(() => {
+    const cats = new Set(menuItems.map((i) => i.menu.name));
+    return ['all', ...cats];
+  }, [menuItems]);
+
+  const filteredItems = useMemo(
+    () =>
+      activeCategory === 'all'
+        ? menuItems
+        : menuItems.filter((i) => i.menu.name === activeCategory),
+    [menuItems, activeCategory],
+  );
+
+  // Cart totals
+  const cartTotal = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity * Number(item.menuItem.price), 0),
+    [cart],
+  );
+
+  const cartItemCount = useMemo(
+    () => cart.reduce((sum, item) => sum + item.quantity, 0),
+    [cart],
+  );
+
+  function addToCart(menuItem: MenuItem) {
     setCart((prev) => {
-      const existing = prev.find((ci) => ci.menuItem.id === item.id);
+      const existing = prev.find((c) => c.menuItem.id === menuItem.id);
       if (existing) {
-        return prev.map((ci) =>
-          ci.menuItem.id === item.id ? { ...ci, quantity: ci.quantity + 1 } : ci
+        return prev.map((c) =>
+          c.menuItem.id === menuItem.id ? { ...c, quantity: c.quantity + 1 } : c,
         );
       }
-      return [...prev, { menuItem: item, quantity: 1 }];
+      return [...prev, { menuItem, quantity: 1, note: '' }];
     });
-  };
+  }
 
-  const updateQuantity = (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
-      setCart((prev) => prev.filter((ci) => ci.menuItem.id !== itemId));
-    } else {
-      setCart((prev) =>
-        prev.map((ci) => (ci.menuItem.id === itemId ? { ...ci, quantity } : ci))
-      );
-    }
-  };
+  function updateQuantity(itemId: string, delta: number) {
+    setCart((prev) =>
+      prev
+        .map((c) =>
+          c.menuItem.id === itemId ? { ...c, quantity: Math.max(0, c.quantity + delta) } : c,
+        )
+        .filter((c) => c.quantity > 0),
+    );
+  }
 
-  const totalAmount = cart.reduce((sum, ci) => sum + ci.menuItem.price * ci.quantity, 0);
+  function updateNote(itemId: string, note: string) {
+    setCart((prev) =>
+      prev.map((c) => (c.menuItem.id === itemId ? { ...c, note } : c)),
+    );
+  }
 
-  const handleCheckout = async () => {
-    if (cart.length === 0) {
-      message.warning('Cart is empty');
-      return;
-    }
+  function clearCart() {
+    setCart([]);
+    setSelectedTableId('');
+    setSuccess('');
+    setError('');
+  }
+
+  async function handleCheckout() {
     if (!user) {
-      message.error('User not authenticated');
+      setError('You must be logged in to place an order');
       return;
     }
+    if (cart.length === 0) {
+      setError('Cart is empty');
+      return;
+    }
+
     setSubmitting(true);
+    setError('');
+    setSuccess('');
+
     try {
-      const payload = {
+      await createOrder({
         userId: user.id,
-        tableId: selectedTable,
-        items: cart.map((ci) => ({
-          menuItemId: ci.menuItem.id,
-          quantity: ci.quantity,
+        tableId: selectedTableId || undefined,
+        items: cart.map((c) => ({
+          menuItemId: c.menuItem.id,
+          quantity: c.quantity,
+          note: c.note || undefined,
         })),
-      };
-      await createOrder(payload);
-      message.success('Order placed successfully');
-      setCart([]);
-      setSelectedTable(undefined);
-    } catch {
-      message.error('Failed to place order');
+      });
+      setSuccess(`Order placed successfully! ${cartItemCount} item(s) — ${
+        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(cartTotal)
+      }`);
+      clearCart();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to place order');
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
-  const cartColumns = [
-    { title: 'Item', dataIndex: ['menuItem', 'name'], key: 'name' },
-    {
-      title: 'Price',
-      key: 'price',
-      render: (_: any, record: CartItem) => `$${record.menuItem.price.toFixed(2)}`,
-    },
-    {
-      title: 'Quantity',
-      key: 'quantity',
-      render: (_: any, record: CartItem) => (
-        <InputNumber
-          min={0}
-          value={record.quantity}
-          onChange={(val) => updateQuantity(record.menuItem.id, val || 0)}
-        />
-      ),
-    },
-    {
-      title: 'Subtotal',
-      key: 'subtotal',
-      render: (_: any, record: CartItem) =>
-        `$${(record.menuItem.price * record.quantity).toFixed(2)}`,
-    },
-  ];
+  const formatCurrency = (n: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 
-  const grouped: Record<string, MenuItem[]> = {};
-  menuItems.forEach((item) => {
-    const catId = item.menuId;
-    if (!grouped[catId]) grouped[catId] = [];
-    grouped[catId].push(item);
-  });
+  if (loading) return <div className="page-container"><p>Loading POS terminal…</p></div>;
 
   return (
-    <div>
-      <h2>Point of Sale</h2>
-      <Row gutter={[16, 16]}>
-        <Col span={16}>
-          {menus
-            .filter((m) => grouped[m.id]?.length)
-            .map((menu) => (
-              <div key={menu.id} style={{ marginBottom: 24 }}>
-                <h3>{menu.name}</h3>
-                <Row gutter={[12, 12]}>
-                  {grouped[menu.id].map((item) => (
-                    <Col key={item.id} xs={24} sm={12} md={8} lg={6}>
-                      <Card hoverable onClick={() => addToCart(item)}>
-                        <Card.Meta title={item.name} description={`$${item.price.toFixed(2)}`} />
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-              </div>
-            ))}
-        </Col>
-        <Col span={8}>
-          <Card
-            title="Cart"
-            actions={[
-              <Button
-                type="primary"
-                block
-                loading={submitting}
-                onClick={handleCheckout}
-              >
-                Place Order (${totalAmount.toFixed(2)})
-              </Button>,
-            ]}
+    <div className="pos-layout">
+      {/* Left — Menu Grid */}
+      <div className="pos-menu">
+        <header className="pos-header">
+          <h1>POS Terminal</h1>
+          <Link to="/dashboard" className="btn btn-sm btn-secondary">← Dashboard</Link>
+        </header>
+
+        {/* Category tabs */}
+        <div className="category-tabs">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`btn btn-sm ${activeCategory === cat ? 'btn-primary' : 'btn-secondary'}`}
+              onClick={() => setActiveCategory(cat)}
+            >
+              {cat === 'all' ? 'All' : cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Menu item grid */}
+        <div className="menu-grid">
+          {filteredItems.map((item) => (
+            <button
+              key={item.id}
+              className="menu-item-card"
+              onClick={() => addToCart(item)}
+              disabled={!item.isAvailable}
+            >
+              <span className="menu-item-name">{item.name}</span>
+              <span className="menu-item-price">{formatCurrency(Number(item.price))}</span>
+              {!item.isAvailable && <span className="badge badge-danger">Unavailable</span>}
+            </button>
+          ))}
+          {filteredItems.length === 0 && (
+            <p className="text-muted">No items in this category</p>
+          )}
+        </div>
+      </div>
+
+      {/* Right — Cart */}
+      <div className="pos-cart">
+        <h2>Current Order</h2>
+
+        {error && <div className="alert alert-error">{error}</div>}
+        {success && <div className="alert alert-success">{success}</div>}
+
+        {/* Table selector */}
+        <div className="form-group">
+          <label>Table (optional)</label>
+          <select
+            value={selectedTableId}
+            onChange={(e) => setSelectedTableId(e.target.value)}
           >
-            <div style={{ marginBottom: 12 }}>
-              <Select
-                placeholder="Select table (optional)"
-                allowClear
-                style={{ width: '100%' }}
-                value={selectedTable}
-                onChange={setSelectedTable}
-                options={tableOptions.map((t) => ({
-                  label: `Table ${t.tableNumber}`,
-                  value: t.id,
-                }))}
-              />
-            </div>
-            <Table
-              dataSource={cart}
-              columns={cartColumns}
-              rowKey={(record) => record.menuItem.id}
-              pagination={false}
-              size="small"
-              summary={() => (
-                <Table.Summary.Row>
-                  <Table.Summary.Cell index={0} colSpan={3}>
-                    Total
-                  </Table.Summary.Cell>
-                  <Table.Summary.Cell index={1}>${totalAmount.toFixed(2)}</Table.Summary.Cell>
-                </Table.Summary.Row>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
+            <option value="">Takeaway</option>
+            {tables.map((t) => (
+              <option key={t.id} value={t.id}>
+                Table {t.tableNumber} — {t.status}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Cart items */}
+        <div className="cart-items">
+          {cart.length === 0 ? (
+            <p className="text-muted">Click menu items to add them here</p>
+          ) : (
+            cart.map((item) => (
+              <div key={item.menuItem.id} className="cart-item">
+                <div className="cart-item-header">
+                  <span className="cart-item-name">{item.menuItem.name}</span>
+                  <span className="cart-item-price">
+                    {formatCurrency(Number(item.menuItem.price) * item.quantity)}
+                  </span>
+                </div>
+                <div className="cart-item-controls">
+                  <button
+                    className="btn btn-sm btn-secondary"
+                    onClick={() => updateQuantity(item.menuItem.id, -1)}
+                  >
+                    −
+                  </button>
+                  <span className="cart-qty">{item.quantity}</span>
+                  <button
+                    className="btn btn-sm btn-secondary"
+                    onClick={() => updateQuantity(item.menuItem.id, 1)}
+                  >
+                    +
+                  </button>
+                  <input
+                    className="cart-note"
+                    placeholder="Note…"
+                    value={item.note}
+                    onChange={(e) => updateNote(item.menuItem.id, e.target.value)}
+                  />
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Totals & checkout */}
+        <div className="cart-footer">
+          <div className="cart-total">
+            <span>Total ({cartItemCount} items)</span>
+            <strong>{formatCurrency(cartTotal)}</strong>
+          </div>
+
+          <div className="cart-actions">
+            <button className="btn btn-secondary" onClick={clearCart} disabled={cart.length === 0}>
+              Clear
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleCheckout}
+              disabled={submitting || cart.length === 0}
+            >
+              {submitting ? 'Placing Order…' : 'Place Order'}
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
-};
-
-export default POSPage;
+}

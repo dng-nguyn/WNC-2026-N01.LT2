@@ -1,26 +1,25 @@
-import apiClient from './api';
-import { Menu } from '../types';
+import { get, post, patch, del } from './api';
+import type { Menu, CreateMenuDto, UpdateMenuDto } from '../types';
 
-export const getMenus = async (): Promise<Menu[]> => {
-  const response = await apiClient.get('/menus');
-  return response.data;
-};
+export async function fetchMenus(): Promise<Menu[]> {
+  return get<Menu[]>('/menus');
+}
 
-export const getMenu = async (id: string): Promise<Menu> => {
-  const response = await apiClient.get(`/menus/${id}`);
-  return response.data;
-};
+export async function fetchMenu(id: string): Promise<Menu> {
+  return get<Menu>(`/menus/${id}`);
+}
 
-export const createMenu = async (data: { name: string; description?: string }): Promise<Menu> => {
-  const response = await apiClient.post('/menus', data);
-  return response.data;
-};
+export async function createMenu(dto: CreateMenuDto): Promise<Menu> {
+  return post<Menu>('/menus', dto);
+}
 
-export const updateMenu = async (id: string, data: { name?: string; description?: string }): Promise<Menu> => {
-  const response = await apiClient.put(`/menus/${id}`, data);
-  return response.data;
-};
+export async function updateMenu(
+  id: string,
+  dto: UpdateMenuDto,
+): Promise<Menu> {
+  return patch<Menu>(`/menus/${id}`, dto);
+}
 
-export const deleteMenu = async (id: string): Promise<void> => {
-  await apiClient.delete(`/menus/${id}`);
-};
+export async function deleteMenu(id: string): Promise<void> {
+  return del(`/menus/${id}`);
+}
