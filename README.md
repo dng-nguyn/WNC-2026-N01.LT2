@@ -1,6 +1,6 @@
 # WNC-2026-N01.LT2
 
-This project is a NestJS backend for a coffee shop management system. Implemented CRUD modules: `menus`, `menu-items`, `tables`, `employees`, and `orders`.
+This project is a NestJS backend for a coffee shop management system. Implemented CRUD modules: `menus`, `menu-items`, `tables`, `employees`, `orders`, and `payments`.
 
 ## Run
 
@@ -51,6 +51,13 @@ The app listens on port `3000` by default.
 - `DELETE /orders/:id` - delete order
 - `POST /orders/:id/items` - add item to an existing order
 
+## Payment API
+
+- `POST /payments/qr` - create a QR payment for an order
+- `GET /payments/:id` - get payment details
+- `GET /payments/order/:orderId` - get all payments for an order
+- `POST /payments/:id/verify` - verify a payment via Sepay
+
 ## Authentication & Authorization
 
 The project uses **JWT** (JSON Web Token) for authentication, with **HTTP-only cookies** for secure token storage and **express-session** for session management. Passwords are hashed with **argon2id**.
@@ -59,8 +66,8 @@ The project uses **JWT** (JSON Web Token) for authentication, with **HTTP-only c
 
 | Method | Endpoint | Auth Required | Description |
 |--------|----------|:---:|-------------|
-| POST | `/auth/register` | No | Register a new user with `username` and `password` (min 6 chars) |
-| POST | `/auth/login` | No | Login with `username` and `password`, receive JWT token |
+| POST | `/auth/register` | No | Register a new user with `username`, `password` (min 8 chars, one uppercase, one number), and optional `fullName`/`phone` |
+| POST | `/auth/login` | No | Login with `username` and `password`, receive access and refresh tokens as HTTP-only cookies |
 | GET | `/auth/profile` | Yes | Get the profile info of the currently authenticated user |
 
 ### Register example
@@ -68,7 +75,7 @@ The project uses **JWT** (JSON Web Token) for authentication, with **HTTP-only c
 ```bash
 curl -X POST http://localhost:3000/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"username": "yourname", "password": "yourpassword"}'
+  -d '{"username": "yourname", "password": "YourPass1", "fullName": "Your Name"}'
 ```
 
 **Response:**
@@ -76,6 +83,7 @@ curl -X POST http://localhost:3000/auth/register \
 {
   "message": "Registration successful",
   "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
   "user": {
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "username": "yourname",
@@ -118,6 +126,11 @@ Add the following to your `.env` file:
 ```env
 JWT_SECRET=your-jwt-secret-key
 SESSION_SECRET=your-session-secret-key
+
+# Sepay payment integration
+SEPAY_API_KEY=your-sepay-api-key
+SEPAY_ACCOUNT_NUMBER=your-account-number
+SEPAY_BANK_NAME=your-bank-name
 ```
 
 ## Activity Diagram

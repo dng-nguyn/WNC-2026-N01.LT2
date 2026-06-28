@@ -29,7 +29,7 @@ CREATE TABLE products (
     price DECIMAL(10, 2) NOT NULL, -- Using decimal for financial accuracy
     is_available BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(id)
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
 );
 
 -- MODULE 2: TABLE & ORDER (BÀN & ORDER)
@@ -45,12 +45,12 @@ CREATE TABLE orders (
     id VARCHAR(36) PRIMARY KEY,
     table_id VARCHAR(36), -- Nullable to allow for Takeaway orders
     user_id VARCHAR(36) NOT NULL, -- Link to your existing 'users' table
-    status ENUM('PENDING', 'PAID', 'CANCELLED') DEFAULT 'PENDING',
+    status ENUM('PENDING', 'CONFIRMED', 'PREPARING', 'COMPLETED', 'CANCELLED') DEFAULT 'PENDING',
     total_amount DECIMAL(10, 2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (table_id) REFERENCES tables(id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE order_items (
@@ -75,4 +75,19 @@ CREATE TABLE employees (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- MODULE 3: PAYMENT
+
+CREATE TABLE payment_requests (
+    id VARCHAR(36) PRIMARY KEY,
+    order_id VARCHAR(36) NOT NULL,
+    code VARCHAR(12) NOT NULL UNIQUE,
+    amount DECIMAL(12, 0) NOT NULL,
+    status ENUM('PENDING', 'COMPLETED', 'FAILED', 'EXPIRED') DEFAULT 'PENDING',
+    qr_url TEXT NOT NULL,
+    sepay_transaction_id VARCHAR(36),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE
 );
