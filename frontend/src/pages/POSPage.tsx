@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchMenuItems } from '../services/menuitem.service';
+import { fetchMenuItems } from '../services/menuItem.service';
 import { fetchTables } from '../services/table.service';
 import { createOrder } from '../services/order.service';
 import { getLoggedInUser } from '../services/auth.service';
