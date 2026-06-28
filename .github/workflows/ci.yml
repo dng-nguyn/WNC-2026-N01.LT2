@@ -2,12 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main, cafe-backend-expansion]
+    branches: [main, cafe-backend-expansion, frontend]
   pull_request:
     branches: [main]
 
 jobs:
-  test:
+  # ── Backend E2E tests ──────────────────────────────────────────────
+  backend-test:
     runs-on: ubuntu-latest
 
     services:
@@ -36,7 +37,7 @@ jobs:
 
       - run: npm run build
 
-      - name: Run E2E tests
+      - name: Run backend E2E tests
         env:
           DB_HOST: 127.0.0.1
           DB_PORT: 3306
@@ -46,8 +47,99 @@ jobs:
           JWT_SECRET: ci-jwt-secret
           SESSION_SECRET: ci-session-secret
           NODE_ENV: test
-          # Dummy Sepay values for E2E smoke tests (QR is public, verify gracefully fails)
           SEPAY_API_KEY: ci-dummy-key
           SEPAY_ACCOUNT_NUMBER: '0000000000'
           SEPAY_BANK_NAME: MBBank
         run: npm test
+
+  # ── Frontend unit/component tests (Vitest) ─────────────────────────
+  frontend-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Run frontend unit tests
+        working-directory: frontend
+        run: npm test
+
+  # ── Frontend E2E tests (Playwright) ────────────────────────────────
+  frontend-e2e:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpass
+          MYSQL_DATABASE: Quan_Ly_Quan_Cafe
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install Playwright browsers
+        working-directory: frontend
+        run: npx playwright install chromium --with-deps
+
+      - name: Build backend
+        run: npm run build
+
+      - name: Start backend server
+        run: |
+          nohup node dist/main.js &
+          sleep 5
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3306
+          DB_USERNAME: root
+          DB_PASSWORD: testpass
+          DB_DATABASE: Quan_Ly_Quan_Cafe
+          JWT_SECRET: ci-jwt-secret
+          SESSION_SECRET: ci-session-secret
+          NODE_ENV: test
+          SEPAY_API_KEY: ci-dummy-key
+          SEPAY_ACCOUNT_NUMBER: '0000000000'
+          SEPAY_BANK_NAME: MBBank
+
+      - name: Run frontend E2E tests
+        working-directory: frontend
+        env:
+          VITE_API_BASE_URL: http://localhost:3000
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7

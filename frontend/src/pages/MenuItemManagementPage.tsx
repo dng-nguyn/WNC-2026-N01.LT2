@@ -1,6 +1,6 @@
 import { useEffect, useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from '../services/menuitem.service';
+import { fetchMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from '../services/menuItem.service';
 import { fetchMenus } from '../services/menu.service';
 import type { MenuItem, Menu } from '../types';
 
@@ -130,7 +130,7 @@ export default function MenuItemManagementPage() {
       {showForm && (
         <div className="card form-card">
           <h3>{editingId ? 'Edit Menu Item' : 'New Menu Item'}</h3>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             <div className="form-group">
               <label htmlFor="itemCategory">Category *</label>
               <select
