@@ -22,7 +22,7 @@ export class Order {
   @JoinColumn({ name: 'table_id' })
   table: Table | null;
 
-  @ManyToOne(() => User, { nullable: false })
+  @ManyToOne(() => User, { nullable: false, onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 

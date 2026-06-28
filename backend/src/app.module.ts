@@ -17,9 +17,9 @@ import { UsersModule } from './users/users.module';
   controllers: [AppController],
   providers: [AppService],
   imports: [
-    // Rate limiting - 10 requests per minute globally
+    // Rate limiting - 100 requests per minute globally
     ThrottlerModule.forRoot({
-      throttlers: [{ ttl: 60000, limit: 10 }],
+      throttlers: [{ ttl: 60000, limit: 100 }],
     }),
     // Load .env file
     ConfigModule.forRoot({
@@ -39,6 +39,7 @@ import { UsersModule } from './users/users.module';
         ? { ca: process.env.DB_SSL_CA, rejectUnauthorized: true }
         : undefined,
       extra: {
+        decimalNumbers: true,
         ssl: process.env.DB_SSL_CA
           ? { rejectUnauthorized: true }
           : { rejectUnauthorized: false },
