@@ -1,36 +1,27 @@
-import apiClient from './api';
-import { MenuItem } from '../types';
+import { get, post, patch, del } from './api';
+import type { MenuItem, CreateMenuItemDto, UpdateMenuItemDto } from '../types';
 
-export const getMenuItems = async (menuId?: string): Promise<MenuItem[]> => {
-  const params = menuId ? { menuId } : {};
-  const response = await apiClient.get('/menu-items', { params });
-  return response.data;
-};
+export async function fetchMenuItems(): Promise<MenuItem[]> {
+  return get<MenuItem[]>('/menu-items');
+}
 
-export const getMenuItem = async (id: string): Promise<MenuItem> => {
-  const response = await apiClient.get(`/menu-items/${id}`);
-  return response.data;
-};
+export async function fetchMenuItem(id: string): Promise<MenuItem> {
+  return get<MenuItem>(`/menu-items/${id}`);
+}
 
-export const createMenuItem = async (data: {
-  name: string;
-  price: number;
-  menuId: string;
-  description?: string;
-  imageUrl?: string;
-}): Promise<MenuItem> => {
-  const response = await apiClient.post('/menu-items', data);
-  return response.data;
-};
+export async function createMenuItem(
+  dto: CreateMenuItemDto,
+): Promise<MenuItem> {
+  return post<MenuItem>('/menu-items', dto);
+}
 
-export const updateMenuItem = async (
+export async function updateMenuItem(
   id: string,
-  data: Partial<{ name: string; price: number; menuId: string; description: string; imageUrl: string }>
-): Promise<MenuItem> => {
-  const response = await apiClient.put(`/menu-items/${id}`, data);
-  return response.data;
-};
+  dto: UpdateMenuItemDto,
+): Promise<MenuItem> {
+  return patch<MenuItem>(`/menu-items/${id}`, dto);
+}
 
-export const deleteMenuItem = async (id: string): Promise<void> => {
-  await apiClient.delete(`/menu-items/${id}`);
-};
+export async function deleteMenuItem(id: string): Promise<void> {
+  return del(`/menu-items/${id}`);
+}

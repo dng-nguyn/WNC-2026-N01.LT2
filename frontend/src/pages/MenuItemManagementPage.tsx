@@ -1,157 +1,243 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, message } from 'antd';
-import { getMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from '../services/menuItem.service';
-import { getMenus } from '../services/menu.service';
-import { MenuItem, Menu } from '../types';
+import { useEffect, useState, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from '../services/menuitem.service';
+import { fetchMenus } from '../services/menu.service';
+import type { MenuItem, Menu } from '../types';
 
-const MenuItemManagementPage: React.FC = () => {
+export default function MenuItemManagementPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
-  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [menuItemsData, menusData] = await Promise.all([getMenuItems(), getMenus()]);
-      setItems(menuItemsData);
-      setMenus(menusData);
-    } catch {
-      message.error('Failed to load data');
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Form fields
+  const [menuId, setMenuId] = useState('');
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [isAvailable, setIsAvailable] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    Promise.all([fetchMenuItems(), fetchMenus()])
+      .then(([itemsData, menusData]) => {
+        setItems(itemsData);
+        setMenus(menusData);
+      })
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load data'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleOpenCreate = () => {
-    setEditingItem(null);
-    form.resetFields();
-    setIsModalOpen(true);
-  };
+  function openCreate() {
+    setEditingId(null);
+    setMenuId(menus[0]?.id || '');
+    setName('');
+    setPrice('');
+    setIsAvailable(true);
+    setShowForm(true);
+    setError('');
+  }
 
-  const handleOpenEdit = (record: MenuItem) => {
-    setEditingItem(record);
-    form.setFieldsValue({
-      name: record.name,
-      price: record.price,
-      menuId: record.menuId,
-      description: record.description,
-      imageUrl: record.imageUrl,
-    });
-    setIsModalOpen(true);
-  };
+  function openEdit(item: MenuItem) {
+    setEditingId(item.id);
+    setMenuId(item.menu.id);
+    setName(item.name);
+    setPrice(String(Number(item.price)));
+    setIsAvailable(item.isAvailable);
+    setShowForm(true);
+    setError('');
+  }
 
-  const handleSubmit = async () => {
+  function cancelForm() {
+    setShowForm(false);
+    setEditingId(null);
+  }
+
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+
     try {
-      const values = await form.validateFields();
-      if (editingItem) {
-        await updateMenuItem(editingItem.id, values);
-        message.success('Item updated');
-      } else {
-        await createMenuItem(values);
-        message.success('Item created');
+      const priceNum = parseFloat(price);
+      if (isNaN(priceNum) || priceNum < 0) {
+        throw new Error('Please enter a valid price');
       }
-      setIsModalOpen(false);
-      fetchData();
-    } catch {
-      message.error('Operation failed');
-    }
-  };
 
-  const handleDelete = async (id: string) => {
+      if (editingId) {
+        await updateMenuItem(editingId, {
+          menuId,
+          name,
+          price: priceNum,
+          isAvailable,
+        });
+      } else {
+        await createMenuItem({
+          menuId,
+          name,
+          price: priceNum,
+          isAvailable,
+        });
+      }
+
+      const [itemsData, menusData] = await Promise.all([fetchMenuItems(), fetchMenus()]);
+      setItems(itemsData);
+      setMenus(menusData);
+      cancelForm();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save menu item');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Are you sure you want to delete this menu item?')) return;
     try {
       await deleteMenuItem(id);
-      message.success('Item deleted');
-      fetchData();
-    } catch {
-      message.error('Failed to delete item');
+      const itemsData = await fetchMenuItems();
+      setItems(itemsData);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to delete menu item');
     }
-  };
+  }
 
-  const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    {
-      title: 'Price',
-      dataIndex: 'price',
-      key: 'price',
-      render: (val: number) => `$${val.toFixed(2)}`,
-    },
-    {
-      title: 'Category',
-      key: 'menu',
-      render: (_: any, record: MenuItem) => {
-        const menu = menus.find((m) => m.id === record.menuId);
-        return menu?.name || record.menuId;
-      },
-    },
-    { title: 'Description', dataIndex: 'description', key: 'description' },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: any, record: MenuItem) => (
-        <Space>
-          <Button onClick={() => handleOpenEdit(record)}>Edit</Button>
-          <Button danger onClick={() => handleDelete(record.id)}>
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  const formatCurrency = (n: number) =>
+    new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
+
+  if (loading) return <div className="page-container"><p>Loading menu items…</p></div>;
 
   return (
-    <div>
-      <h2>Menu Items</h2>
-      <Button type="primary" onClick={handleOpenCreate} style={{ marginBottom: 16 }}>
-        Add Item
-      </Button>
-      <Table dataSource={items} columns={columns} rowKey="id" loading={loading} />
-      <Modal
-        title={editingItem ? 'Edit Item' : 'New Item'}
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onOk={handleSubmit}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="price"
-            label="Price"
-            rules={[{ required: true, type: 'number', min: 0 }]}
-          >
-            <InputNumber style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item
-            name="menuId"
-            label="Category"
-            rules={[{ required: true, message: 'Select category' }]}
-          >
-            <Select placeholder="Select category">
-              {menus.map((m) => (
-                <Select.Option key={m.id} value={m.id}>
-                  {m.name}
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-          <Form.Item name="imageUrl" label="Image URL">
-            <Input />
-          </Form.Item>
-        </Form>
-      </Modal>
+    <div className="page-container">
+      <header className="page-header">
+        <div>
+          <h1>Menu Items (Products)</h1>
+        </div>
+        <nav className="nav-links">
+          <Link to="/dashboard" className="btn btn-secondary">Dashboard</Link>
+          <Link to="/menus" className="btn btn-secondary">Categories</Link>
+          <Link to="/pos" className="btn btn-primary">POS Terminal</Link>
+        </nav>
+      </header>
+
+      {error && <div className="alert alert-error">{error}</div>}
+
+      <button className="btn btn-primary" onClick={openCreate}>
+        + New Menu Item
+      </button>
+
+      {showForm && (
+        <div className="card form-card">
+          <h3>{editingId ? 'Edit Menu Item' : 'New Menu Item'}</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="itemCategory">Category *</label>
+              <select
+                id="itemCategory"
+                value={menuId}
+                onChange={(e) => setMenuId(e.target.value)}
+                required
+              >
+                <option value="">Select a category</option>
+                {menus.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="itemName">Name *</label>
+              <input
+                id="itemName"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                maxLength={100}
+                autoFocus
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="itemPrice">Price (VND) *</label>
+              <input
+                id="itemPrice"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="form-group checkbox-group">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={isAvailable}
+                  onChange={(e) => setIsAvailable(e.target.checked)}
+                />
+                Available for sale
+              </label>
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={cancelForm}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Available</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {items.length === 0 ? (
+            <tr>
+              <td colSpan={6} className="text-muted">No menu items yet. Create one above.</td>
+            </tr>
+          ) : (
+            items.map((item) => (
+              <tr key={item.id}>
+                <td><strong>{item.name}</strong></td>
+                <td>{item.menu.name}</td>
+                <td>{formatCurrency(Number(item.price))}</td>
+                <td>
+                  <span className={`badge ${item.isAvailable ? 'badge-success' : 'badge-danger'}`}>
+                    {item.isAvailable ? 'Yes' : 'No'}
+                  </span>
+                </td>
+                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+                <td className="action-cell">
+                  <button className="btn btn-sm btn-secondary" onClick={() => openEdit(item)}>
+                    Edit
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(item.id)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
-};
-
-export default MenuItemManagementPage;
+}

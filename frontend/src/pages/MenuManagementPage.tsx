@@ -1,111 +1,177 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Space, Modal, Form, Input, message } from 'antd';
-import { getMenus, createMenu, updateMenu, deleteMenu } from '../services/menu.service';
-import { Menu } from '../types';
+import { useEffect, useState, FormEvent } from 'react';
+import { Link } from 'react-router-dom';
+import { fetchMenus, createMenu, updateMenu, deleteMenu } from '../services/menu.service';
+import type { Menu } from '../types';
 
-const MenuManagementPage: React.FC = () => {
+export default function MenuManagementPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMenu, setEditingMenu] = useState<Menu | null>(null);
-  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  const fetchMenus = async () => {
-    setLoading(true);
+  useEffect(() => {
+    loadMenus();
+  }, []);
+
+  async function loadMenus() {
     try {
-      const data = await getMenus();
+      const data = await fetchMenus();
       setMenus(data);
-    } catch {
-      message.error('Failed to load menus');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load menus');
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  useEffect(() => {
-    fetchMenus();
-  }, []);
+  function openCreate() {
+    setEditingId(null);
+    setName('');
+    setDescription('');
+    setShowForm(true);
+    setError('');
+  }
 
-  const handleOpenCreate = () => {
-    setEditingMenu(null);
-    form.resetFields();
-    setIsModalOpen(true);
-  };
+  function openEdit(menu: Menu) {
+    setEditingId(menu.id);
+    setName(menu.name);
+    setDescription(menu.description || '');
+    setShowForm(true);
+    setError('');
+  }
 
-  const handleOpenEdit = (record: Menu) => {
-    setEditingMenu(record);
-    form.setFieldsValue({ name: record.name, description: record.description });
-    setIsModalOpen(true);
-  };
+  function cancelForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setName('');
+    setDescription('');
+  }
 
-  const handleSubmit = async () => {
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
+
     try {
-      const values = await form.validateFields();
-      if (editingMenu) {
-        await updateMenu(editingMenu.id, values);
-        message.success('Menu updated');
+      if (editingId) {
+        await updateMenu(editingId, { name, description: description || undefined });
       } else {
-        await createMenu(values);
-        message.success('Menu created');
+        await createMenu({ name, description: description || undefined });
       }
-      setIsModalOpen(false);
-      fetchMenus();
-    } catch {
-      message.error('Operation failed');
+      await loadMenus();
+      cancelForm();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to save menu');
+    } finally {
+      setSaving(false);
     }
-  };
+  }
 
-  const handleDelete = async (id: string) => {
+  async function handleDelete(id: string) {
+    if (!confirm('Are you sure you want to delete this menu category?')) return;
     try {
       await deleteMenu(id);
-      message.success('Menu deleted');
-      fetchMenus();
-    } catch {
-      message.error('Failed to delete menu');
+      await loadMenus();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to delete menu');
     }
-  };
+  }
 
-  const columns = [
-    { title: 'Name', dataIndex: 'name', key: 'name' },
-    { title: 'Description', dataIndex: 'description', key: 'description' },
-    {
-      title: 'Actions',
-      key: 'actions',
-      render: (_: any, record: Menu) => (
-        <Space>
-          <Button onClick={() => handleOpenEdit(record)}>Edit</Button>
-          <Button danger onClick={() => handleDelete(record.id)}>
-            Delete
-          </Button>
-        </Space>
-      ),
-    },
-  ];
+  if (loading) return <div className="page-container"><p>Loading menus…</p></div>;
 
   return (
-    <div>
-      <h2>Menu Categories</h2>
-      <Button type="primary" onClick={handleOpenCreate} style={{ marginBottom: 16 }}>
-        Add Category
-      </Button>
-      <Table dataSource={menus} columns={columns} rowKey="id" loading={loading} />
-      <Modal
-        title={editingMenu ? 'Edit Category' : 'New Category'}
-        open={isModalOpen}
-        onCancel={() => setIsModalOpen(false)}
-        onOk={handleSubmit}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="description" label="Description">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
+    <div className="page-container">
+      <header className="page-header">
+        <div>
+          <h1>Menu Categories</h1>
+        </div>
+        <nav className="nav-links">
+          <Link to="/dashboard" className="btn btn-secondary">Dashboard</Link>
+          <Link to="/menu-items" className="btn btn-secondary">Menu Items</Link>
+          <Link to="/pos" className="btn btn-primary">POS Terminal</Link>
+        </nav>
+      </header>
+
+      {error && <div className="alert alert-error">{error}</div>}
+
+      <button className="btn btn-primary" onClick={openCreate}>
+        + New Category
+      </button>
+
+      {showForm && (
+        <div className="card form-card">
+          <h3>{editingId ? 'Edit Category' : 'New Category'}</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="menuName">Name *</label>
+              <input
+                id="menuName"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                maxLength={100}
+                autoFocus
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="menuDesc">Description</label>
+              <textarea
+                id="menuDesc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+            <div className="form-actions">
+              <button type="submit" className="btn btn-primary" disabled={saving}>
+                {saving ? 'Saving…' : 'Save'}
+              </button>
+              <button type="button" className="btn btn-secondary" onClick={cancelForm}>
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <table className="table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {menus.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="text-muted">No categories yet. Create one above.</td>
+            </tr>
+          ) : (
+            menus.map((menu) => (
+              <tr key={menu.id}>
+                <td><strong>{menu.name}</strong></td>
+                <td>{menu.description || '—'}</td>
+                <td>{new Date(menu.createdAt).toLocaleDateString()}</td>
+                <td className="action-cell">
+                  <button className="btn btn-sm btn-secondary" onClick={() => openEdit(menu)}>
+                    Edit
+                  </button>
+                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(menu.id)}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
-};
-
-export default MenuManagementPage;
+}

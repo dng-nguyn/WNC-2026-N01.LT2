@@ -1,65 +1,74 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
-import { Form, Input, Button, Typography, message } from 'antd';
-import { useAuth } from '../hooks/useAuth';
+import { useState, FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { login } from '../services/auth.service';
 
-const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+export default function LoginPage() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [submitting, setSubmitting] = useState(false);
-  const from = (location.state as any)?.from?.pathname || '/';
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const onFinish = async (values: { username: string; password: string }) => {
-    setSubmitting(true);
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
     try {
-      await login(values.username, values.password);
-      message.success('Login successful');
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      message.error(err.response?.data?.message || 'Login failed');
+      await login({ username, password });
+      navigate('/dashboard', { replace: true });
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : 'Login failed. Please try again.';
+      setError(msg);
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        background: '#f0f2f5',
-      }}
-    >
-      <div style={{ width: 400, padding: 24, background: '#fff', borderRadius: 8 }}>
-        <Typography.Title level={3}>Log in</Typography.Title>
-        <Form onFinish={onFinish} layout="vertical">
-          <Form.Item
-            name="username"
-            rules={[{ required: true, message: 'Please input your username' }]}
-          >
-            <Input placeholder="Username" />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: 'Please input your password' }]}
-          >
-            <Input.Password placeholder="Password" />
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={submitting} block>
-              Log in
-            </Button>
-          </Form.Item>
-        </Form>
-        <Typography.Text>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h1>Coffee Shop POS</h1>
+        <h2>Sign In</h2>
+
+        {error && <div className="alert alert-error">{error}</div>}
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="Enter your username"
+              required
+              autoFocus
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign In'}
+          </button>
+        </form>
+
+        <p className="auth-footer">
           Don't have an account? <Link to="/register">Register here</Link>
-        </Typography.Text>
+        </p>
       </div>
     </div>
   );
-};
-
-export default LoginPage;
+}
