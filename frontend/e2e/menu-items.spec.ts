@@ -36,12 +36,9 @@ test.describe('Menu items management', () => {
 
   test('menu items table displays correctly', async ({ page }) => {
     await page.goto('/menu-items');
-
     await expect(page.locator('.page-container')).toBeVisible();
-
-    const table = page.locator('table');
-    const emptyMessage = page.getByText(/no menu items/i);
-    await expect(table.or(emptyMessage)).toBeVisible();
+    // Table is always rendered (with rows or empty message)
+    await expect(page.locator('table')).toBeVisible();
   });
 
   test('shows empty state when no items exist for user', async ({ page }) => {
