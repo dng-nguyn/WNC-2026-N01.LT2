@@ -6,7 +6,6 @@ test.describe('Navigation', () => {
   const password = 'Testpass123!';
 
   test.beforeAll(async ({ browser }) => {
-    // Register a user
     const page = await browser.newPage();
     await page.goto('/register');
     await page.getByLabel('Username').fill(username);
@@ -18,7 +17,6 @@ test.describe('Navigation', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    // Login before each test
     await page.goto('/login');
     await page.getByLabel('Username').fill(username);
     await page.getByLabel('Password').fill(password);
@@ -26,38 +24,34 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
-  test('dashboard links navigate to POS, Menus, Menu Items', async ({ page }) => {
-    // Navigate to POS
-    await page.getByRole('link', { name: /pos/i }).click();
+  test('sidebar links navigate to POS, Categories, Menu Items', async ({ page }) => {
+    const sidebar = page.locator('.sidebar-nav');
+
+    await sidebar.getByRole('link', { name: /pos/i }).click();
     await expect(page).toHaveURL(/\/pos/);
 
-    // Navigate back to dashboard
-    await page.getByRole('link', { name: /dashboard/i }).click();
+    await sidebar.getByRole('link', { name: /dashboard/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    // Navigate to Menus
-    await page.getByRole('link', { name: /menus/i }).click();
+    await sidebar.getByRole('link', { name: /menu categories/i }).click();
     await expect(page).toHaveURL(/\/menus/);
 
-    // Navigate back to dashboard
-    await page.getByRole('link', { name: /dashboard/i }).click();
+    await sidebar.getByRole('link', { name: /dashboard/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    // Navigate to Menu Items
-    await page.getByRole('link', { name: /menu items/i }).click();
+    await sidebar.getByRole('link', { name: /menu items/i }).click();
     await expect(page).toHaveURL(/\/menu-items/);
   });
 
-  test('POS has link back to Dashboard', async ({ page }) => {
+  test('POS has sidebar link back to Dashboard', async ({ page }) => {
     await page.goto('/pos');
-
-    await page.getByRole('link', { name: /dashboard/i }).click();
+    const sidebar = page.locator('.sidebar-nav');
+    await sidebar.getByRole('link', { name: /dashboard/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
   test('default route redirects to dashboard', async ({ page }) => {
     await page.goto('/');
-
     await expect(page).toHaveURL(/\/dashboard/);
   });
 });

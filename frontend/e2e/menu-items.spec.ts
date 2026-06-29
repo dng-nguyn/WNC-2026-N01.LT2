@@ -51,13 +51,13 @@ test.describe('Menu items management', () => {
   test('can create a new menu item', async ({ page }) => {
     await page.goto('/menu-items');
 
-    await page.getByRole('button', { name: /new menu item/i }).click();
+    await page.getByRole('button', { name: /new item/i }).click();
 
     // Select category from dropdown
-    await page.getByLabel('Category *').selectOption({ label: categoryName });
+    await page.getByLabel('Category').selectOption({ label: categoryName });
 
-    await page.getByLabel('Name *').fill(`Espresso ${unique}`);
-    await page.getByLabel('Price (VND) *').fill('45000');
+    await page.getByLabel('Name').fill(`Espresso ${unique}`);
+    await page.getByLabel('Price (VND)').fill('45000');
 
     await page.getByRole('button', { name: /^save$/i }).click();
 
@@ -72,7 +72,7 @@ test.describe('Menu items management', () => {
     if (await editButtons.count() > 0) {
       await editButtons.first().click();
 
-      const nameInput = page.getByLabel('Name *');
+      const nameInput = page.getByLabel('Name');
       await nameInput.fill(`Updated Espresso ${unique}`);
       await page.getByRole('button', { name: /^save$/i }).click();
 
@@ -98,11 +98,11 @@ test.describe('Menu items management', () => {
   test('validates price input', async ({ page }) => {
     await page.goto('/menu-items');
 
-    await page.getByRole('button', { name: /new menu item/i }).click();
+    await page.getByRole('button', { name: /new item/i }).click();
 
-    await page.getByLabel('Category *').selectOption({ label: categoryName });
-    await page.getByLabel('Name *').fill('Bad Item');
-    await page.getByLabel('Price (VND) *').fill('-100');
+    await page.getByLabel('Category').selectOption({ label: categoryName });
+    await page.getByLabel('Name').fill('Bad Item');
+    await page.getByLabel('Price (VND)').fill('-100');
 
     await page.getByRole('button', { name: /^save$/i }).click();
 
@@ -112,10 +112,10 @@ test.describe('Menu items management', () => {
   test('shows availability badge', async ({ page }) => {
     // Create an item first
     await page.goto('/menu-items');
-    await page.getByRole('button', { name: /new menu item/i }).click();
-    await page.getByLabel('Category *').selectOption({ label: categoryName });
-    await page.getByLabel('Name *').fill(`Latte ${unique}`);
-    await page.getByLabel('Price (VND) *').fill('55000');
+    await page.getByRole('button', { name: /new item/i }).click();
+    await page.getByLabel('Category').selectOption({ label: categoryName });
+    await page.getByLabel('Name').fill(`Latte ${unique}`);
+    await page.getByLabel('Price (VND)').fill('55000');
     await page.getByRole('button', { name: /^save$/i }).click();
 
     await expect(page.locator('.badge-success').first()).toBeVisible();
