@@ -1,7 +1,7 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import MenuItemManagementPage from './MenuItemManagementPage';
 import type { MenuItem, Menu } from '../types';
 
@@ -80,10 +80,6 @@ describe('MenuItemManagementPage', () => {
     mockDeleteMenuItem.mockResolvedValue(undefined);
   });
 
-  afterEach(() => {
-    vi.resetAllMocks();
-  });
-
   it('shows loading state initially', async () => {
     const { promise, resolve } = Promise.withResolvers<MenuItem[]>();
     mockFetchMenuItems.mockReturnValue(promise);
@@ -96,7 +92,7 @@ describe('MenuItemManagementPage', () => {
     );
 
     expect(screen.getByText('Loading menu items…')).toBeInTheDocument();
-    expect(screen.queryByText('Menu Items (Products)')).not.toBeInTheDocument();
+    expect(screen.queryByText('Menu Items')).not.toBeInTheDocument();
 
     resolve([]);
     await waitFor(() => expect(screen.queryByText('Loading menu items…')).not.toBeInTheDocument());
@@ -110,13 +106,13 @@ describe('MenuItemManagementPage', () => {
     ];
     await renderMenuItemManagement(items, menus);
 
-    expect(screen.getByText('Menu Items (Products)')).toBeInTheDocument();
+    expect(screen.getByText('Menu Items')).toBeInTheDocument();
     expect(screen.getByText('Espresso')).toBeInTheDocument();
     expect(screen.getByText('Latte')).toBeInTheDocument();
     expect(screen.getByText(formatCurrency(30000))).toBeInTheDocument();
     expect(screen.getByText(formatCurrency(40000))).toBeInTheDocument();
-    expect(screen.getByText('Yes')).toBeInTheDocument();
-    expect(screen.getByText('No')).toBeInTheDocument();
+    expect(screen.getByText('Available')).toBeInTheDocument();
+    expect(screen.getByText('Unavailable')).toBeInTheDocument();
   });
 
   it('shows "No menu items yet" when empty', async () => {
@@ -130,10 +126,10 @@ describe('MenuItemManagementPage', () => {
     const menus = [createMockMenu({ id: 'm1', name: 'Coffee' })];
     await renderMenuItemManagement([], menus);
 
-    await user.click(screen.getByText('+ New Menu Item'));
+    await user.click(screen.getByText('+ New Item'));
 
     expect(screen.getByText('New Menu Item')).toBeInTheDocument();
-    expect(screen.getByLabelText('Category *')).toBeInTheDocument();
+    expect(screen.getByLabelText('Category')).toBeInTheDocument();
     expect(screen.getByRole('option', { name: 'Coffee' })).toBeInTheDocument();
   });
 
@@ -142,13 +138,13 @@ describe('MenuItemManagementPage', () => {
     const menus = [createMockMenu({ id: 'm1', name: 'Coffee' })];
     await renderMenuItemManagement([], menus);
 
-    await user.click(screen.getByText('+ New Menu Item'));
+    await user.click(screen.getByText('+ New Item'));
 
-    await user.selectOptions(screen.getByLabelText('Category *'), 'm1');
-    await user.type(screen.getByLabelText('Name *'), 'Negative Price Item');
-    
+    await user.selectOptions(screen.getByLabelText('Category'), 'm1');
+    await user.type(screen.getByLabelText('Name'), 'Negative Price Item');
+
     // Use fireEvent.change to bypass userEvent number/min typing limitation
-    fireEvent.change(screen.getByLabelText('Price (VND) *'), { target: { value: '-100' } });
+    fireEvent.change(screen.getByLabelText('Price (VND)'), { target: { value: '-100' } });
 
     await user.click(screen.getByText('Save'));
 
@@ -161,11 +157,11 @@ describe('MenuItemManagementPage', () => {
     const menus = [createMockMenu({ id: 'm1', name: 'Coffee' })];
     await renderMenuItemManagement([], menus);
 
-    await user.click(screen.getByText('+ New Menu Item'));
+    await user.click(screen.getByText('+ New Item'));
 
-    await user.selectOptions(screen.getByLabelText('Category *'), 'm1');
-    await user.type(screen.getByLabelText('Name *'), 'Americano');
-    await user.type(screen.getByLabelText('Price (VND) *'), '35000');
+    await user.selectOptions(screen.getByLabelText('Category'), 'm1');
+    await user.type(screen.getByLabelText('Name'), 'Americano');
+    await user.type(screen.getByLabelText('Price (VND)'), '35000');
 
     await user.click(screen.getByText('Save'));
 
@@ -187,12 +183,13 @@ describe('MenuItemManagementPage', () => {
     const items = [createMockMenuItem({ id: 'mi-1', name: 'Espresso', price: 30000, isAvailable: true, menu: menus[0] })];
     await renderMenuItemManagement(items, menus);
 
-    await user.click(screen.getByText('Edit'));
+    // Click the Edit icon button (first icon-btn in the row)
+    await user.click(screen.getByRole('button', { name: /edit/i }));
 
     expect(screen.getByText('Edit Menu Item')).toBeInTheDocument();
-    expect(screen.getByLabelText('Category *')).toHaveValue('m1');
-    expect(screen.getByLabelText('Name *')).toHaveValue('Espresso');
-    expect(screen.getByLabelText('Price (VND) *')).toHaveValue(30000);
+    expect(screen.getByLabelText('Category')).toHaveValue('m1');
+    expect(screen.getByLabelText('Name')).toHaveValue('Espresso');
+    expect(screen.getByLabelText('Price (VND)')).toHaveValue(30000);
   });
 
   it('shows error on fetch failure', async () => {
