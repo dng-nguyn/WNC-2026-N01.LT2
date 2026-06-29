@@ -134,7 +134,7 @@ describe('POSPage', () => {
     ];
     await renderPOS(items);
 
-    expect(screen.getByRole('button', { name: 'All' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tất cả' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Coffee' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Tea' })).toBeInTheDocument();
   });
@@ -177,8 +177,8 @@ describe('POSPage', () => {
     await user.click(screen.getByText('Espresso').closest('button')!);
 
     expect(screen.getByText('Current Order')).toBeInTheDocument();
-    expect(screen.getByText('Total (1 items)')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('1 item')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('1')).toBeInTheDocument();
   });
 
   it('increments/decrements quantity in cart', async () => {
@@ -188,17 +188,17 @@ describe('POSPage', () => {
 
     await user.click(screen.getByText('Espresso').closest('button')!);
 
-    expect(screen.getByText('Total (1 items)')).toBeInTheDocument();
+    expect(screen.getByText('1 item')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '+' }));
-    expect(screen.getByText('Total (2 items)')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /increase/i }));
+    expect(screen.getByText('2 items')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '−' }));
-    expect(screen.getByText('Total (1 items)')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /decrease/i }));
+    expect(screen.getByText('1 item')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '−' }));
-    expect(screen.queryByText('Total (1 items)')).not.toBeInTheDocument();
-    expect(screen.getByText('Click menu items to add them here')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /decrease/i }));
+    expect(screen.queryByText('1 item')).not.toBeInTheDocument();
+    expect(screen.getByText('Tap items to add them here')).toBeInTheDocument();
   });
 
   it('shows cart total', async () => {
@@ -212,13 +212,14 @@ describe('POSPage', () => {
     await user.click(screen.getByText('Espresso').closest('button')!);
     await user.click(screen.getByText('Latte').closest('button')!);
 
-    expect(screen.getByText('Total (2 items)')).toBeInTheDocument();
+    expect(screen.getByText('2 items')).toBeInTheDocument();
     expect(screen.getByText(formatCurrency(70000))).toBeInTheDocument();
   });
 
-  it('shows Place Order button', async () => {
+  it('shows checkout button', async () => {
     await renderPOS([]);
-    expect(screen.getByRole('button', { name: 'Place Order' })).toBeInTheDocument();
+    // The button shows "Pay 0 ₫" initially when cart is empty but still renders
+    expect(screen.getByRole('button', { name: /pay/i })).toBeInTheDocument();
   });
 
   it('calls createOrder() on checkout', async () => {
@@ -231,7 +232,13 @@ describe('POSPage', () => {
 
     await user.selectOptions(screen.getByRole('combobox'), 't1');
 
-    await user.click(screen.getByRole('button', { name: 'Place Order' }));
+    await user.click(screen.getByRole('button', { name: /pay/i }));
+
+    // Payment modal opens — select "Cash"
+    await waitFor(() => {
+      expect(screen.getByText('Select Payment Method')).toBeInTheDocument();
+    });
+    await user.click(screen.getByText('Cash'));
 
     await waitFor(() => {
       expect(mockCreateOrder).toHaveBeenCalledWith(
@@ -252,6 +259,6 @@ describe('POSPage', () => {
 
   it('shows empty cart message initially', async () => {
     await renderPOS([]);
-    expect(screen.getByText('Click menu items to add them here')).toBeInTheDocument();
+    expect(screen.getByText('Tap items to add them here')).toBeInTheDocument();
   });
 });

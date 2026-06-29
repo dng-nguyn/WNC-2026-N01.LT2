@@ -195,6 +195,27 @@ export interface UpdateEmployeeDto {
   isActive?: boolean;
 }
 
+// ===== Payment =====
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  EXPIRED = 'EXPIRED',
+}
+
+export interface Payment {
+  id: string;
+  order: Order;
+  code: string;
+  amount: number;
+  status: PaymentStatus;
+  qrUrl: string;
+  sepayTransactionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ===== Dashboard / Stats types =====
 
 export interface DashboardStats {

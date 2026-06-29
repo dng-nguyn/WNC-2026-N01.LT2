@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/ProtectedRoute';
+import AppLayout from './components/AppLayout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
@@ -14,20 +15,14 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Protected routes */}
+      {/* Protected routes — with sidebar layout */}
       <Route
         path="/dashboard"
         element={
           <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/pos"
-        element={
-          <ProtectedRoute>
-            <POSPage />
+            <AppLayout>
+              <DashboardPage />
+            </AppLayout>
           </ProtectedRoute>
         }
       />
@@ -35,7 +30,9 @@ export default function App() {
         path="/menus"
         element={
           <ProtectedRoute>
-            <MenuManagementPage />
+            <AppLayout>
+              <MenuManagementPage />
+            </AppLayout>
           </ProtectedRoute>
         }
       />
@@ -43,7 +40,21 @@ export default function App() {
         path="/menu-items"
         element={
           <ProtectedRoute>
-            <MenuItemManagementPage />
+            <AppLayout>
+              <MenuItemManagementPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Protected routes — with sidebar layout */}
+      <Route
+        path="/pos"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <POSPage />
+            </AppLayout>
           </ProtectedRoute>
         }
       />

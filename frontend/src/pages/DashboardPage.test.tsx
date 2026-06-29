@@ -1,12 +1,10 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import DashboardPage from './DashboardPage';
 import type { Order } from '../types';
 
 const mockFetchOrders = vi.fn();
-const mockLogout = vi.fn();
 const mockGetLoggedInUser = vi.fn();
 
 vi.mock('../services/order.service', () => ({
@@ -14,7 +12,7 @@ vi.mock('../services/order.service', () => ({
 }));
 
 vi.mock('../services/auth.service', () => ({
-  logout: () => mockLogout(),
+  logout: vi.fn(),
   getLoggedInUser: () => mockGetLoggedInUser(),
 }));
 
@@ -81,10 +79,6 @@ describe('DashboardPage', () => {
     vi.clearAllMocks();
     mockGetLoggedInUser.mockReturnValue({ id: 'u1', username: 'barista' });
     mockFetchOrders.mockResolvedValue([]);
-  });
-
-  afterEach(() => {
-    vi.resetAllMocks();
   });
 
   it('shows loading state initially', async () => {
@@ -213,23 +207,4 @@ describe('DashboardPage', () => {
     expect(screen.queryByText('Total Revenue')).not.toBeInTheDocument();
   });
 
-  it('logout button calls logout() and redirects', async () => {
-    const user = userEvent.setup();
-    mockGetLoggedInUser.mockReturnValue({ id: 'u1', username: 'barista' });
-    mockFetchOrders.mockResolvedValue([]);
-
-    render(
-      <MemoryRouter initialEntries={['/dashboard']}>
-        <DashboardPage />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText('Logout')).toBeInTheDocument();
-    });
-
-    await user.click(screen.getByText('Logout'));
-
-    expect(mockLogout).toHaveBeenCalled();
-  });
 });

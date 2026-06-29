@@ -1,14 +1,15 @@
 import { useEffect, useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { fetchMenuItems, createMenuItem, updateMenuItem, deleteMenuItem } from '../services/menuItem.service';
 import { fetchMenus } from '../services/menu.service';
 import type { MenuItem, Menu } from '../types';
+import Modal from '../components/ui/Modal';
 
 export default function MenuItemManagementPage() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -28,6 +29,15 @@ export default function MenuItemManagementPage() {
       .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load data'))
       .finally(() => setLoading(false));
   }, []);
+
+  // Filter items by search query
+  const filteredItems = search.trim()
+    ? items.filter(
+        (item) =>
+          item.name.toLowerCase().includes(search.toLowerCase()) ||
+          item.menu.name.toLowerCase().includes(search.toLowerCase()),
+      )
+    : items;
 
   function openCreate() {
     setEditingId(null);
@@ -112,126 +122,156 @@ export default function MenuItemManagementPage() {
     <div className="page-container">
       <header className="page-header">
         <div>
-          <h1>Menu Items (Products)</h1>
+          <h1>Menu Items</h1>
         </div>
-        <nav className="nav-links">
-          <Link to="/dashboard" className="btn btn-secondary">Dashboard</Link>
-          <Link to="/menus" className="btn btn-secondary">Categories</Link>
-          <Link to="/pos" className="btn btn-primary">POS Terminal</Link>
-        </nav>
       </header>
 
       {error && <div className="alert alert-error">{error}</div>}
 
-      <button className="btn btn-primary" onClick={openCreate}>
-        + New Menu Item
-      </button>
-
-      {showForm && (
-        <div className="card form-card">
-          <h3>{editingId ? 'Edit Menu Item' : 'New Menu Item'}</h3>
-          <form onSubmit={handleSubmit} noValidate>
-            <div className="form-group">
-              <label htmlFor="itemCategory">Category *</label>
-              <select
-                id="itemCategory"
-                value={menuId}
-                onChange={(e) => setMenuId(e.target.value)}
-                required
-              >
-                <option value="">Select a category</option>
-                {menus.map((m) => (
-                  <option key={m.id} value={m.id}>
-                    {m.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="itemName">Name *</label>
-              <input
-                id="itemName"
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                maxLength={100}
-                autoFocus
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="itemPrice">Price (VND) *</label>
-              <input
-                id="itemPrice"
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                min="0"
-                step="0.01"
-              />
-            </div>
-
-            <div className="form-group checkbox-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={isAvailable}
-                  onChange={(e) => setIsAvailable(e.target.checked)}
-                />
-                Available for sale
-              </label>
-            </div>
-
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={saving}>
-                {saving ? 'Saving…' : 'Save'}
-              </button>
-              <button type="button" className="btn btn-secondary" onClick={cancelForm}>
-                Cancel
-              </button>
-            </div>
-          </form>
+      {/* Search + Add button row */}
+      <div className="items-toolbar">
+        <div className="search-field">
+          <span className="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search items…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
         </div>
-      )}
+        <button className="btn btn-primary" onClick={openCreate}>
+          + New Item
+        </button>
+      </div>
 
+      {/* Add/Edit Modal */}
+      <Modal
+        open={showForm}
+        onClose={cancelForm}
+        title={editingId ? 'Edit Menu Item' : 'New Menu Item'}
+        footer={
+          <div className="form-actions" style={{ margin: 0 }}>
+            <button type="button" className="btn btn-secondary" onClick={cancelForm}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              form="menu-item-form"
+              className="btn btn-primary"
+              disabled={saving}
+            >
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        }
+      >
+        <form id="menu-item-form" onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label htmlFor="itemCategory">Category</label>
+            <select
+              id="itemCategory"
+              value={menuId}
+              onChange={(e) => setMenuId(e.target.value)}
+              required
+            >
+              <option value="">Select a category</option>
+              {menus.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="itemName">Name</label>
+            <input
+              id="itemName"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              maxLength={100}
+              autoFocus
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="itemPrice">Price (VND)</label>
+            <input
+              id="itemPrice"
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+              min="0"
+              step="0.01"
+            />
+          </div>
+
+          <div className="form-group checkbox-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={isAvailable}
+                onChange={(e) => setIsAvailable(e.target.checked)}
+              />
+              Available for sale
+            </label>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Items table */}
       <table className="table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Available</th>
+            <th>Status</th>
             <th>Created</th>
             <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {items.length === 0 ? (
+          {filteredItems.length === 0 ? (
             <tr>
-              <td colSpan={6} className="text-muted">No menu items yet. Create one above.</td>
+              <td colSpan={6} className="text-muted">
+                {search ? 'No items match your search' : 'No menu items yet. Create one above.'}
+              </td>
             </tr>
           ) : (
-            items.map((item) => (
+            filteredItems.map((item) => (
               <tr key={item.id}>
-                <td><strong>{item.name}</strong></td>
-                <td>{item.menu.name}</td>
-                <td>{formatCurrency(Number(item.price))}</td>
+                <td><span className="item-name">{item.name}</span></td>
+                <td><span className="item-category">{item.menu.name}</span></td>
+                <td className="item-price-cell">{formatCurrency(Number(item.price))}</td>
                 <td>
                   <span className={`badge ${item.isAvailable ? 'badge-success' : 'badge-danger'}`}>
-                    {item.isAvailable ? 'Yes' : 'No'}
+                    {item.isAvailable ? 'Available' : 'Unavailable'}
                   </span>
                 </td>
-                <td>{new Date(item.createdAt).toLocaleDateString()}</td>
-                <td className="action-cell">
-                  <button className="btn btn-sm btn-secondary" onClick={() => openEdit(item)}>
-                    Edit
-                  </button>
-                  <button className="btn btn-sm btn-danger" onClick={() => handleDelete(item.id)}>
-                    Delete
-                  </button>
+                <td className="text-muted">{new Date(item.createdAt).toLocaleDateString()}</td>
+                <td>
+                  <div className="action-icons">
+                    <button
+                      className="icon-btn"
+                      onClick={() => openEdit(item)}
+                      aria-label="Edit"
+                      title="Edit"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      className="icon-btn icon-btn--danger"
+                      onClick={() => handleDelete(item.id)}
+                      aria-label="Delete"
+                      title="Delete"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))

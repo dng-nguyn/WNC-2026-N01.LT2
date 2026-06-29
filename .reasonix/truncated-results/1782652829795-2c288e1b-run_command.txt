@@ -1,0 +1,325 @@
+$ npm --prefix frontend test 2>&1 || npm --prefix frontend exec vitest run 2>&1
+[exit 1]
+
+> coffee-shop-frontend@1.0.0 test
+> vitest run
+
+'vitest' is not recognized as an internal or external command,
+operable program or batch file.
+npm warn exec The following package was not found and will be installed: vitest@4.1.9
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90mC:/web/WNC-2026-N01.LT2[39m
+
+ [31m❯[39m frontend/e2e/menu-items.spec.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/pages/DashboardPage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/pages/MenuItemManagementPage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/pages/MenuManagementPage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/pages/POSPage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/pages/LoginPage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/services/api.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m11 failed[39m[2m)[22m[32m 24[2mms[22m[39m
+[31m     [31m×[31m sends correct method, path, body, and Content-Type header[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m injects Authorization: Bearer <token> from localStorage[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m skips auth header when skipAuth: true[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m returns undefined for 204 No Content[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m throws ApiError with status and message on non-ok response[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m ApiError has correct name, status, message, data properties[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m uses VITE_API_BASE_URL env var as base URL (default: http://localhost:3000)[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m get calls apiRequest with GET method[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m post calls apiRequest with POST method and body[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m patch calls apiRequest with PATCH method and body[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m del calls apiRequest with DELETE method[39m[32m 1[2mms[22m[39m
+ [31m❯[39m frontend/e2e/pos.spec.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/services/auth.service.test.ts [2m([22m[2m11 tests[22m[2m | [22m[31m11 failed[39m[2m)[22m[32m 24[2mms[22m[39m
+[31m       [31m×[31m sends POST to /auth/register with dto and stores tokens in localStorage[39m[32m 11[2mms[22m[39m
+[31m       [31m×[31m sends POST to /auth/login with dto and stores tokens in localStorage[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m sends GET to /auth/profile[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns {id, username} from valid JWT in localStorage[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns null when no token[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns null when token is malformed[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns true for non-expired token[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns false for expired token[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns false when no token[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m returns false for malformed token[39m[32m 1[2mms[22m[39m
+[31m       [31m×[31m clears access_token and refresh_token from localStorage[39m[32m 1[2mms[22m[39m
+ [31m❯[39m frontend/src/services/order.service.test.ts [2m([22m[2m6 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[32m 20[2mms[22m[39m
+[31m     [31m×[31m fetchOrders calls GET /orders[39m[32m 11[2mms[22m[39m
+[31m     [31m×[31m fetchOrder calls GET /orders/:id[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m createOrder calls POST /orders with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m updateOrder calls PATCH /orders/:id with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m deleteOrder calls DELETE /orders/:id[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m addOrderItem calls POST /orders/:orderId/items with dto[39m[32m 1[2mms[22m[39m
+ [31m❯[39m frontend/e2e/menu-management.spec.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/pages/RegisterPage.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/services/menuItem.service.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 16[2mms[22m[39m
+[31m     [31m×[31m fetchMenuItems calls GET /menu-items[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m fetchMenuItem calls GET /menu-items/:id[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m createMenuItem calls POST /menu-items with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m updateMenuItem calls PATCH /menu-items/:id with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m deleteMenuItem calls DELETE /menu-items/:id[39m[32m 1[2mms[22m[39m
+ [31m❯[39m frontend/src/services/menu.service.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 16[2mms[22m[39m
+[31m     [31m×[31m fetchMenus calls GET /menus[39m[32m 9[2mms[22m[39m
+[31m     [31m×[31m fetchMenu calls GET /menus/:id[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m createMenu calls POST /menus with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m updateMenu calls PATCH /menus/:id with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m deleteMenu calls DELETE /menus/:id[39m[32m 1[2mms[22m[39m
+ [31m❯[39m frontend/src/services/table.service.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m5 failed[39m[2m)[22m[32m 14[2mms[22m[39m
+[31m     [31m×[31m fetchTables calls GET /tables[39m[32m 8[2mms[22m[39m
+[31m     [31m×[31m fetchTable calls GET /tables/:id[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m createTable calls POST /tables with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m updateTable calls PATCH /tables/:id with dto[39m[32m 1[2mms[22m[39m
+[31m     [31m×[31m deleteTable calls DELETE /tables/:id[39m[32m 1[2mms[22m[39m
+ [31m❯[39m frontend/e2e/auth.spec.ts [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/src/components/ProtectedRoute.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m frontend/e2e/navigation.spec.ts [2m([22m[2m0 test[22m[2m)[22m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 12 [49m[22m[31m⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/auth.spec.ts[2m [ frontend/e2e/auth.spec.ts ][22m
+[31m[1mError[22m: Cannot find package '@playwright/test' imported from C:/web/WNC-2026-N01.LT2/frontend/e2e/auth.spec.ts[39m
+[36m [2m❯[22m frontend/e2e/auth.spec.ts:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Auth flows'[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/menu-items.spec.ts[2m [ frontend/e2e/menu-items.spec.ts ][22m
+[31m[1mError[22m: Cannot find package '@playwright/test' imported from C:/web/WNC-2026-N01.LT2/frontend/e2e/menu-items.spec.ts[39m
+[36m [2m❯[22m frontend/e2e/menu-items.spec.ts:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Menu items management'[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/menu-management.spec.ts[2m [ frontend/e2e/menu-management.spec.ts ][22m
+[31m[1mError[22m: Cannot find package '@playwright/test' imported from C:/web/WNC-2026-N01.LT2/frontend/e2e/menu-management.spec.ts[39m
+[36m [2m❯[22m frontend/e2e/menu-management.spec.ts:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Menu management'[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/navigation.spec.ts[2m [ frontend/e2e/navigation.spec.ts ][22m
+[31m[1mError[22m: Cannot find package '@playwright/test' imported from C:/web/WNC-2026-N01.LT2/frontend/e2e/navigation.spec.ts[39m
+[36m [2m❯[22m frontend/e2e/navigation.spec.ts:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Navigation'[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/pos.spec.ts[2m [ frontend/e2e/pos.spec.ts ][22m
+[31m[1mError[22m: Cannot find package '@playwright/test' imported from C:/web/WNC-2026-N01.LT2/frontend/e2e/pos.spec.ts[39m
+[36m [2m❯[22m frontend/e2e/pos.spec.ts:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'POS terminal'[39m[33m,[39m () [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/components/ProtectedRoute.test.tsx[2m [ frontend/src/components/ProtectedRoute.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/components/ProtectedRoute.test.tsx[39m
+[36m [2m❯[22m frontend/src/components/ProtectedRoute.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { render[33m,[39m screen } [35mfrom[39m [32m'@testing-library/react'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m { [33mMemoryRouter[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { vi[33m,[39m describe[33m,[39m it[33m,[39m expect[33m,[39m beforeEach } [35mfrom[39m [32m'vitest'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/DashboardPage.test.tsx[2m [ frontend/src/pages/DashboardPage.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/pages/DashboardPage.test.tsx[39m
+[36m [2m❯[22m frontend/src/pages/DashboardPage.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { render[33m,[39m screen[33m,[39m waitFor } [35mfrom[39m [32m'@testing-library/react'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m userEvent [35mfrom[39m [32m'@testing-library/user-event'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { [33mMemoryRouter[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/LoginPage.test.tsx[2m [ frontend/src/pages/LoginPage.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/pages/LoginPage.test.tsx[39m
+[36m [2m❯[22m frontend/src/pages/LoginPage.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { render[33m,[39m screen[33m,[39m waitFor } [35mfrom[39m [32m'@testing-library/react'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m userEvent [35mfrom[39m [32m'@testing-library/user-event'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { [33mMemoryRouter[39m[33m,[39m [33mRoutes[39m[33m,[39m [33mRoute[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/MenuItemManagementPage.test.tsx[2m [ frontend/src/pages/MenuItemManagementPage.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/pages/MenuItemManagementPage.test.tsx[39m
+[36m [2m❯[22m frontend/src/pages/MenuItemManagementPage.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m import { render, screen, waitFor, fireEvent } from '@testing-library/r…
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m userEvent [35mfrom[39m [32m'@testing-library/user-event'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { [33mMemoryRouter[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/MenuManagementPage.test.tsx[2m [ frontend/src/pages/MenuManagementPage.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/pages/MenuManagementPage.test.tsx[39m
+[36m [2m❯[22m frontend/src/pages/MenuManagementPage.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { render[33m,[39m screen[33m,[39m waitFor } [35mfrom[39m [32m'@testing-library/react'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m userEvent [35mfrom[39m [32m'@testing-library/user-event'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { [33mMemoryRouter[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/POSPage.test.tsx[2m [ frontend/src/pages/POSPage.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/pages/POSPage.test.tsx[39m
+[36m [2m❯[22m frontend/src/pages/POSPage.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { render[33m,[39m screen[33m,[39m waitFor } [35mfrom[39m [32m'@testing-library/react'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m userEvent [35mfrom[39m [32m'@testing-library/user-event'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { [33mMemoryRouter[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/RegisterPage.test.tsx[2m [ frontend/src/pages/RegisterPage.test.tsx ][22m
+[31m[1mError[22m: Cannot find package '@testing-library/react' imported from C:/web/WNC-2026-N01.LT2/frontend/src/pages/RegisterPage.test.tsx[39m
+[36m [2m❯[22m frontend/src/pages/RegisterPage.test.tsx:[2m1:1[22m[39m
+    [90m  1|[39m [35mimport[39m { render[33m,[39m screen[33m,[39m waitFor } [35mfrom[39m [32m'@testing-library/react'[39m[33m;[39m
+    [90m   |[39m [31m^[39m
+    [90m  2|[39m [35mimport[39m userEvent [35mfrom[39m [32m'@testing-library/user-event'[39m[33m;[39m
+    [90m  3|[39m [35mimport[39m { [33mMemoryRouter[39m[33m,[39m [33mRoutes[39m[33m,[39m [33mRoute[39m } [35mfrom[39m [32m'react-router-dom'[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/55]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 43 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22msends correct method, path, body, and Content-Type header
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22minjects Authorization: Bearer <token> from localStorage
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mskips auth header when skipAuth: true
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mreturns undefined for 204 No Content
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mthrows ApiError with status and message on non-ok response
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mApiError has correct name, status, message, data properties
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22muses VITE_API_BASE_URL env var as base URL (default: http://localhost:3000)
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/api.test.ts:[2m14:5[22m[39m
+    [90m 12|[39m [34mdescribe[39m([32m'apiRequest'[39m[33m,[39m () [33m=>[39m {
+    [90m 13|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 14|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 15|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 16|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mget calls apiRequest with GET method
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mpost calls apiRequest with POST method and body
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mpatch calls apiRequest with PATCH method and body
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mdel calls apiRequest with DELETE method
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/api.test.ts:[2m121:5[22m[39m
+    [90m119|[39m [34mdescribe[39m([32m'convenience helpers'[39m[33m,[39m () [33m=>[39m {
+    [90m120|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m121|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m122|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m123|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mregister[2m > [22msends POST to /auth/register with dto and stores tokens in localStorage
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mlogin[2m > [22msends POST to /auth/login with dto and stores tokens in localStorage
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetProfile[2m > [22msends GET to /auth/profile
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetLoggedInUser[2m > [22mreturns {id, username} from valid JWT in localStorage
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetLoggedInUser[2m > [22mreturns null when no token
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetLoggedInUser[2m > [22mreturns null when token is malformed
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns true for non-expired token
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns false for expired token
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns false when no token
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns false for malformed token
+[41m[1m FAIL [22m[49m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mlogout[2m > [22mclears access_token and refresh_token from localStorage
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/auth.service.test.ts:[2m24:5[22m[39m
+    [90m 22|[39m [34mdescribe[39m([32m'auth.service'[39m[33m,[39m () [33m=>[39m {
+    [90m 23|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 24|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 25|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 26|[39m     mockPost[33m.[39m[34mmockReset[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mfetchMenus calls GET /menus
+[41m[1m FAIL [22m[49m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mfetchMenu calls GET /menus/:id
+[41m[1m FAIL [22m[49m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mcreateMenu calls POST /menus with dto
+[41m[1m FAIL [22m[49m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mupdateMenu calls PATCH /menus/:id with dto
+[41m[1m FAIL [22m[49m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mdeleteMenu calls DELETE /menus/:id
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/menu.service.test.ts:[2m25:5[22m[39m
+    [90m 23|[39m [34mdescribe[39m([32m'menu.service'[39m[33m,[39m () [33m=>[39m {
+    [90m 24|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 25|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 26|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 27|[39m     mockGet[33m.[39m[34mmockReset[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mfetchMenuItems calls GET /menu-items
+[41m[1m FAIL [22m[49m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mfetchMenuItem calls GET /menu-items/:id
+[41m[1m FAIL [22m[49m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mcreateMenuItem calls POST /menu-items with dto
+[41m[1m FAIL [22m[49m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mupdateMenuItem calls PATCH /menu-items/:id with dto
+[41m[1m FAIL [22m[49m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mdeleteMenuItem calls DELETE /menu-items/:id
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/menuItem.service.test.ts:[2m25:5[22m[39m
+    [90m 23|[39m [34mdescribe[39m([32m'menuItem.service'[39m[33m,[39m () [33m=>[39m {
+    [90m 24|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 25|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 26|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 27|[39m     mockGet[33m.[39m[34mmockReset[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mfetchOrders calls GET /orders
+[41m[1m FAIL [22m[49m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mfetchOrder calls GET /orders/:id
+[41m[1m FAIL [22m[49m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mcreateOrder calls POST /orders with dto
+[41m[1m FAIL [22m[49m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mupdateOrder calls PATCH /orders/:id with dto
+[41m[1m FAIL [22m[49m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mdeleteOrder calls DELETE /orders/:id
+[41m[1m FAIL [22m[49m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22maddOrderItem calls POST /orders/:orderId/items with dto
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/order.service.test.ts:[2m26:5[22m[39m
+    [90m 24|[39m [34mdescribe[39m([32m'order.service'[39m[33m,[39m () [33m=>[39m {
+    [90m 25|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 26|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 27|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 28|[39m     mockGet[33m.[39m[34mmockReset[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/55]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mfetchTables calls GET /tables
+[41m[1m FAIL [22m[49m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mfetchTable calls GET /tables/:id
+[41m[1m FAIL [22m[49m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mcreateTable calls POST /tables with dto
+[41m[1m FAIL [22m[49m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mupdateTable calls PATCH /tables/:id with dto
+[41m[1m FAIL [22m[49m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mdeleteTable calls DELETE /tables/:id
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/table.service.test.ts:[2m25:5[22m[39m
+    [90m 23|[39m [34mdescribe[39m([32m'table.service'[39m[33m,[39m () [33m=>[39m {
+    [90m 24|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 25|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 26|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 27|[39m     mockGet[33m.[39m[34mmockReset[39m()[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/55]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m18 failed[39m[22m[90m (18)[39m
+[2m      Tests [22m [1m[31m43 failed[39m[22m[90m (43)[39m
+[2m   Start at [22m 20:20:27
+[2m   Duration [22m 2.15s[2m (transform 1.65s, setup 0ms, import 976ms, tests 114ms, environment 6ms)[22m
+
