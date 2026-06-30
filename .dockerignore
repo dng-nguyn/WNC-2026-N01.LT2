@@ -1,0 +1,21 @@
+node_modules
+dist
+.git
+.github
+*.md
+LICENSE
+
+# Never leak env files into the image
+**/.env
+**/.env.*
+
+frontend/node_modules
+frontend/dist
+frontend/test-results
+frontend/playwright-report
+frontend/e2e
+
+backend/test
+backend/docs
+scripts
+jest.config.js
