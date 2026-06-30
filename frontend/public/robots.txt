@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard
+Disallow: /pos
+Disallow: /menus
+Disallow: /menu-items
+Disallow: /api/
+
+Sitemap: https://shop.dinhcap.dev/sitemap.xml
