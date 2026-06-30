@@ -5,9 +5,12 @@ import {
   HttpException,
   HttpStatus,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { QueryFailedError } from 'typeorm';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
 interface ErrorResponse {
   statusCode: number;
@@ -52,6 +55,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
         `Unhandled error: ${exception.message}`,
         exception.stack,
       );
+    }
+
+    // SPA fallback: serve index.html for 404s on GET requests (page reloads on /login, /dashboard, etc.)
+    if (status === 404 && request.method === 'GET') {
+      const publicPath = join(__dirname, '..', '..', 'public');
+      if (existsSync(publicPath)) {
+        response.sendFile(join(publicPath, 'index.html'));
+        return;
+      }
     }
 
     const body: ErrorResponse = {
