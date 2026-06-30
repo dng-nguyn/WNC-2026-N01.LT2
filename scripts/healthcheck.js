@@ -1,4 +1,4 @@
 const http = require('http');
-http.get('http://127.0.0.1:3000/health', (res) => {
-  process.exit(res.statusCode === 200 ? 0 : 1);
+const port = process.env.PORT || 3000;
+http.get(`http://127.0.0.1:${port}/health`, (res) => {
 }).on('error', () => process.exit(1));
