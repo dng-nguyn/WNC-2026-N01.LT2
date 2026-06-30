@@ -29,6 +29,8 @@ jobs:
 
       - name: Run Lighthouse CI
         working-directory: frontend
+        env:
+          LHCI_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx @lhci/cli autorun --config=../lighthouserc.js
 
       - name: Upload Lighthouse report
