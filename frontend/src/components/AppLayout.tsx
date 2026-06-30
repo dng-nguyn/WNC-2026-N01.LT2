@@ -1,26 +1,32 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { logout, getLoggedInUser } from '../services/auth.service';
+import { useTranslation } from '../i18n';
 
 interface AppLayoutProps {
   children: React.ReactNode;
 }
 
 const navItems = [
-  { path: '/dashboard', label: 'Dashboard', icon: '📊' },
-  { path: '/pos', label: 'POS Terminal', icon: '🛒' },
-  { path: '/menus', label: 'Menu Categories', icon: '📁' },
-  { path: '/menu-items', label: 'Menu Items', icon: '☕' },
+  { path: '/dashboard', labelKey: 'nav.dashboard' as const, icon: '📊' },
+  { path: '/pos', labelKey: 'nav.pos' as const, icon: '🛒' },
+  { path: '/menus', labelKey: 'nav.categories' as const, icon: '📁' },
+  { path: '/menu-items', labelKey: 'nav.menuItems' as const, icon: '☕' },
 ];
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = getLoggedInUser();
+  const { t, locale, setLocale } = useTranslation();
 
   function handleLogout() {
     logout();
     navigate('/login', { replace: true });
+  }
+
+  function toggleLocale() {
+    setLocale(locale === 'vi' ? 'en' : 'vi');
   }
 
   return (
@@ -52,12 +58,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
               onClick={() => setSidebarOpen(false)}
             >
               <span className="sidebar-link-icon">{item.icon}</span>
-              <span className="sidebar-link-label">{item.label}</span>
+              <span className="sidebar-link-label">{t(item.labelKey)}</span>
             </NavLink>
           ))}
         </nav>
 
         <div className="sidebar-footer">
+          <button
+            className="sidebar-lang"
+            onClick={toggleLocale}
+            title="Change language"
+          >
+            {locale === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English'}
+          </button>
           {user && (
             <div className="sidebar-user">
               <span className="sidebar-user-avatar">
@@ -71,7 +84,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
             onClick={handleLogout}
             title="Logout"
           >
-            Logout
+            {t('nav.logout')}
           </button>
         </div>
       </aside>

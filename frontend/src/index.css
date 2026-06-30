@@ -722,3 +722,25 @@ a:hover {
     align-items: flex-start;
   }
 }
+
+/* ═══ Language Switcher ═══ */
+
+.sidebar-lang {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.sidebar-lang:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+}
