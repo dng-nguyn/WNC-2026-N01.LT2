@@ -17,5 +17,4 @@ frontend/e2e
 
 backend/test
 backend/docs
-scripts
 jest.config.js
