@@ -1,0 +1,40 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, frontend-dev]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+
+      - name: Run Lighthouse CI
+        working-directory: frontend
+        run: npx @lhci/cli autorun --config=../lighthouserc.js
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v7
+        if: ${{ !cancelled() }}
+        with:
+          name: lighthouse-report
+          path: frontend/.lighthouseci/
+          retention-days: 14
