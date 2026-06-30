@@ -64,20 +64,14 @@ async function bootstrap() {
     }),
   );
   // Serve frontend static files (single-image deployment)
-  await app.init();
+  // Registered BEFORE app.init() so static files are served before NestJS routing.
+  // SPA routing (e.g. /dashboard → index.html) is handled by the external reverse proxy.
   const publicPath = join(__dirname, '..', 'public');
   if (existsSync(publicPath)) {
-    const httpAdapter = app.getHttpAdapter();
-    httpAdapter.use(express.static(publicPath));
-    // SPA fallback: non-file GET requests that hit no API route → index.html
-    httpAdapter.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-      if (req.method === 'GET' && !req.path.includes('.')) {
-        res.sendFile(join(publicPath, 'index.html'));
-      } else {
-        next();
-      }
-    });
+    app.use(express.static(publicPath));
   }
+
+  await app.init();
 
   await app.listen(process.env.PORT ?? 3000);
 }
