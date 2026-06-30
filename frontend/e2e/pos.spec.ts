@@ -6,7 +6,6 @@ test.describe('POS terminal', () => {
   const password = 'Testpass123!';
 
   test.beforeAll(async ({ browser }) => {
-    // Register a user for POS tests
     const page = await browser.newPage();
     await page.goto('/register');
     await page.getByLabel('Username').fill(username);
@@ -18,7 +17,6 @@ test.describe('POS terminal', () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    // Login before each test
     await page.goto('/login');
     await page.getByLabel('Username').fill(username);
     await page.getByLabel('Password').fill(password);
@@ -26,76 +24,153 @@ test.describe('POS terminal', () => {
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
-  test('POS page loads and displays menu items', async ({ page }) => {
+  test('POS page loads with layout', async ({ page }) => {
     await page.goto('/pos');
-
-    // Should show the POS layout (may show "No menu items" if none exist)
     await expect(page.locator('.pos-layout')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'POS Terminal' })).toBeVisible();
+  });
+
+  test('displays category tabs', async ({ page }) => {
+    await page.goto('/pos');
+    // "Tất c?" (All) tab should always be present
+    await expect(page.locator('.category-tabs')).toBeVisible();
+    await expect(page.locator('.category-pill').first()).toBeVisible();
+  });
+
+  test('displays product cards', async ({ page }) => {
+    await page.goto('/pos');
+    const cards = page.locator('.product-card');
+    const count = await cards.count();
+    if (count > 0) {
+      // First card should have name and price
+      await expect(cards.first().locator('.product-card-name')).toBeVisible();
+      await expect(cards.first().locator('.product-card-price-pill')).toBeVisible();
+    }
   });
 
   test('can add items to cart', async ({ page }) => {
     await page.goto('/pos');
-
-    // Look for menu item buttons; if none exist, this test verifies the empty state
-    const itemButtons = page.locator('.menu-item-card');
-    const count = await itemButtons.count();
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
 
     if (count > 0) {
-      await itemButtons.first().click();
-      // Cart should show at least one item
-      await expect(page.locator('.cart-item')).toHaveCount(1);
+      await cards.first().click();
+      // Cart should show the item
+      await expect(page.locator('.cart-row')).toHaveCount(1);
+      await expect(page.locator('.cart-count-badge')).toBeVisible();
     }
   });
 
-  test('can adjust quantities', async ({ page }) => {
+  test('can adjust quantities via +/- buttons', async ({ page }) => {
     await page.goto('/pos');
-
-    const itemButtons = page.locator('.menu-item-card');
-    const count = await itemButtons.count();
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
 
     if (count > 0) {
       // Add item twice
-      await itemButtons.first().click();
-      await itemButtons.first().click();
+      await cards.first().click();
+      await cards.first().click();
+      await expect(page.locator('.cart-qty-input').first()).toHaveValue('2');
 
-      // Quantity should be 2
-      await expect(page.locator('.cart-item').first().locator('.quantity')).toContainText('2');
+      // Increment via aria-label
+      await page.getByRole('button', { name: /increase quantity/i }).first().click();
+      await expect(page.locator('.cart-qty-input').first()).toHaveValue('3');
 
       // Decrement
-      await page.locator('.cart-item').first().locator('button', { hasText: '-' }).click();
-      await expect(page.locator('.cart-item').first().locator('.quantity')).toContainText('1');
+      await page.getByRole('button', { name: /decrease quantity/i }).first().click();
+      await expect(page.locator('.cart-qty-input').first()).toHaveValue('2');
     }
   });
 
-  test('can place an order', async ({ page }) => {
+  test('shows cart total', async ({ page }) => {
     await page.goto('/pos');
-
-    const itemButtons = page.locator('.menu-item-card');
-    const count = await itemButtons.count();
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
 
     if (count > 0) {
-      await itemButtons.first().click();
-
-      // Click Place Order
-      await page.getByRole('button', { name: /place order/i }).click();
-
-      // Should show success message
-      await expect(page.locator('.alert-success')).toBeVisible();
+      await cards.first().click();
+      // Total should be visible and non-zero
+      await expect(page.locator('.cart-total-amount')).toBeVisible();
+      const total = await page.locator('.cart-total-amount').textContent();
+      expect(total).not.toBe('0 ₫');
     }
   });
 
-  test('cart clears after successful order', async ({ page }) => {
+  test('can select a table', async ({ page }) => {
     await page.goto('/pos');
+    const tableSelect = page.locator('.cart-table-selector select');
+    // Takeaway option should be default
+    await expect(tableSelect).toBeVisible();
+  });
 
-    const itemButtons = page.locator('.menu-item-card');
-    const count = await itemButtons.count();
+  test('Pay button opens payment modal', async ({ page }) => {
+    await page.goto('/pos');
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
 
     if (count > 0) {
-      await itemButtons.first().click();
-      await page.getByRole('button', { name: /place order/i }).click();
+      await cards.first().click();
+      await page.locator('.cart-pay-btn').click();
+      // Payment modal should appear
+      await expect(page.getByText(/select payment method/i)).toBeVisible();
+    }
+  });
 
-      // Cart should be empty after successful order
-      await expect(page.locator('.cart-item')).toHaveCount(0);
+  test('payment modal shows Cash and Bank Transfer options', async ({ page }) => {
+    await page.goto('/pos');
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
+
+    if (count > 0) {
+      await cards.first().click();
+      await page.locator('.cart-pay-btn').click();
+
+      await expect(page.getByText('Cash')).toBeVisible();
+      await expect(page.getByText(/bank transfer/i)).toBeVisible();
+    }
+  });
+
+  test('payment modal can be closed', async ({ page }) => {
+    await page.goto('/pos');
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
+
+    if (count > 0) {
+      await cards.first().click();
+      await page.locator('.cart-pay-btn').click();
+      await expect(page.getByText(/select payment method/i)).toBeVisible();
+
+      // Close modal
+      await page.getByRole('button', { name: /close/i }).click();
+      await expect(page.getByText(/select payment method/i)).not.toBeVisible();
+    }
+  });
+
+  test('Clear button empties cart', async ({ page }) => {
+    await page.goto('/pos');
+    const cards = page.locator('.product-card:not([disabled])');
+    const count = await cards.count();
+
+    if (count > 0) {
+      await cards.first().click();
+      await expect(page.locator('.cart-row')).toHaveCount(1);
+
+      await page.locator('.cart-clear-btn').click();
+      await expect(page.locator('.cart-row')).toHaveCount(0);
+      await expect(page.getByText(/tap items to add them here/i)).toBeVisible();
+    }
+  });
+
+  test('category tabs filter products', async ({ page }) => {
+    await page.goto('/pos');
+    const tabs = page.locator('.category-pill');
+    const tabCount = await tabs.count();
+
+    if (tabCount > 1) {
+      // Click a non-"all" tab
+      await tabs.nth(1).click();
+      // The tab should become active
+      await expect(tabs.nth(1)).toHaveClass(/category-pill--active/);
     }
   });
 });

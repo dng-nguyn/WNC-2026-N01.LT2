@@ -136,4 +136,29 @@ test.describe('Menu items management', () => {
       await expect(page.locator('.badge-danger')).toBeVisible();
     }
   });
+
+  test('search filters menu items', async ({ page }) => {
+    // Create two items with distinct names
+    await page.goto('/menu-items');
+    await page.getByRole('button', { name: /new item/i }).click();
+    await page.getByLabel('Category').selectOption({ label: categoryName });
+    await page.getByLabel('Name').fill(`Alpha_${unique}`);
+    await page.getByLabel('Price (VND)').fill('30000');
+    await page.getByRole('button', { name: /^save$/i }).click();
+    await expect(page.getByText(`Alpha_${unique}`)).toBeVisible();
+
+    await page.getByRole('button', { name: /new item/i }).click();
+    await page.getByLabel('Category').selectOption({ label: categoryName });
+    await page.getByLabel('Name').fill(`Beta_${unique}`);
+    await page.getByLabel('Price (VND)').fill('60000');
+    await page.getByRole('button', { name: /^save$/i }).click();
+    await expect(page.getByText(`Beta_${unique}`)).toBeVisible();
+
+    // Search for Alpha
+    const searchInput = page.getByPlaceholder(/search/i);
+    await searchInput.fill(`Alpha_${unique}`);
+
+    await expect(page.getByText(`Alpha_${unique}`)).toBeVisible();
+    await expect(page.getByText(`Beta_${unique}`)).not.toBeVisible();
+  });
 });
