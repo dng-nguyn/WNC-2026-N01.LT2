@@ -44,6 +44,7 @@ services:
       SEPAY_API_KEY: your_sepay_api_key           # CHANGE
       SEPAY_ACCOUNT_NUMBER: "0000000000"          # CHANGE
       SEPAY_BANK_NAME: MBBank
+      INIT_DB_SEED: "true"                        # Set to "false" after first run
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
       interval: 10s
@@ -52,16 +53,6 @@ services:
       start_period: 30s
     ports:
       - "80:3000"
-
-  seed:
-    image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:latest
-    depends_on:
-      app:
-        condition: service_healthy
-    environment:
-      SEED_API_URL: http://app:3000
-    command: ["sh", "-c", "node scripts/seed.mjs || true"]
-    restart: "no"
 
 volumes:
   mysql_data:

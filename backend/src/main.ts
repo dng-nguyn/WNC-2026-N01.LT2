@@ -74,6 +74,19 @@ async function bootstrap() {
   await app.init();
 
   await app.listen(process.env.PORT ?? 3000);
+
+  // Auto-seed on first boot if INIT_DB_SEED=true
+  if (process.env.INIT_DB_SEED === 'true') {
+    const { spawn } = await import('child_process');
+    const port = process.env.PORT ?? 3000;
+    const seed = spawn('node', ['scripts/seed.mjs'], {
+      env: { ...process.env, SEED_API_URL: `http://127.0.0.1:${port}` },
+      stdio: 'inherit',
+    });
+    seed.on('exit', (code) => {
+      if (code !== 0) console.warn(`Seed exited with code ${code} (items may already exist)`);
+    });
+  }
 }
 
 bootstrap();
