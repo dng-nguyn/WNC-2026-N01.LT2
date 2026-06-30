@@ -211,7 +211,9 @@ export default function PaymentModal({
         setError(`Payment ${updated.status.toLowerCase()}.`);
         setStep('error');
       } else {
-        setError('Transaction not found yet. Please wait and try again.');
+        setPayment(updated);
+        setError('Transaction not found yet. Please wait a moment and try again.');
+        setStep('show-qr');
       }
     } catch (err: unknown) {
       setError(
