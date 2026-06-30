@@ -21,9 +21,12 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  // CORS for frontend access
+  // CORS for frontend access (comma-separated origins supported)
+  const origins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
+    .split(',')
+    .map((s) => s.trim());
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+    origin: origins,
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
   });

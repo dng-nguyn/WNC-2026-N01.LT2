@@ -39,7 +39,7 @@ export class PaymentService {
     const code = this.generateCode(12);
     const amountVnd = Math.round(Number(order.totalAmount));
 
-    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '0000000000';
+    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '3669420000';
     const bankName = this.configService.get<string>('SEPAY_BANK_NAME') || 'MBBank';
 
     const qrUrl =
@@ -88,8 +88,14 @@ export class PaymentService {
   async verify(paymentId: string): Promise<Payment> {
     const payment = await this.findById(paymentId);
 
+    // Already completed — return as-is
     if (payment.status === PaymentStatus.COMPLETED) {
-      return payment; // already verified
+      return payment;
+    }
+
+    // Mark failed/expired payments — no point checking Sepay
+    if (payment.status === PaymentStatus.FAILED || payment.status === PaymentStatus.EXPIRED) {
+      return payment;
     }
 
     const apiKey = this.configService.get<string>('SEPAY_API_KEY');
@@ -97,14 +103,19 @@ export class PaymentService {
       throw new BadRequestException('SEPAY_API_KEY not configured');
     }
 
+    // Query Sepay for matching transaction
     const tx = await this.findSepayTransaction(apiKey, payment.code, payment.amount);
 
+    // No transaction found yet — payment is still pending, return OK
     if (!tx) {
-      throw new BadRequestException(
-        'No matching transaction found. Please complete the bank transfer and try again.',
-      );
+      const pendingPayment = await this.paymentRepository.findOne({
+        where: { id: paymentId },
+        relations: { order: true },
+      });
+      return pendingPayment!;
     }
 
+    // Transaction found — mark as completed
     payment.status = PaymentStatus.COMPLETED;
     payment.sepayTransactionId = tx.id;
     await this.paymentRepository.save(payment);
@@ -135,21 +146,21 @@ export class PaymentService {
     code: string,
     amount: number,
   ): Promise<{ id: string } | null> {
+    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '3669420000';
     try {
       const response = await firstValueFrom(
         this.httpService.get<{
+          status: number;
           transactions: Array<{
             id: string;
-            amount_in: number;
+            amount_in: string;
             transaction_content: string;
-            transfer_type: string;
           }>;
-        }>('https://userapi.sepay.vn/v2/transactions', {
+        }>('https://my.sepay.vn/userapi/transactions/list', {
           params: {
-            transaction_content: code,
-            transfer_type: 'in',
-            per_page: 10,
-            timestamp_format: 'iso8601',
+            account_number: accountNumber,
+            amount_in: amount,
+            limit: 20,
           },
           headers: {
             Authorization: `Bearer ${apiKey}`,
@@ -159,11 +170,12 @@ export class PaymentService {
         }),
       );
 
-      const txs = response.data;
-      if (!txs?.transactions?.length) return null;
+      const txs = response.data?.transactions;
+      if (!txs?.length) return null;
 
-      const match = txs.transactions.find(
-        (tx) => tx.amount_in === amount && tx.transfer_type === 'in',
+      // Match transaction_content containing the payment code
+      const match = txs.find((tx) =>
+        tx.transaction_content?.includes(code),
       );
 
       return match ? { id: match.id } : null;
