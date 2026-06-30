@@ -31,10 +31,10 @@ describe('AppLayout', () => {
         </I18nProvider>
       </MemoryRouter>
     );
-    expect(screen.getByText('Tổng quan')).toBeInTheDocument();
-    expect(screen.getByText('Bán hàng')).toBeInTheDocument();
-    expect(screen.getByText('Danh mục')).toBeInTheDocument();
-    expect(screen.getByText('Món')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('POS Terminal')).toBeInTheDocument();
+    expect(screen.getByText('Menu Categories')).toBeInTheDocument();
+    expect(screen.getByText('Menu Items')).toBeInTheDocument();
   });
 
   it('renders children', () => {
@@ -69,7 +69,7 @@ describe('AppLayout', () => {
         </I18nProvider>
       </MemoryRouter>
     );
-    await user.click(screen.getByText('Đăng xuất'));
+    await user.click(screen.getByText('Logout'));
     expect(mockLogout).toHaveBeenCalledOnce();
     expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: true });
   });
