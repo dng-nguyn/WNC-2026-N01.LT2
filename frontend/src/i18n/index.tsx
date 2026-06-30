@@ -58,7 +58,7 @@ export function useTranslation(): I18nContextValue {
  * Falls back to stored locale or 'vi'.
  */
 export function t(key: TranslationKey): string {
-  let locale: Locale = 'vi';
+  let locale: Locale = 'en';
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && stored in locales) locale = stored as Locale;
