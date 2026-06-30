@@ -60,7 +60,7 @@ services:
         condition: service_healthy
     environment:
       SEED_API_URL: http://app:3000
-    command: ["node", "scripts/seed.mjs"]
+    command: ["sh", "-c", "node scripts/seed.mjs || true"]
     restart: "no"
 
 volumes:
