@@ -59,7 +59,7 @@ test.describe('Auth flows', () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     // Logout
-    await page.getByRole("button", { name: /đăng xuất/i }).click();
+    await page.getByRole("button", { name: /logout/i }).click();
 
     await expect(page).toHaveURL(/\/login/);
   });

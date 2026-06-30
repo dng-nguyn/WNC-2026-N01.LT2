@@ -13,7 +13,7 @@ function getInitialLocale(): Locale {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored && stored in locales) return stored as Locale;
   } catch {}
-  return 'vi';
+  return 'en';
 }
 
 interface I18nContextValue {
