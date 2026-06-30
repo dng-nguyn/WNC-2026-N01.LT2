@@ -22,7 +22,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+    ports:
+      - "3306:3306"
   app:
     image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:latest
     restart: unless-stopped
