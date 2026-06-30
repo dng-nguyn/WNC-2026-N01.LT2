@@ -3,12 +3,9 @@
    ════════════════════════════════════════════════ */
 
 .pos-layout {
-  width: 100%;
-  max-width: 100vw;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
   background: #f8fafc;
 }
@@ -109,13 +106,10 @@
 /* ═══ Main Body: Product Grid + Cart Sidebar ═══ */
 
 .pos-body {
-  width: 100%;
-  max-width: 100%;
   flex: 1;
   display: flex;
   overflow: hidden;
   min-height: 0;
-  max-width: 100%;
 }
 
 /* ─── Left: Scrollable Product Grid ─── */
@@ -212,6 +206,8 @@
 /* ─── Right: Cart Sidebar (3-area flex column) ─── */
 
 .pos-cart {
+  height: 100%;
+  overflow: hidden;
   flex: 0 0 360px;
   background: #ffffff;
   border-left: 1px solid #e2e8f0;
@@ -288,6 +284,7 @@
 
 .cart-items {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 0 24px;
 }
@@ -750,4 +747,29 @@
     border-left: none;
     border-top: 1px solid #e2e8f0;
   }
+}
+
+/* ═══ Minimalist Scrollbars ═══ */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }

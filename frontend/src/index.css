@@ -657,7 +657,7 @@ a:hover {
   flex: 1;
   margin-left: 240px;
   min-height: 100vh;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .sidebar-overlay {
