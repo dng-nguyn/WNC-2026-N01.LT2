@@ -38,6 +38,7 @@ services:
       SEPAY_ACCOUNT_NUMBER: ${SEPAY_ACCOUNT_NUMBER:-0000000000}
       SEPAY_BANK_NAME: ${SEPAY_BANK_NAME:-MBBank}
       INIT_DB_SEED: ${INIT_DB_SEED:-false}
+      DB_SYNC: ${DB_SYNC:-true}
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.js"]
       interval: 10s
