@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${DB_DATABASE:-Quan_Ly_Quan_Cafe}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    # Uncomment to expose MySQL to the host (development only)
+    # ports:
+    #   - "3306:3306"
+
+  app:
+    image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:${TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # DB_HOST is the Docker service DNS name — must stay "db"
+      DB_HOST: db
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      DB_DATABASE: ${DB_DATABASE:-Quan_Ly_Quan_Cafe}
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-in-production}
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: ${PORT:-3000}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      SEPAY_API_KEY: ${SEPAY_API_KEY:-your_sepay_api_key}
+      SEPAY_ACCOUNT_NUMBER: ${SEPAY_ACCOUNT_NUMBER:-0000000000}
+      SEPAY_BANK_NAME: ${SEPAY_BANK_NAME:-MBBank}
+    ports:
+      - "${APP_PORT:-80}:${PORT:-3000}"
+
+volumes:
+  mysql_data:
