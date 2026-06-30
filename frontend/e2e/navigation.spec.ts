@@ -27,26 +27,26 @@ test.describe('Navigation', () => {
   test('sidebar links navigate to POS, Categories, Menu Items', async ({ page }) => {
     const sidebar = page.locator('.sidebar-nav');
 
-    await sidebar.getByRole('link', { name: /pos/i }).click();
+    await sidebar.getByRole('link', { name: /bán hàng/i }).click();
     await expect(page).toHaveURL(/\/pos/);
 
-    await sidebar.getByRole('link', { name: /dashboard/i }).click();
+    await sidebar.getByRole('link', { name: /tổng quan/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await sidebar.getByRole('link', { name: /menu categories/i }).click();
+    await sidebar.getByRole('link', { name: /danh mục/i }).click();
     await expect(page).toHaveURL(/\/menus/);
 
-    await sidebar.getByRole('link', { name: /dashboard/i }).click();
+    await sidebar.getByRole('link', { name: /tổng quan/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await sidebar.getByRole('link', { name: /menu items/i }).click();
+    await sidebar.getByRole('link', { name: /^món$/i }).click();
     await expect(page).toHaveURL(/\/menu-items/);
   });
 
   test('POS has sidebar link back to Dashboard', async ({ page }) => {
     await page.goto('/pos');
     const sidebar = page.locator('.sidebar-nav');
-    await sidebar.getByRole('link', { name: /dashboard/i }).click();
+    await sidebar.getByRole('link', { name: /tổng quan/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
