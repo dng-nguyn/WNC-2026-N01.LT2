@@ -34,7 +34,7 @@ import { UsersModule } from './users/users.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       autoLoadEntities: true,
-      synchronize: process.env.NODE_ENV !== 'production',
+      synchronize: process.env.DB_SYNC !== 'false',
       ssl: process.env.DB_SSL_CA
         ? { ca: process.env.DB_SSL_CA, rejectUnauthorized: true }
         : undefined,
