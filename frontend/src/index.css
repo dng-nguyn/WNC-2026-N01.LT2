@@ -655,7 +655,7 @@ a:hover {
 
 .main-content {
   flex: 1;
-  margin-left: 240px;
+  
   min-height: 100vh;
 }
 
