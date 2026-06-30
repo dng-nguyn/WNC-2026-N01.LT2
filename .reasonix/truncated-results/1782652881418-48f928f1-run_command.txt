@@ -1,0 +1,366 @@
+$ npm --prefix frontend exec -- vitest run --reporter verbose 2>&1
+[exit 1]
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90mC:/web/WNC-2026-N01.LT2[39m
+
+ [31m×[39m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mfetchTables calls GET /tables[32m 9[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mfetchTable calls GET /tables/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mcreateTable calls POST /tables with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mupdateTable calls PATCH /tables/:id with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/table.service.test.ts[2m > [22mtable.service[2m > [22mdeleteTable calls DELETE /tables/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mfetchMenuItems calls GET /menu-items[32m 11[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mfetchMenuItem calls GET /menu-items/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mcreateMenuItem calls POST /menu-items with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mupdateMenuItem calls PATCH /menu-items/:id with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menuItem.service.test.ts[2m > [22mmenuItem.service[2m > [22mdeleteMenuItem calls DELETE /menu-items/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mfetchMenus calls GET /menus[32m 10[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mfetchMenu calls GET /menus/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mcreateMenu calls POST /menus with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mupdateMenu calls PATCH /menus/:id with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/menu.service.test.ts[2m > [22mmenu.service[2m > [22mdeleteMenu calls DELETE /menus/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mfetchOrders calls GET /orders[32m 11[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mfetchOrder calls GET /orders/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mcreateOrder calls POST /orders with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mupdateOrder calls PATCH /orders/:id with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22mdeleteOrder calls DELETE /orders/:id[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/order.service.test.ts[2m > [22morder.service[2m > [22maddOrderItem calls POST /orders/:orderId/items with dto[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mregister[2m > [22msends POST to /auth/register with dto and stores tokens in localStorage[32m 9[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mlogin[2m > [22msends POST to /auth/login with dto and stores tokens in localStorage[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetProfile[2m > [22msends GET to /auth/profile[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetLoggedInUser[2m > [22mreturns {id, username} from valid JWT in localStorage[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetLoggedInUser[2m > [22mreturns null when no token[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mgetLoggedInUser[2m > [22mreturns null when token is malformed[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns true for non-expired token[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns false for expired token[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns false when no token[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22misAuthenticated[2m > [22mreturns false for malformed token[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/auth.service.test.ts[2m > [22mauth.service[2m > [22mlogout[2m > [22mclears access_token and refresh_token from localStorage[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22msends correct method, path, body, and Content-Type header[32m 11[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22minjects Authorization: Bearer <token> from localStorage[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mskips auth header when skipAuth: true[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mreturns undefined for 204 No Content[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mthrows ApiError with status and message on non-ok response[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mApiError has correct name, status, message, data properties[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22muses VITE_API_BASE_URL env var as base URL (default: http://localhost:3000)[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mget calls apiRequest with GET method[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mpost calls apiRequest with POST method and body[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mpatch calls apiRequest with PATCH method and body[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mdel calls apiRequest with DELETE method[32m 1[2mms[22m[39m
+[31m   → localStorage is not defined[39m
+ [31m×[39m frontend/src/components/ProtectedRoute.test.tsx[2m > [22mProtectedRoute[2m > [22mrenders children when isAuthenticated returns true[32m 13[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/components/ProtectedRoute.test.tsx[2m > [22mProtectedRoute[2m > [22mredirects to /login when isAuthenticated returns false[32m 2[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/components/ProtectedRoute.test.tsx[2m > [22mProtectedRoute[2m > [22mrenders children as React fragment (not extra DOM wrapper)[32m 2[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mshows loading state initially[32m 13[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mdisplays Welcome, {username} for logged-in user[32m 3[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mdisplays stats cards (Total Revenue, Total Orders, Completed, Pending, Avg Order Value)[32m 4[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mdisplays top selling items table[32m 2[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mshows "No orders yet" when no orders[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mhandles fetchOrders failure gracefully (shows error)[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/DashboardPage.test.tsx[2m > [22mDashboardPage[2m > [22mlogout button calls logout() and redirects[32m 2[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mshows loading state initially[32m 14[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mdisplays menu items table with name, category, price, availability[32m 2[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mshows "No menu items yet" when empty[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mopens create form with category dropdown[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mvalidates price input (rejects negative) — shows error[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22msubmits new item via createMenuItem()[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mopens edit form with pre-filled data[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuItemManagementPage.test.tsx[2m > [22mMenuItemManagementPage[2m > [22mshows error on fetch failure[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22mshows loading state initially[32m 10[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22mdisplays menu categories table[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22mshows "No categories yet" when empty[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22mopens create form on + New Category click[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22msubmits new menu via createMenu()[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22mopens edit form with pre-filled data[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22msubmits edit via updateMenu()[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/MenuManagementPage.test.tsx[2m > [22mMenuManagementPage[2m > [22mshows error on fetch failure[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mshows loading state initially[32m 10[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mdisplays menu item grid[32m 3[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mdisplays category filter tabs (including All)[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mfilters items by category on tab click[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22madds item to cart on click[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mincrements/decrements quantity in cart[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mshows cart total[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mshows Place Order button[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mcalls createOrder() on checkout[32m 1[2mms[22m[39m
+[31m   → Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+ [31m×[39m frontend/src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mshows empty cart message initially[32m 1[2mms[22m[39m
+[31m   → document is not defined[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 7 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/auth.spec.ts[2m [ frontend/e2e/auth.spec.ts ][22m
+[31m[1mError[22m: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.
+- You are calling test.describe() from an async test.describe() block. Only sync ones are supported.[39m
+[90m [2m❯[22m _TestTypeImpl._currentSuite frontend/node_modules/playwright/lib/common/index.js:[2m2257:13[22m[39m
+[90m [2m❯[22m _TestTypeImpl._describe frontend/node_modules/playwright/lib/common/index.js:[2m2298:24[22m[39m
+[90m [2m❯[22m Function.describe frontend/node_modules/playwright/lib/common/index.js:[2m1220:12[22m[39m
+[36m [2m❯[22m frontend/e2e/auth.spec.ts:[2m3:6[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Auth flows'[39m[33m,[39m () [33m=>[39m {
+    [90m   |[39m      [31m^[39m
+    [90m  4|[39m   [35mconst[39m unique [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m  5|[39m   [35mconst[39m username [33m=[39m [32m`e2euser_[39m[36m${[39munique[36m}[39m[32m`[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/menu-items.spec.ts[2m [ frontend/e2e/menu-items.spec.ts ][22m
+[31m[1mError[22m: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.
+- You are calling test.describe() from an async test.describe() block. Only sync ones are supported.[39m
+[90m [2m❯[22m _TestTypeImpl._currentSuite frontend/node_modules/playwright/lib/common/index.js:[2m2257:13[22m[39m
+[90m [2m❯[22m _TestTypeImpl._describe frontend/node_modules/playwright/lib/common/index.js:[2m2298:24[22m[39m
+[90m [2m❯[22m Function.describe frontend/node_modules/playwright/lib/common/index.js:[2m1220:12[22m[39m
+[36m [2m❯[22m frontend/e2e/menu-items.spec.ts:[2m3:6[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Menu items management'[39m[33m,[39m () [33m=>[39m {
+    [90m   |[39m      [31m^[39m
+    [90m  4|[39m   [35mconst[39m unique [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m  5|[39m   [35mconst[39m username [33m=[39m [32m`itemuser_[39m[36m${[39munique[36m}[39m[32m`[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/menu-management.spec.ts[2m [ frontend/e2e/menu-management.spec.ts ][22m
+[31m[1mError[22m: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.
+- You are calling test.describe() from an async test.describe() block. Only sync ones are supported.[39m
+[90m [2m❯[22m _TestTypeImpl._currentSuite frontend/node_modules/playwright/lib/common/index.js:[2m2257:13[22m[39m
+[90m [2m❯[22m _TestTypeImpl._describe frontend/node_modules/playwright/lib/common/index.js:[2m2298:24[22m[39m
+[90m [2m❯[22m Function.describe frontend/node_modules/playwright/lib/common/index.js:[2m1220:12[22m[39m
+[36m [2m❯[22m frontend/e2e/menu-management.spec.ts:[2m3:6[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Menu management'[39m[33m,[39m () [33m=>[39m {
+    [90m   |[39m      [31m^[39m
+    [90m  4|[39m   [35mconst[39m unique [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m  5|[39m   [35mconst[39m username [33m=[39m [32m`menuuser_[39m[36m${[39munique[36m}[39m[32m`[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/navigation.spec.ts[2m [ frontend/e2e/navigation.spec.ts ][22m
+[31m[1mError[22m: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.
+- You are calling test.describe() from an async test.describe() block. Only sync ones are supported.[39m
+[90m [2m❯[22m _TestTypeImpl._currentSuite frontend/node_modules/playwright/lib/common/index.js:[2m2257:13[22m[39m
+[90m [2m❯[22m _TestTypeImpl._describe frontend/node_modules/playwright/lib/common/index.js:[2m2298:24[22m[39m
+[90m [2m❯[22m Function.describe frontend/node_modules/playwright/lib/common/index.js:[2m1220:12[22m[39m
+[36m [2m❯[22m frontend/e2e/navigation.spec.ts:[2m3:6[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'Navigation'[39m[33m,[39m () [33m=>[39m {
+    [90m   |[39m      [31m^[39m
+    [90m  4|[39m   [35mconst[39m unique [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m  5|[39m   [35mconst[39m username [33m=[39m [32m`navuser_[39m[36m${[39munique[36m}[39m[32m`[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/e2e/pos.spec.ts[2m [ frontend/e2e/pos.spec.ts ][22m
+[31m[1mError[22m: Playwright Test did not expect test.describe() to be called here.
+Most common reasons include:
+- You are calling test.describe() in a configuration file.
+- You are calling test.describe() in a file that is imported by the configuration file.
+- You have two different versions of @playwright/test. This usually happens
+  when one of the dependencies in your package.json depends on @playwright/test.
+- You are calling test.describe() from an async test.describe() block. Only sync ones are supported.[39m
+[90m [2m❯[22m _TestTypeImpl._currentSuite frontend/node_modules/playwright/lib/common/index.js:[2m2257:13[22m[39m
+[90m [2m❯[22m _TestTypeImpl._describe frontend/node_modules/playwright/lib/common/index.js:[2m2298:24[22m[39m
+[90m [2m❯[22m Function.describe frontend/node_modules/playwright/lib/common/index.js:[2m1220:12[22m[39m
+[36m [2m❯[22m frontend/e2e/pos.spec.ts:[2m3:6[22m[39m
+    [90m  1|[39m [35mimport[39m { test[33m,[39m expect } [35mfrom[39m [32m'@playwright/test'[39m[33m;[39m
+    [90m  2|[39m
+    [90m  3|[39m test[33m.[39m[34mdescribe[39m([32m'POS terminal'[39m[33m,[39m () [33m=>[39m {
+    [90m   |[39m      [31m^[39m
+    [90m  4|[39m   [35mconst[39m unique [33m=[39m [33mDate[39m[33m.[39m[34mnow[39m()[33m;[39m
+    [90m  5|[39m   [35mconst[39m username [33m=[39m [32m`posuser_[39m[36m${[39munique[36m}[39m[32m`[39m[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/LoginPage.test.tsx[2m [ frontend/src/pages/LoginPage.test.tsx ][22m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+[90m [2m❯[22m prepareDocument frontend/node_modules/@testing-library/user-event/dist/esm/document/prepareDocument.js:[2m10:17[22m[39m
+[90m [2m❯[22m Object.setupMain [as setup] frontend/node_modules/@testing-library/user-event/dist/esm/setup/setup.js:[2m52:5[22m[39m
+[36m [2m❯[22m frontend/src/pages/LoginPage.test.tsx:[2m25:26[22m[39m
+    [90m 23|[39m
+    [90m 24|[39m [34mdescribe[39m([32m'LoginPage'[39m[33m,[39m () [33m=>[39m {
+    [90m 25|[39m   [35mconst[39m user [33m=[39m userEvent[33m.[39m[34msetup[39m()[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 26|[39m
+    [90m 27|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/pages/RegisterPage.test.tsx[2m [ frontend/src/pages/RegisterPage.test.tsx ][22m
+[31m[1mTypeError[22m: Cannot read properties of undefined (reading 'Symbol(Node prepared with document state workarounds)')[39m
+[90m [2m❯[22m prepareDocument frontend/node_modules/@testing-library/user-event/dist/esm/document/prepareDocument.js:[2m10:17[22m[39m
+[90m [2m❯[22m Object.setupMain [as setup] frontend/node_modules/@testing-library/user-event/dist/esm/setup/setup.js:[2m52:5[22m[39m
+[36m [2m❯[22m frontend/src/pages/RegisterPage.test.tsx:[2m25:26[22m[39m
+    [90m 23|[39m
+    [90m 24|[39m [34mdescribe[39m([32m'RegisterPage'[39m[33m,[39m () [33m=>[39m {
+    [90m 25|[39m   [35mconst[39m user [33m=[39m userEvent[33m.[39m[34msetup[39m()[33m;[39m
+    [90m   |[39m                          [31m^[39m
+    [90m 26|[39m
+    [90m 27|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/86]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 79 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m frontend/src/components/ProtectedRoute.test.tsx[2m > [22mProtectedRoute[2m > [22mrenders children when isAuthenticated returns true
+[31m[1mReferenceError[22m: document is not defined[39m
+[90m [2m❯[22m Proxy.render frontend/node_modules/@testing-library/react/dist/pure.js:[2m256:5[22m[39m
+[36m [2m❯[22m frontend/src/components/ProtectedRoute.test.tsx:[2m19:5[22m[39m
+    [90m 17|[39m     mockIsAuthenticated[33m.[39m[34mmockReturnValue[39m([35mtrue[39m)[33m;[39m
+    [90m 18|[39m
+    [90m 19|[39m     [34mrender[39m(
+    [90m   |[39m     [31m^[39m
+    [90m 20|[39m       [33m<[39m[33mMemoryRouter[39m[33m>[39m
+    [90m 21|[39m         [33m<[39m[33mProtectedRoute[39m[33m>[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/components/ProtectedRoute.test.tsx[2m > [22mProtectedRoute[2m > [22mredirects to /login when isAuthenticated returns false
+[31m[1mReferenceError[22m: document is not defined[39m
+[90m [2m❯[22m Proxy.render frontend/node_modules/@testing-library/react/dist/pure.js:[2m256:5[22m[39m
+[36m [2m❯[22m frontend/src/components/ProtectedRoute.test.tsx:[2m33:5[22m[39m
+    [90m 31|[39m     mockIsAuthenticated[33m.[39m[34mmockReturnValue[39m([35mfalse[39m)[33m;[39m
+    [90m 32|[39m
+    [90m 33|[39m     [34mrender[39m(
+    [90m   |[39m     [31m^[39m
+    [90m 34|[39m       [33m<[39m[33mMemoryRouter[39m[33m>[39m
+    [90m 35|[39m         [33m<[39m[33mProtectedRoute[39m[33m>[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/components/ProtectedRoute.test.tsx[2m > [22mProtectedRoute[2m > [22mrenders children as React fragment (not extra DOM wrapper)
+[31m[1mReferenceError[22m: document is not defined[39m
+[90m [2m❯[22m Proxy.render frontend/node_modules/@testing-library/react/dist/pure.js:[2m256:5[22m[39m
+[36m [2m❯[22m frontend/src/components/ProtectedRoute.test.tsx:[2m49:27[22m[39m
+    [90m 47|[39m     mockIsAuthenticated[33m.[39m[34mmockReturnValue[39m([35mtrue[39m)[33m;[39m
+    [90m 48|[39m
+    [90m 49|[39m     [35mconst[39m { container } [33m=[39m [34mrender[39m(
+    [90m   |[39m                           [31m^[39m
+    [90m 50|[39m       [33m<[39m[33mMemoryRouter[39m[33m>[39m
+    [90m 51|[39m         [33m<[39m[33mProtectedRoute[39m[33m>[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22msends correct method, path, body, and Content-Type header
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22minjects Authorization: Bearer <token> from localStorage
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mskips auth header when skipAuth: true
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mreturns undefined for 204 No Content
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mthrows ApiError with status and message on non-ok response
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22mApiError has correct name, status, message, data properties
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mapiRequest[2m > [22muses VITE_API_BASE_URL env var as base URL (default: http://localhost:3000)
+[31m[1mReferenceError[22m: localStorage is not defined[39m
+[36m [2m❯[22m frontend/src/services/api.test.ts:[2m14:5[22m[39m
+    [90m 12|[39m [34mdescribe[39m([32m'apiRequest'[39m[33m,[39m () [33m=>[39m {
+    [90m 13|[39m   [34mbeforeEach[39m(() [33m=>[39m {
+    [90m 14|[39m     localStorage[33m.[39m[34mclear[39m()[33m;[39m
+    [90m   |[39m     [31m^[39m
+    [90m 15|[39m     vi[33m.[39m[34mrestoreAllMocks[39m()[33m;[39m
+    [90m 16|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/86]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mget calls apiRequest with GET method
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mpost calls apiRequest with POST method and body
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mpatch calls apiRequest with PATCH method and body
+[41m[1m FAIL [22m[49m frontend/src/services/api.test.ts[2m > [22mconvenience helpers[2m > [22mdel calls apiRequest with DELETE method
+[31m[1mReferenceError[22m: localStorage i
+
+[… truncated 43686 chars …]
