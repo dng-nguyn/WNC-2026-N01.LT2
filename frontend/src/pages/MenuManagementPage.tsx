@@ -1,5 +1,4 @@
 import { useEffect, useState, FormEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { fetchMenus, createMenu, updateMenu, deleteMenu } from '../services/menu.service';
 import type { Menu } from '../types';
 
@@ -89,11 +88,6 @@ export default function MenuManagementPage() {
         <div>
           <h1>Menu Categories</h1>
         </div>
-        <nav className="nav-links">
-          <Link to="/dashboard" className="btn btn-secondary">Dashboard</Link>
-          <Link to="/menu-items" className="btn btn-secondary">Menu Items</Link>
-          <Link to="/pos" className="btn btn-primary">POS Terminal</Link>
-        </nav>
       </header>
 
       {error && <div className="alert alert-error">{error}</div>}

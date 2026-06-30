@@ -1,29 +1,9 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { usePOSData } from '../hooks/usePOSData';
 import { useCart } from '../hooks/useCart';
 import { CategoryTabs, ProductCard, CartSummary } from '../components/pos';
 import { Alert } from '../components';
 import { PaymentModal } from '../components/payment';
-
-/* ── Map raw DB category names to friendly Vietnamese labels ── */
-const categoryMap: Record<string, string> = {
-  all: 'Tất cả',
-  OrderMenu_1782529111770: 'Cà phê & Trà',
-  PayMenu_1782529122262: 'Đồ ăn vặt',
-  OrderMenu_1782482776669: 'Trà sữa & Đá xay',
-};
-
-function friendlyName(raw: string): string {
-  return categoryMap[raw] ?? raw;
-}
-
-function rawName(friendly: string): string {
-  for (const [key, val] of Object.entries(categoryMap)) {
-    if (val === friendly) return key;
-  }
-  return friendly;
-}
 
 export default function POSPage() {
   const [showPayment, setShowPayment] = useState(false);
@@ -53,18 +33,6 @@ export default function POSPage() {
   } = useCart();
 
   const displayError = dataError || cartError;
-
-  // Friendly category labels for display
-  const displayCategories = useMemo(
-    () => categories.map((c) => friendlyName(c)),
-    [categories],
-  );
-
-  const friendlyActive = friendlyName(activeCategory);
-
-  function handleCategorySelect(friendly: string) {
-    setActiveCategory(rawName(friendly));
-  }
 
   function handlePayClick() {
     if (cart.length === 0) return;
@@ -96,17 +64,14 @@ export default function POSPage() {
       {/* ═══ Fixed Top Navbar ═══ */}
       <div className="pos-topbar">
         <h1 className="pos-topbar-title">POS Terminal</h1>
-        <Link to="/dashboard" className="pos-topbar-back">
-          ← Dashboard
-        </Link>
       </div>
 
       {/* ═══ Horizontally Scrollable Category Bar ═══ */}
       <div className="pos-category-bar">
         <CategoryTabs
-          categories={displayCategories}
-          activeCategory={friendlyActive}
-          onSelect={handleCategorySelect}
+          categories={categories}
+          activeCategory={activeCategory}
+          onSelect={setActiveCategory}
         />
       </div>
 
@@ -143,18 +108,22 @@ export default function POSPage() {
             onClear={clearCart}
             onCheckout={handlePayClick}
           >
-            <label>Table (optional)</label>
-            <select
-              value={selectedTableId}
-              onChange={(e) => setSelectedTableId(e.target.value)}
-            >
-              <option value="">Takeaway</option>
-              {tables.map((t) => (
-                <option key={t.id} value={t.id}>
-                  Table {t.tableNumber} — {t.status}
-                </option>
-              ))}
-            </select>
+            {/* Table selector */}
+            <div className="cart-table-selector">
+              <label htmlFor="pos-table">Table</label>
+              <select
+                id="pos-table"
+                value={selectedTableId}
+                onChange={(e) => setSelectedTableId(e.target.value)}
+              >
+                <option value="">Takeaway</option>
+                {tables.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.tableNumber}
+                  </option>
+                ))}
+              </select>
+            </div>
           </CartSummary>
         </div>
       </div>

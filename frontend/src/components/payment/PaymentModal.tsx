@@ -22,11 +22,6 @@ type Step = 'select-method' | 'creating-order' | 'show-qr' | 'success' | 'error'
 
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-const BANK_INFO = {
-  name: 'MBBank',
-  accountNumber: '3669420000',
-  accountHolder: 'Cafe Shop Account',
-};
 
 const formatCurrency = (n: number) =>
   new Intl.NumberFormat('vi-VN', {
@@ -280,7 +275,6 @@ export default function PaymentModal({
       <div className="payment-qr-container">
         <h3>Scan QR Code to Pay</h3>
 
-        {/* Side-by-side: QR left, details right */}
         <div className="payment-qr-body">
           <div className="payment-qr-card">
             <img
@@ -288,37 +282,6 @@ export default function PaymentModal({
               src={payment.qrUrl}
               alt="VietQR payment code"
             />
-          </div>
-
-          <div className="payment-details">
-            <div className="payment-detail-row">
-              <span className="payment-detail-label">Bank</span>
-              <span className="payment-detail-value">{BANK_INFO.name}</span>
-            </div>
-            <div className="payment-detail-row">
-              <span className="payment-detail-label">Account No.</span>
-              <span className="payment-detail-value">
-                {BANK_INFO.accountNumber}
-              </span>
-            </div>
-            <div className="payment-detail-row">
-              <span className="payment-detail-label">Account Holder</span>
-              <span className="payment-detail-value">
-                {BANK_INFO.accountHolder}
-              </span>
-            </div>
-            <div className="payment-detail-row">
-              <span className="payment-detail-label">Amount</span>
-              <span className="payment-detail-value payment-detail-amount">
-                {formatCurrency(Number(payment.amount))}
-              </span>
-            </div>
-            <div className="payment-detail-row payment-detail-memo">
-              <span className="payment-detail-label">Transfer Memo</span>
-              <span className="payment-detail-value payment-detail-code">
-                {payment.code}
-              </span>
-            </div>
           </div>
         </div>
 
