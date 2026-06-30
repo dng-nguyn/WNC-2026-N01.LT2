@@ -1,0 +1,50 @@
+# Standalone deployment — no .env file, no repository checkout needed.
+# Copy this single file to your server, edit the values marked "CHANGE",
+# then run:
+#
+#   docker compose -f docker-compose.standalone.yml up -d
+#
+# Or rename to docker-compose.yml on the server and just run:
+#
+#   docker compose up -d
+
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword          # CHANGE
+      MYSQL_DATABASE: Quan_Ly_Quan_Cafe
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db                                # Docker service name — do not change
+      DB_PORT: "3306"
+      DB_USERNAME: root
+      DB_PASSWORD: rootpassword                  # MUST match MYSQL_ROOT_PASSWORD
+      DB_DATABASE: Quan_Ly_Quan_Cafe
+      JWT_SECRET: change-me-in-production        # CHANGE
+      SESSION_SECRET: change-me-in-production     # CHANGE
+      NODE_ENV: development                      # Use "production" once DB schema is stable
+      PORT: "3000"
+      FRONTEND_URL: http://localhost              # CHANGE to your domain for CORS
+      SEPAY_API_KEY: your_sepay_api_key           # CHANGE
+      SEPAY_ACCOUNT_NUMBER: "0000000000"          # CHANGE
+      SEPAY_BANK_NAME: MBBank
+    ports:
+      - "80:3000"
+
+volumes:
+  mysql_data:
