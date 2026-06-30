@@ -16,11 +16,11 @@ const vi = {
   'common.done': 'Xong',
 
   // ── Navigation / Sidebar ──
-  'nav.dashboard': 'Dashboard',
-  'nav.pos': 'POS Terminal',
-  'nav.categories': 'Menu Categories',
-  'nav.menuItems': 'Menu Items',
-  'nav.logout': 'Logout',
+  'nav.dashboard': 'Tổng quan',
+  'nav.pos': 'Bán hàng',
+  'nav.categories': 'Danh mục',
+  'nav.menuItems': 'Món',
+  'nav.logout': 'Đăng xuất',
 
   // ── Auth ──
   'auth.login': 'Đăng nhập',

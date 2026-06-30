@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import AppLayout from './AppLayout';
+import { I18nProvider } from '../i18n';
 
 const mockLogout = vi.fn();
 const mockNavigate = vi.fn();
@@ -25,19 +26,23 @@ describe('AppLayout', () => {
   it('renders sidebar with navigation links', () => {
     render(
       <MemoryRouter>
+        <I18nProvider>
         <AppLayout><div>Content</div></AppLayout>
+        </I18nProvider>
       </MemoryRouter>
     );
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('POS Terminal')).toBeInTheDocument();
-    expect(screen.getByText('Menu Categories')).toBeInTheDocument();
-    expect(screen.getByText('Menu Items')).toBeInTheDocument();
+    expect(screen.getByText('Tổng quan')).toBeInTheDocument();
+    expect(screen.getByText('Bán hàng')).toBeInTheDocument();
+    expect(screen.getByText('Danh mục')).toBeInTheDocument();
+    expect(screen.getByText('Món')).toBeInTheDocument();
   });
 
   it('renders children', () => {
     render(
       <MemoryRouter>
+        <I18nProvider>
         <AppLayout><div>Page Content</div></AppLayout>
+        </I18nProvider>
       </MemoryRouter>
     );
     expect(screen.getByText('Page Content')).toBeInTheDocument();
@@ -46,7 +51,9 @@ describe('AppLayout', () => {
   it('renders user avatar with first letter', () => {
     render(
       <MemoryRouter>
+        <I18nProvider>
         <AppLayout><div /></AppLayout>
+        </I18nProvider>
       </MemoryRouter>
     );
     expect(screen.getByText('B')).toBeInTheDocument();
@@ -57,10 +64,12 @@ describe('AppLayout', () => {
     const user = userEvent.setup();
     render(
       <MemoryRouter>
+        <I18nProvider>
         <AppLayout><div /></AppLayout>
+        </I18nProvider>
       </MemoryRouter>
     );
-    await user.click(screen.getByText('Logout'));
+    await user.click(screen.getByText('Đăng xuất'));
     expect(mockLogout).toHaveBeenCalledOnce();
     expect(mockNavigate).toHaveBeenCalledWith('/login', { replace: true });
   });
