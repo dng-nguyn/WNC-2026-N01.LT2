@@ -146,21 +146,21 @@ export class PaymentService {
     code: string,
     amount: number,
   ): Promise<{ id: string } | null> {
+    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '3669420000';
     try {
       const response = await firstValueFrom(
         this.httpService.get<{
+          status: number;
           transactions: Array<{
             id: string;
-            amount_in: number;
+            amount_in: string;
             transaction_content: string;
-            transfer_type: string;
           }>;
-        }>('https://userapi.sepay.vn/v2/transactions', {
+        }>('https://my.sepay.vn/userapi/transactions/list', {
           params: {
-            transaction_content: code,
-            transfer_type: 'in',
-            per_page: 10,
-            timestamp_format: 'iso8601',
+            account_number: accountNumber,
+            amount_in: amount,
+            limit: 20,
           },
           headers: {
             Authorization: `Bearer ${apiKey}`,
@@ -170,11 +170,12 @@ export class PaymentService {
         }),
       );
 
-      const txs = response.data;
-      if (!txs?.transactions?.length) return null;
+      const txs = response.data?.transactions;
+      if (!txs?.length) return null;
 
-      const match = txs.transactions.find(
-        (tx) => tx.amount_in === amount && tx.transfer_type === 'in',
+      // Match transaction_content containing the payment code
+      const match = txs.find((tx) =>
+        tx.transaction_content?.includes(code),
       );
 
       return match ? { id: match.id } : null;
