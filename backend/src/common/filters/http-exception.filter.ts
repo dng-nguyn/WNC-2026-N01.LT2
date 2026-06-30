@@ -59,7 +59,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // SPA fallback: serve index.html for 404s on GET requests (page reloads on /login, /dashboard, etc.)
     if (status === 404 && request.method === 'GET') {
-      const publicPath = join(__dirname, '..', '..', 'public');
+      const publicPath = join(__dirname, '..', '..', '..', 'public');
       if (existsSync(publicPath)) {
         response.sendFile(join(publicPath, 'index.html'));
         return;
