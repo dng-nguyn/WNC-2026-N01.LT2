@@ -104,7 +104,7 @@ describe('apiRequest', () => {
     expect(error.data).toEqual({ detail: 'internal' });
   });
 
-  it('uses VITE_API_BASE_URL env var as base URL (default: http://localhost:3000)', async () => {
+  it('uses VITE_API_BASE_URL env var as base URL', async () => {
     mockFetch(200, { ok: true });
 
     await apiRequest('GET', '/endpoint');
