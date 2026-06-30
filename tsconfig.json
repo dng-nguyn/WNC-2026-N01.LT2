@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "rootDir": "./backend/src",
-    "module": "commonjs",
+    "module": "node16",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
@@ -14,10 +14,9 @@
     "skipLibCheck": true,
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "node10",
+    "moduleResolution": "node16",
     "types": ["node"],
-    "strictPropertyInitialization": false,
-    "ignoreDeprecations": "5.0"
+    "strictPropertyInitialization": false
   },
   "include": ["backend/src/**/*.ts"],
   "exclude": ["node_modules", "dist", "backend/test", "**/*.spec.ts"]
