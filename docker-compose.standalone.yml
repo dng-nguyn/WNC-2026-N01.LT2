@@ -44,8 +44,24 @@ services:
       SEPAY_API_KEY: your_sepay_api_key           # CHANGE
       SEPAY_ACCOUNT_NUMBER: "0000000000"          # CHANGE
       SEPAY_BANK_NAME: MBBank
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     ports:
       - "80:3000"
+
+  seed:
+    image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:latest
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      SEED_API_URL: http://app:3000
+    command: ["node", "scripts/seed.mjs"]
+    restart: "no"
 
 volumes:
   mysql_data:
