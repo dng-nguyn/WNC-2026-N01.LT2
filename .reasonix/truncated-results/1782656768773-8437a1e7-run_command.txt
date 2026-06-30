@@ -1,0 +1,836 @@
+$ npm --prefix frontend run test 2>&1
+[exit 1]
+
+> coffee-shop-frontend@1.0.0 test
+> vitest run
+
+
+[1m[30m[46m RUN [49m[39m[22m [36mv4.1.9 [39m[90mC:/web/WNC-2026-N01.LT2/frontend[39m
+
+ [32m✓[39m src/components/ProtectedRoute.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 156[2mms[22m[39m
+ [32m✓[39m src/pages/DashboardPage.test.tsx [2m([22m[2m6 tests[22m[2m)[22m[33m 605[2mms[22m[39m
+     [33m[2m✓[22m[39m shows loading state initially [33m 310[2mms[22m[39m
+ [31m❯[39m src/pages/POSPage.test.tsx [2m([22m[2m10 tests[22m[2m | [22m[31m6 failed[39m[2m)[22m[33m 3245[2mms[22m[39m
+     [33m[2m✓[22m[39m shows loading state initially [33m 379[2mms[22m[39m
+     [32m✓[39m displays menu item grid[32m 105[2mms[22m[39m
+     [33m[2m✓[22m[39m displays category filter tabs (including All) [33m 593[2mms[22m[39m
+     [32m✓[39m filters items by category on tab click[32m 260[2mms[22m[39m
+[31m     [31m×[31m adds item to cart on click[39m[32m 189[2mms[22m[39m
+[31m     [31m×[31m increments/decrements quantity in cart[39m[32m 147[2mms[22m[39m
+[31m     [31m×[31m shows cart total[39m[33m 397[2mms[22m[39m
+[31m     [31m×[31m shows Place Order button[39m[33m 327[2mms[22m[39m
+[31m     [31m×[31m calls createOrder() on checkout[39m[33m 771[2mms[22m[39m
+[31m     [31m×[31m shows empty cart message initially[39m[32m 64[2mms[22m[39m
+ [32m✓[39m src/pages/MenuManagementPage.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 3801[2mms[22m[39m
+     [33m[2m✓[22m[39m displays menu categories table [33m 355[2mms[22m[39m
+     [33m[2m✓[22m[39m opens create form on + New Category click [33m 673[2mms[22m[39m
+     [33m[2m✓[22m[39m submits new menu via createMenu() [33m 898[2mms[22m[39m
+     [33m[2m✓[22m[39m opens edit form with pre-filled data [33m 310[2mms[22m[39m
+     [33m[2m✓[22m[39m submits edit via updateMenu() [33m 1205[2mms[22m[39m
+ [32m✓[39m src/pages/MenuItemManagementPage.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 4130[2mms[22m[39m
+     [33m[2m✓[22m[39m opens create form with category dropdown [33m 797[2mms[22m[39m
+     [33m[2m✓[22m[39m validates price input (rejects negative) — shows error [33m 1212[2mms[22m[39m
+     [33m[2m✓[22m[39m submits new item via createMenuItem() [33m 1308[2mms[22m[39m
+ [32m✓[39m src/pages/LoginPage.test.tsx [2m([22m[2m8 tests[22m[2m)[22m[33m 5090[2mms[22m[39m
+     [33m[2m✓[22m[39m shows Sign In button [33m 701[2mms[22m[39m
+     [33m[2m✓[22m[39m calls login() on form submit with correct values [33m 822[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates to /dashboard on successful login [33m 1113[2mms[22m[39m
+     [33m[2m✓[22m[39m shows error message on login failure [33m 935[2mms[22m[39m
+     [33m[2m✓[22m[39m shows loading state (Signing in…) while submitting [33m 667[2mms[22m[39m
+     [33m[2m✓[22m[39m disables submit button while loading [33m 597[2mms[22m[39m
+ [32m✓[39m src/pages/RegisterPage.test.tsx [2m([22m[2m7 tests[22m[2m)[22m[33m 5176[2mms[22m[39m
+     [33m[2m✓[22m[39m shows Create Account button [33m 662[2mms[22m[39m
+     [33m[2m✓[22m[39m validates password minimum length (8 chars) - shows error [33m 770[2mms[22m[39m
+     [33m[2m✓[22m[39m calls register() on form submit with correct values [33m 1907[2mms[22m[39m
+     [33m[2m✓[22m[39m navigates to /dashboard on successful registration [33m 891[2mms[22m[39m
+     [33m[2m✓[22m[39m shows error message on registration failure [33m 577[2mms[22m[39m
+ [32m✓[39m src/services/api.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 50[2mms[22m[39m
+ [32m✓[39m src/services/menu.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 26[2mms[22m[39m
+ [32m✓[39m src/services/order.service.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 24[2mms[22m[39m
+ [32m✓[39m src/services/auth.service.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+ [32m✓[39m src/services/menuItem.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/services/table.service.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22madds item to cart on click
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Total (1 items). This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"pos-layout"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-menu"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"pos-header"[39m
+        [36m>[39m
+          [36m<h1>[39m
+            [0mPOS Terminal[0m
+          [36m</h1>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"btn btn-sm btn-secondary"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mhref[39m=[32m"/dashboard"[39m
+          [36m>[39m
+            [0m← Dashboard[0m
+          [36m</a>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"category-tabs"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill category-pill--active"[39m
+          [36m>[39m
+            [0mAll[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill "[39m
+          [36m>[39m
+            [0mCoffee[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"menu-grid"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"menu-item-card"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-name"[39m
+            [36m>[39m
+              [0mEspresso[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-price"[39m
+            [36m>[39m
+              [0m30.000 ₫[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-cart"[39m
+      [36m>[39m
+        [36m<h2>[39m
+          [0mCurrent Order[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"table-selector"[39m
+        [36m>[39m
+          [36m<label>[39m
+            [0mTable (optional)[0m
+          [36m</label>[39m
+          [36m<select>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTakeaway[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-items"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-item"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-header"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-name"[39m
+              [36m>[39m
+                [0mEspresso[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-price"[39m
+              [36m>[39m
+                [0m30.000 ₫[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-controls"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Decrease quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m−[0m
+              [36m</button>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-qty"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Increase quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m+[0m
+              [36m</button>[39m
+              [36m<input[39m
+                [33mclass[39m=[32m"cart-note"[39m
+                [33mplaceholder[39m=[32m"Note…"[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-footer"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-total"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m item[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m30.000 ₫[0m
+            [36m</strong>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-actions"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn btn-primary btn-block"[39m
+            [36m>[39m
+              [0mPay 30.000 ₫[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn-clear"[39m
+            [36m>[39m
+              [0mClear all items[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/POSPage.test.tsx:[2m180:19[22m[39m
+    [90m178|[39m
+    [90m179|[39m     [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m'Current Order'[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m180|[39m     [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m'Total (1 items)'[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m181|[39m     [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m'1'[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m182|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mincrements/decrements quantity in cart
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Total (1 items). This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"pos-layout"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-menu"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"pos-header"[39m
+        [36m>[39m
+          [36m<h1>[39m
+            [0mPOS Terminal[0m
+          [36m</h1>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"btn btn-sm btn-secondary"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mhref[39m=[32m"/dashboard"[39m
+          [36m>[39m
+            [0m← Dashboard[0m
+          [36m</a>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"category-tabs"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill category-pill--active"[39m
+          [36m>[39m
+            [0mAll[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill "[39m
+          [36m>[39m
+            [0mCoffee[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"menu-grid"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"menu-item-card"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-name"[39m
+            [36m>[39m
+              [0mEspresso[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-price"[39m
+            [36m>[39m
+              [0m30.000 ₫[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-cart"[39m
+      [36m>[39m
+        [36m<h2>[39m
+          [0mCurrent Order[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"table-selector"[39m
+        [36m>[39m
+          [36m<label>[39m
+            [0mTable (optional)[0m
+          [36m</label>[39m
+          [36m<select>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTakeaway[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-items"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-item"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-header"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-name"[39m
+              [36m>[39m
+                [0mEspresso[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-price"[39m
+              [36m>[39m
+                [0m30.000 ₫[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-controls"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Decrease quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m−[0m
+              [36m</button>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-qty"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Increase quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m+[0m
+              [36m</button>[39m
+              [36m<input[39m
+                [33mclass[39m=[32m"cart-note"[39m
+                [33mplaceholder[39m=[32m"Note…"[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-footer"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-total"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0m1[0m
+              [0m item[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m30.000 ₫[0m
+            [36m</strong>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-actions"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn btn-primary btn-block"[39m
+            [36m>[39m
+              [0mPay 30.000 ₫[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn-clear"[39m
+            [36m>[39m
+              [0mClear all items[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/POSPage.test.tsx:[2m191:19[22m[39m
+    [90m189|[39m     [35mawait[39m user[33m.[39m[34mclick[39m(screen[33m.[39m[34mgetByText[39m([32m'Espresso'[39m)[33m.[39m[34mclosest[39m([32m'button'[39m)[33m![39m)[33m;[39m
+    [90m190|[39m
+    [90m191|[39m     [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m'Total (1 items)'[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m192|[39m
+    [90m193|[39m     [35mawait[39m user[33m.[39m[34mclick[39m(screen[33m.[39m[34mgetByRole[39m([32m'button'[39m[33m,[39m { name[33m:[39m [32m'+'[39m }))[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mshows cart total
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Total (2 items). This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"pos-layout"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-menu"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"pos-header"[39m
+        [36m>[39m
+          [36m<h1>[39m
+            [0mPOS Terminal[0m
+          [36m</h1>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"btn btn-sm btn-secondary"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mhref[39m=[32m"/dashboard"[39m
+          [36m>[39m
+            [0m← Dashboard[0m
+          [36m</a>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"category-tabs"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill category-pill--active"[39m
+          [36m>[39m
+            [0mAll[0m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill "[39m
+          [36m>[39m
+            [0mCoffee[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"menu-grid"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"menu-item-card"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-name"[39m
+            [36m>[39m
+              [0mEspresso[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-price"[39m
+            [36m>[39m
+              [0m30.000 ₫[0m
+            [36m</span>[39m
+          [36m</button>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"menu-item-card"[39m
+          [36m>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-name"[39m
+            [36m>[39m
+              [0mLatte[0m
+            [36m</span>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"menu-item-price"[39m
+            [36m>[39m
+              [0m40.000 ₫[0m
+            [36m</span>[39m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-cart"[39m
+      [36m>[39m
+        [36m<h2>[39m
+          [0mCurrent Order[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"table-selector"[39m
+        [36m>[39m
+          [36m<label>[39m
+            [0mTable (optional)[0m
+          [36m</label>[39m
+          [36m<select>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTakeaway[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-items"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-item"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-header"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-name"[39m
+              [36m>[39m
+                [0mEspresso[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-price"[39m
+              [36m>[39m
+                [0m30.000 ₫[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-controls"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Decrease quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m−[0m
+              [36m</button>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-qty"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Increase quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m+[0m
+              [36m</button>[39m
+              [36m<input[39m
+                [33mclass[39m=[32m"cart-note"[39m
+                [33mplaceholder[39m=[32m"Note…"[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-item"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-header"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-name"[39m
+              [36m>[39m
+                [0mLatte[0m
+              [36m</span>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-item-price"[39m
+              [36m>[39m
+                [0m40.000 ₫[0m
+              [36m</span>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"cart-item-controls"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Decrease quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m−[0m
+              [36m</button>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"cart-qty"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</span>[39m
+              [36m<button[39m
+                [33maria-label[39m=[32m"Increase quantity"[39m
+                [33mclass[39m=[32m"cart-qty-btn"[39m
+              [36m>[39m
+                [0m+[0m
+              [36m</button>[39m
+              [36m<input[39m
+                [33mclass[39m=[32m"cart-note"[39m
+                [33mplaceholder[39m=[32m"Note…"[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-footer"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-total"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0m2[0m
+              [0m item[0m
+              [0ms[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m70.000 ₫[0m
+            [36m</strong>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-actions"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn btn-primary btn-block"[39m
+            [36m>[39m
+              [0mPay 70.000 ₫[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn-clear"[39m
+            [36m>[39m
+              [0mClear all items[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/POSPage.test.tsx:[2m215:19[22m[39m
+    [90m213|[39m     [35mawait[39m user[33m.[39m[34mclick[39m(screen[33m.[39m[34mgetByText[39m([32m'Latte'[39m)[33m.[39m[34mclosest[39m([32m'button'[39m)[33m![39m)[33m;[39m
+    [90m214|[39m
+    [90m215|[39m     [34mexpect[39m(screen[33m.[39m[34mgetByText[39m([32m'Total (2 items)'[39m))[33m.[39m[34mtoBeInTheDocument[39m()[33m;[39m
+    [90m   |[39m                   [31m^[39m
+    [90m216|[39m     expect(screen.getByText(formatCurrency(70000))).toBeInTheDocument(…
+    [90m217|[39m   })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/pages/POSPage.test.tsx[2m > [22mPOSPage[2m > [22mshows Place Order button
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an accessible element with the role "button" and name "Place Order"
+
+Here are the accessible roles:
+
+  banner:
+
+  Name "":
+  [36m<header[39m
+    [33mclass[39m=[32m"pos-header"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  heading:
+
+  Name "POS Terminal":
+  [36m<h1 />[39m
+
+  Name "Current Order":
+  [36m<h2 />[39m
+
+  --------------------------------------------------
+  link:
+
+  Name "← Dashboard":
+  [36m<a[39m
+    [33mclass[39m=[32m"btn btn-sm btn-secondary"[39m
+    [33mdata-discover[39m=[32m"true"[39m
+    [33mhref[39m=[32m"/dashboard"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  button:
+
+  Name "All":
+  [36m<button[39m
+    [33mclass[39m=[32m"category-pill category-pill--active"[39m
+  [36m/>[39m
+
+  Name "Pay 0 ₫":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn btn-primary btn-block"[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  Name "Clear all items":
+  [36m<button[39m
+    [33mclass[39m=[32m"btn-clear"[39m
+    [33mdisabled[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  paragraph:
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-muted"[39m
+  [36m/>[39m
+
+  Name "":
+  [36m<p[39m
+    [33mclass[39m=[32m"text-muted"[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  combobox:
+
+  Name "":
+  [36m<select />[39m
+
+  --------------------------------------------------
+  option:
+
+  Name "Takeaway":
+  [36m<option[39m
+    [33mvalue[39m=[32m""[39m
+  [36m/>[39m
+
+  --------------------------------------------------
+  strong:
+
+  Name "":
+  [36m<strong />[39m
+
+  --------------------------------------------------
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"pos-layout"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-menu"[39m
+      [36m>[39m
+        [36m<header[39m
+          [33mclass[39m=[32m"pos-header"[39m
+        [36m>[39m
+          [36m<h1>[39m
+            [0mPOS Terminal[0m
+          [36m</h1>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"btn btn-sm btn-secondary"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mhref[39m=[32m"/dashboard"[39m
+          [36m>[39m
+            [0m← Dashboard[0m
+          [36m</a>[39m
+        [36m</header>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"category-tabs"[39m
+        [36m>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"category-pill category-pill--active"[39m
+          [36m>[39m
+            [0mAll[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"menu-grid"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-muted"[39m
+          [36m>[39m
+            [0mNo items in this category[0m
+          [36m</p>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"pos-cart"[39m
+      [36m>[39m
+        [36m<h2>[39m
+          [0mCurrent Order[0m
+        [36m</h2>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"table-selector"[39m
+        [36m>[39m
+          [36m<label>[39m
+            [0mTable (optional)[0m
+          [36m</label>[39m
+          [36m<select>[39m
+            [36m<option[39m
+              [33mvalue[39m=[32m""[39m
+            [36m>[39m
+              [0mTakeaway[0m
+            [36m</option>[39m
+          [36m</select>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-items"[39m
+        [36m>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-muted"[39m
+          [36m>[39m
+            [0mTap items to add them here[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"cart-footer"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-total"[39m
+          [36m>[39m
+            [36m<span>[39m
+              [0m0[0m
+              [0m item[0m
+              [0ms[0m
+            [36m</span>[39m
+            [36m<strong>[39m
+              [0m0 ₫[0m
+            [36m</strong>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"cart-actions"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn btn-primary btn-block"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mPay 0 ₫[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"btn-clear"[39m
+              [33mdisabled[39m=[32m""[39m
+            [36m>[39m
+              [0mClear all items[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+[90m [2m❯[22m Object.getElementError node_modules/@testing-library/dom/dist/config.js:[2m37:19[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m76:38[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m52:17[22m[39m
+[90m [2m❯[22m node_modules/@testing-library/dom/dist/query-helpers.js:[2m95:19[22m[39m
+[36m [2m❯[22m src/pages/POSPage.test.tsx:[2m221:19[22m[39m
+
+[… truncated 14249 chars …]
