@@ -26,6 +26,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=backend-build /app/dist ./dist
 COPY --from=frontend-build /app/dist ./public
+COPY scripts/ scripts/
 USER appuser
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
