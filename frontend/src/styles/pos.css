@@ -587,14 +587,14 @@
 /* Side-by-side row: QR left, details right */
 .payment-qr-body {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20px;
   align-items: center;
   justify-content: center;
 }
 
 .payment-qr-card {
-  width: 200px;
+  width: 360px;
   flex-shrink: 0;
   aspect-ratio: 540 / 687;
   background: #ffffff;
