@@ -50,15 +50,15 @@ describe('Payments', () => {
     }).expect(201);
     const p = await request(ctx.server).post('/payments/qr').send({ orderId: o.body.id }).expect(201);
 
-    nock('https://userapi.sepay.vn')
-      .get('/v2/transactions')
+    nock('https://my.sepay.vn')
+      .get('/userapi/transactions/list')
       .query(true)
       .reply(200, {
+        status: 200,
         transactions: [{
           id: 'tx-mock-999',
-          amount_in: p.body.amount,
-          transaction_content: p.body.code,
-          transfer_type: 'in',
+          amount_in: String(p.body.amount),
+          transaction_content: 'Chuyen tien ' + p.body.code + ' tu KH',
         }],
       });
 
