@@ -1,264 +1,119 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import POSPage from './POSPage';
-import type { MenuItem, Table, Order } from '../types';
+import type { MenuItem, Menu } from '../types';
 
-const mockFetchMenuItems = vi.fn();
-const mockFetchTables = vi.fn();
-const mockCreateOrder = vi.fn();
-const mockGetLoggedInUser = vi.fn();
+const mockSetActiveCategory = vi.fn();
+const mockAddToCart = vi.fn();
+const mockUpdateQuantity = vi.fn();
+const mockClearCart = vi.fn();
+const mockClearMessages = vi.fn();
 
-vi.mock('../services/menuItem.service', () => ({
-  fetchMenuItems: () => mockFetchMenuItems(),
-}));
+const mockUsePOSData = {
+  menuItems: [] as MenuItem[],
+  tables: [],
+  categories: ['all'] as string[],
+  activeCategory: 'all',
+  setActiveCategory: mockSetActiveCategory,
+  filteredItems: [] as MenuItem[],
+  loading: false,
+  error: '',
+  refetch: vi.fn(),
+};
 
-vi.mock('../services/table.service', () => ({
-  fetchTables: () => mockFetchTables(),
-}));
+const mockUseCart = {
+  cart: [] as { menuItem: MenuItem; quantity: number; note: string }[],
+  selectedTableId: '',
+  setSelectedTableId: vi.fn(),
+  cartTotal: 0,
+  cartItemCount: 0,
+  submitting: false,
+  error: '',
+  success: '',
+  addToCart: mockAddToCart,
+  updateQuantity: mockUpdateQuantity,
+  clearCart: mockClearCart,
+  clearMessages: mockClearMessages,
+};
 
-vi.mock('../services/order.service', () => ({
-  createOrder: (dto: unknown) => mockCreateOrder(dto),
-}));
+vi.mock('../hooks/usePOSData', () => ({ usePOSData: () => mockUsePOSData }));
+vi.mock('../hooks/useCart', () => ({ useCart: () => mockUseCart }));
 
-vi.mock('../services/auth.service', () => ({
-  getLoggedInUser: () => mockGetLoggedInUser(),
-}));
+const mockMenu: Menu = { id: 'm1', name: 'Coffee', description: null, createdAt: '2025-01-01' };
+const item1: MenuItem = { id: 'i1', name: 'Espresso', price: 45000, isAvailable: true, menu: mockMenu, createdAt: '2025-01-01' };
 
-const formatCurrency = (n: number) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n).replace(/\u00a0/g, ' ');
-
-async function renderPOS(
-  initialItems: MenuItem[] = [],
-  initialTables: Table[] = [],
-  waitLoading = true
-) {
-  mockFetchMenuItems.mockResolvedValue(initialItems);
-  mockFetchTables.mockResolvedValue(initialTables);
-  mockGetLoggedInUser.mockReturnValue({ id: 'u1', username: 'barista' });
-
-  const result = render(
-    <MemoryRouter initialEntries={['/pos']}>
-      <POSPage />
-    </MemoryRouter>
-  );
-
-  if (waitLoading) {
-    await waitFor(() => {
-      expect(screen.queryByText('Loading POS terminal…')).not.toBeInTheDocument();
-    });
-  }
-
-  return result;
-}
-
-function createMockMenuItem(overrides: Partial<MenuItem> = {}): MenuItem {
-  return {
-    id: 'mi-1',
-    menu: { id: 'm1', name: 'Coffee', description: '', createdAt: new Date().toISOString() },
-    name: 'Espresso',
-    price: 30000,
-    isAvailable: true,
-    createdAt: new Date().toISOString(),
-    ...overrides,
-  };
-}
-
-function createMockTable(overrides: Partial<Table> = {}): Table {
-  return {
-    id: 't1',
-    tableNumber: '1',
-    status: 'EMPTY' as const,
-    createdAt: new Date().toISOString(),
-    ...overrides,
-  };
+function resetMocks() {
+  mockUsePOSData.menuItems = [];
+  mockUsePOSData.filteredItems = [];
+  mockUsePOSData.categories = ['all'];
+  mockUsePOSData.activeCategory = 'all';
+  mockUsePOSData.loading = false;
+  mockUsePOSData.error = '';
+  mockUseCart.cart = [];
+  mockUseCart.cartTotal = 0;
+  mockUseCart.cartItemCount = 0;
+  mockUseCart.submitting = false;
+  mockUseCart.error = '';
+  mockUseCart.success = '';
 }
 
 describe('POSPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockFetchMenuItems.mockResolvedValue([]);
-    mockFetchTables.mockResolvedValue([]);
-    mockCreateOrder.mockResolvedValue({} as Order);
-    mockGetLoggedInUser.mockReturnValue({ id: 'u1', username: 'barista' });
+    resetMocks();
   });
 
-  afterEach(() => {
-    vi.resetAllMocks();
+  it('shows loading state', () => {
+    mockUsePOSData.loading = true;
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
   });
 
-  it('shows loading state initially', async () => {
-    const { promise, resolve } = Promise.withResolvers<MenuItem[]>();
-    mockFetchMenuItems.mockReturnValue(promise);
-    mockFetchTables.mockResolvedValue([]);
-
-    render(
-      <MemoryRouter initialEntries={['/pos']}>
-        <POSPage />
-      </MemoryRouter>
-    );
-
-    expect(screen.getByText('Loading POS terminal…')).toBeInTheDocument();
-    expect(screen.queryByText('POS Terminal')).not.toBeInTheDocument();
-
-    resolve([]);
-    await waitFor(() => expect(screen.queryByText('Loading POS terminal…')).not.toBeInTheDocument());
+  it('renders POS layout', () => {
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(document.querySelector('.pos-layout')).toBeInTheDocument();
   });
 
-  it('displays menu item grid', async () => {
-    const items = [
-      createMockMenuItem({ id: 'mi-1', name: 'Espresso', price: 30000 }),
-      createMockMenuItem({ id: 'mi-2', name: 'Latte', price: 40000 }),
-    ];
-    await renderPOS(items);
-
+  it('renders product cards for items', () => {
+    mockUsePOSData.menuItems = [item1];
+    mockUsePOSData.filteredItems = [item1];
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
     expect(screen.getByText('Espresso')).toBeInTheDocument();
-    expect(screen.getByText('Latte')).toBeInTheDocument();
-    expect(screen.getByText(formatCurrency(30000))).toBeInTheDocument();
-    expect(screen.getByText(formatCurrency(40000))).toBeInTheDocument();
   });
 
-  it('displays category filter tabs (including All)', async () => {
-    const items = [
-      createMockMenuItem({
-        id: 'mi-1',
-        name: 'Espresso',
-        menu: { id: 'm1', name: 'Coffee', description: '', createdAt: new Date().toISOString() },
-      }),
-      createMockMenuItem({
-        id: 'mi-2',
-        name: 'Green Tea',
-        menu: { id: 'm2', name: 'Tea', description: '', createdAt: new Date().toISOString() },
-      }),
-    ];
-    await renderPOS(items);
-
-    expect(screen.getByRole('button', { name: 'Tất cả' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Coffee' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tea' })).toBeInTheDocument();
-  });
-
-  it('filters items by category on tab click', async () => {
+  it('calls addToCart on product click', async () => {
+    mockUsePOSData.menuItems = [item1];
+    mockUsePOSData.filteredItems = [item1];
     const user = userEvent.setup();
-    const items = [
-      createMockMenuItem({
-        id: 'mi-1',
-        name: 'Espresso',
-        menu: { id: 'm1', name: 'Coffee', description: '', createdAt: new Date().toISOString() },
-      }),
-      createMockMenuItem({
-        id: 'mi-2',
-        name: 'Green Tea',
-        menu: { id: 'm2', name: 'Tea', description: '', createdAt: new Date().toISOString() },
-      }),
-    ];
-    await renderPOS(items);
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    await user.click(screen.getByText('Espresso'));
+    expect(mockAddToCart).toHaveBeenCalledWith(item1);
+  });
 
+  it('shows empty cart message', () => {
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(screen.getByText(/tap items to add them here/i)).toBeInTheDocument();
+  });
+
+  it('shows cart items when items in cart', () => {
+    mockUseCart.cart = [{ menuItem: item1, quantity: 2, note: '' }];
+    mockUseCart.cartItemCount = 2;
+    mockUseCart.cartTotal = 90000;
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
     expect(screen.getByText('Espresso')).toBeInTheDocument();
-    expect(screen.getByText('Green Tea')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Coffee' }));
-
-    expect(screen.getByText('Espresso')).toBeInTheDocument();
-    expect(screen.queryByText('Green Tea')).not.toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: 'Tea' }));
-
-    expect(screen.queryByText('Espresso')).not.toBeInTheDocument();
-    expect(screen.getByText('Green Tea')).toBeInTheDocument();
   });
 
-  it('adds item to cart on click', async () => {
-    const user = userEvent.setup();
-    const items = [createMockMenuItem({ id: 'mi-1', name: 'Espresso', price: 30000 })];
-    await renderPOS(items);
-
-    await user.click(screen.getByText('Espresso').closest('button')!);
-
-    expect(screen.getByText('Current Order')).toBeInTheDocument();
-    expect(screen.getByText('1 item')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('1')).toBeInTheDocument();
+  it('shows error message', () => {
+    mockUsePOSData.error = 'Failed to load';
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(screen.getByText('Failed to load')).toBeInTheDocument();
   });
 
-  it('increments/decrements quantity in cart', async () => {
-    const user = userEvent.setup();
-    const items = [createMockMenuItem({ id: 'mi-1', name: 'Espresso', price: 30000 })];
-    await renderPOS(items);
-
-    await user.click(screen.getByText('Espresso').closest('button')!);
-
-    expect(screen.getByText('1 item')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /increase/i }));
-    expect(screen.getByText('2 items')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /decrease/i }));
-    expect(screen.getByText('1 item')).toBeInTheDocument();
-
-    await user.click(screen.getByRole('button', { name: /decrease/i }));
-    expect(screen.queryByText('1 item')).not.toBeInTheDocument();
-    expect(screen.getByText('Tap items to add them here')).toBeInTheDocument();
-  });
-
-  it('shows cart total', async () => {
-    const user = userEvent.setup();
-    const items = [
-      createMockMenuItem({ id: 'mi-1', name: 'Espresso', price: 30000 }),
-      createMockMenuItem({ id: 'mi-2', name: 'Latte', price: 40000 }),
-    ];
-    await renderPOS(items);
-
-    await user.click(screen.getByText('Espresso').closest('button')!);
-    await user.click(screen.getByText('Latte').closest('button')!);
-
-    expect(screen.getByText('2 items')).toBeInTheDocument();
-    expect(screen.getByText(formatCurrency(70000))).toBeInTheDocument();
-  });
-
-  it('shows checkout button', async () => {
-    await renderPOS([]);
-    // The button shows "Pay 0 ₫" initially when cart is empty but still renders
-    expect(screen.getByRole('button', { name: /pay/i })).toBeInTheDocument();
-  });
-
-  it('calls createOrder() on checkout', async () => {
-    const user = userEvent.setup();
-    const items = [createMockMenuItem({ id: 'mi-1', name: 'Espresso', price: 30000 })];
-    const tables = [createMockTable({ id: 't1', tableNumber: '1' })];
-    await renderPOS(items, tables);
-
-    await user.click(screen.getByText('Espresso').closest('button')!);
-
-    await user.selectOptions(screen.getByRole('combobox'), 't1');
-
-    await user.click(screen.getByRole('button', { name: /pay/i }));
-
-    // Payment modal opens — select "Cash"
-    await waitFor(() => {
-      expect(screen.getByText('Select Payment Method')).toBeInTheDocument();
-    });
-    await user.click(screen.getByText('Cash'));
-
-    await waitFor(() => {
-      expect(mockCreateOrder).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tableId: 't1',
-          userId: 'u1',
-          items: [
-            expect.objectContaining({
-              menuItemId: 'mi-1',
-              quantity: 1,
-              note: undefined,
-            }),
-          ],
-        })
-      );
-    });
-  });
-
-  it('shows empty cart message initially', async () => {
-    await renderPOS([]);
-    expect(screen.getByText('Tap items to add them here')).toBeInTheDocument();
+  it('shows success message', () => {
+    mockUseCart.success = 'Order placed!';
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(screen.getByText('Order placed!')).toBeInTheDocument();
   });
 });

@@ -81,7 +81,8 @@ describe('MenuItemManagementPage', () => {
   });
 
   it('shows loading state initially', async () => {
-    const { promise, resolve } = Promise.withResolvers<MenuItem[]>();
+    let resolve!: (value: MenuItem[]) => void;
+    const promise = new Promise<MenuItem[]>((r) => { resolve = r; });
     mockFetchMenuItems.mockReturnValue(promise);
     mockFetchMenus.mockResolvedValue([]);
 
