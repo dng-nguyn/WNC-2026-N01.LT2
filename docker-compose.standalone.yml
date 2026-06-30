@@ -45,6 +45,7 @@ services:
       SEPAY_ACCOUNT_NUMBER: "0000000000"          # CHANGE
       SEPAY_BANK_NAME: MBBank
       INIT_DB_SEED: "true"                        # Set to "false" after first run
+      DB_SYNC: "true"                             # Set to "false" once schema is stable
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.js"]
       interval: 10s
