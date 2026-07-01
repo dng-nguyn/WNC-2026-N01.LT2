@@ -315,11 +315,12 @@ Phụ thuộc 5 repository (Order, User, Table, MenuItem, OrderItem).
 
 ### Entity: `Employee` → Bảng `employees`
 
-Quản lý hồ sơ nhân viên quán (thông tin hành chính — **khác với User** dùng để đăng nhập).
+Quản lý hồ sơ nhân viên quán (thông tin hành chính). Liên kết **N-1** với User (tùy chọn — nhân viên có thể chưa có tài khoản đăng nhập).
 
 | Trường | Kiểu | Ghi chú |
 |---|---|---|
 | `id` | UUID (PK) | |
+| `user` | → User (FK: `user_id`, nullable) | Tài khoản đăng nhập. `null` = chưa có tài khoản |
 | `fullName` | VARCHAR(100) | Họ tên |
 | `email` | VARCHAR(100) | Duy nhất |
 | `phone` | VARCHAR(15) | |
@@ -332,16 +333,16 @@ Quản lý hồ sơ nhân viên quán (thông tin hành chính — **khác với
 
 ### Service: `EmployeeService`
 
-- `create(dto)` — Thêm nhân viên
-- `findAll()` — Danh sách nhân viên
-- `findOne(id)` — Chi tiết nhân viên
-- `update(id, dto)` — Cập nhật thông tin
+- `create(dto)` — Thêm nhân viên, kiểm tra User tồn tại nếu có `userId`
+- `findAll()` — Danh sách nhân viên kèm user (nếu có)
+- `findOne(id)` — Chi tiết nhân viên kèm user
+- `update(id, dto)` — Cập nhật thông tin, đổi user liên kết
 - `remove(id)` — Xóa nhân viên
 
 ### DTOs
 
-- **CreateEmployeeDto**: `{ fullName, email, phone?, position?, department?, salary?, isActive? }`
-- **UpdateEmployeeDto**: `{ fullName?, email?, phone?, position?, department?, salary?, isActive? }`
+- **CreateEmployeeDto**: `{ userId?, fullName, email, phone?, position?, department?, salary?, isActive? }`
+- **UpdateEmployeeDto**: `{ userId?, fullName?, email?, phone?, position?, department?, salary?, isActive? }`
 
 ### Endpoints
 
@@ -498,7 +499,7 @@ OrderItem (order_items)  │ N
          └──→ User (users) ─── nhân viên tạo đơn
 Order (orders) ──1──→ Payment (payment_requests) — thanh toán QR
 
-Employee (employees) — độc lập, không FK với bảng nào
+Employee (employees) ──N──→ User (users) — nullable (nhân viên có thể chưa có tài khoản)
 ```
 
 ### Ghi chú ánh xạ entity → bảng
@@ -512,7 +513,7 @@ Employee (employees) — độc lập, không FK với bảng nào
 | Order | `orders` | orders | |
 | OrderItem | `order_items` | order_items | |
 | Payment | `payment_requests` | payment_requests | |
-| Employee | `employees` | employees | |
+| Employee | `employees` | employees | FK → users (nullable) |
 
 ---
 
