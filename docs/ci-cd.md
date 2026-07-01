@@ -1,6 +1,6 @@
 # CI/CD Pipeline
 
-Automated testing, building, and deployment for the Cafe POS system. All workflows run on GitHub Actions and target AWS ECS Fargate.
+Automated testing, building, and deployment for the Cafe POS system. All workflows run on GitHub Actions and target AWS ECS Fargate Spot.
 
 ---
 
