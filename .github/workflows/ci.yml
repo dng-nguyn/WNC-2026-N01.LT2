@@ -7,8 +7,37 @@ on:
     branches: [main]
 
 jobs:
+  # ── Detect changed paths ───────────────────────────────────────────
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'backend/src/**'
+              - 'test/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'tsconfig.json'
+              - 'tsconfig.build.json'
+              - 'nest-cli.json'
+              - 'jest.config.js'
+              - 'database.sql'
+              - 'Dockerfile'
+              - '.env.example'
+            frontend:
+              - 'frontend/**'
+
   # ── Backend E2E tests ──────────────────────────────────────────────
   backend-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
 
     services:
@@ -54,6 +83,8 @@ jobs:
 
   # ── Frontend unit/component tests (Vitest) ─────────────────────────
   frontend-test:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -75,6 +106,8 @@ jobs:
 
   # ── Frontend E2E tests (Playwright) ────────────────────────────────
   frontend-e2e:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' || needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
 
     services:

@@ -3,8 +3,14 @@ name: Lighthouse CI
 on:
   pull_request:
     branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'lighthouserc.js'
   push:
     branches: [main, frontend-dev]
+    paths:
+      - 'frontend/**'
+      - 'lighthouserc.js'
 
 jobs:
   lighthouse:
