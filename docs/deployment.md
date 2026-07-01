@@ -91,9 +91,9 @@ docker compose -f docker-compose.standalone.yml up -d
 
 ---
 
-## 3. AWS (ECS Fargate + RDS)
+## 3. AWS (ECS Fargate Spot + RDS)
 
-Production deployment on AWS using ECS Fargate for compute and RDS MySQL for the database. Automated via GitHub Actions — every push to `main` triggers a deploy.
+Production deployment on AWS using ECS Fargate Spot for compute and RDS MySQL for the database. Automated via GitHub Actions — every push to `main` triggers a deploy.
 
 ### Prerequisites
 
@@ -121,7 +121,7 @@ Push to the `main` branch:
 git push origin main
 ```
 
-The GitHub Actions workflow (`.github/workflows/deploy-aws.yml`) builds a Docker image, pushes it to ECR, updates the ECS task definition, and deploys to the Fargate service.
+The GitHub Actions workflow (`.github/workflows/deploy-aws.yml`) builds a Docker image, pushes it to ECR, updates the ECS task definition, and deploys to the Fargate Spot service.
 
 ### Manual Deploy
 
@@ -138,7 +138,7 @@ gh workflow run deploy-aws.yml
 | **AWS Region** | Set via `AWS_REGION` GitHub secret |
 | **ECR Repository** | Set via `ECR_REPOSITORY` GitHub secret |
 | **ECS Cluster** | Set via `ECS_CLUSTER` GitHub secret |
-| **ECS Service** | 1 Fargate task, 1 vCPU, 2 GB RAM |
+| **ECS Service** | 1 Fargate Spot task, 1 vCPU, 2 GB RAM |
 | **RDS MySQL** | `coffee-shop-db` (endpoint in Secrets Manager) |
 | **ALB** | HTTPS listener with Origin CA cert, HTTP→HTTPS redirect |
 | **SSL** | Cloudflare Origin CA certificate (Full Strict mode) |
@@ -148,7 +148,7 @@ gh workflow run deploy-aws.yml
 The following AWS resources must exist before deploying. The deployment workflow assumes they are already provisioned.
 
 - **ECR** — Container registry for the Docker image.
-- **ECS Cluster + Service** — Runs the Fargate task. Task definition is at `.aws/task-definition.json`.
+- **ECS Cluster + Service** — Runs the Fargate Spot task. Task definition is at `.aws/task-definition.json`.
 - **RDS MySQL** — Managed database. Connection details injected via AWS Secrets Manager.
 - **Security Groups** — ECS: port 3000 from ALB SG. RDS: port 3306 from ECS SG only. ALB: ports 80, 443 from anywhere.
 - **ALB** — HTTPS listener with Origin CA cert, HTTP→HTTPS redirect.
