@@ -66,6 +66,7 @@ CREATE TABLE order_items (
 
 CREATE TABLE employees (
     id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36), -- Nullable link to users table (employee may not have a login account)
     full_name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     phone VARCHAR(15),
@@ -74,7 +75,8 @@ CREATE TABLE employees (
     salary DECIMAL(12, 2),
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- MODULE 3: PAYMENT
