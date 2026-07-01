@@ -54,7 +54,7 @@ All inbound requests pass through a global `ValidationPipe` configured with `whi
 | `MenuModule` | `src/menus/` | Menu category CRUD |
 | `MenuItemModule` | `src/menu-items/` | Menu item CRUD |
 | `TableModule` | `src/tables/` | Table CRUD |
-| `EmployeeModule` | `src/employees/` | Employee CRUD |
+| `EmployeeModule` | `src/employees/` | Employee CRUD, FK → User |
 | `OrderModule` | `src/orders/` | Order and order-item management |
 | `PaymentModule` | `src/payments/` | Payment creation, QR generation, Sepay verification |
 

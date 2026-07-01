@@ -66,11 +66,14 @@
 | Column | Type | Notes |
 | --- | --- | --- |
 | id | UUID | PK |
-| name | varchar | |
-| position | varchar | nullable |
-| phone | varchar | nullable |
-| email | varchar | nullable |
-| hire_date | date | nullable |
+| user_id | UUID | FK → users, nullable, ON DELETE SET NULL |
+| full_name | varchar(100) | |
+| email | varchar(100) | unique |
+| phone | varchar(15) | nullable |
+| position | varchar(50) | nullable |
+| department | varchar(50) | nullable |
+| salary | decimal(12,2) | nullable |
+| is_active | boolean | default true |
 | created_at | timestamp | |
 | updated_at | timestamp | |
 
@@ -115,6 +118,7 @@
 ## Relationships
 
 - **Menu (1) → MenuItem (many):** Each menu category contains multiple menu items.
+- **User (1) → Employee (many):** Each user account can be linked to employee records (nullable FK).
 - **Order (1) → OrderItem (many):** Each order contains multiple line items.
 - **MenuItem (1) → OrderItem (many):** Each menu item can appear across many order items.
 - **Table (1) → Order (many):** Each table can be associated with multiple orders over time.

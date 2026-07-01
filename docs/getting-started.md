@@ -99,7 +99,7 @@ WNC-2026-N01.LT2/
 │   │   ├── menus/              # Menu (categories) CRUD
 │   │   ├── menu-items/         # Menu items (products) CRUD
 │   │   ├── tables/             # Table management
-│   │   ├── employees/          # Employee CRUD
+│   │   ├── employees/          # Employee CRUD, FK → User
 │   │   ├── orders/             # Order + OrderItem management
 │   │   ├── payments/           # Payment (QR, Sepay verification)
 │   │   ├── common/             # Shared filters, interceptors
