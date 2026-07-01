@@ -1,141 +1,70 @@
-# WNC-2026-N01.LT2
+# Coffee Shop POS
 
-This project is a NestJS backend for a coffee shop management system. Implemented CRUD modules: `menus`, `menu-items`, `tables`, `employees`, `orders`, and `payments`.
+Full-stack point-of-sale and management system for coffee shops. Built with NestJS, React, and MySQL.
 
-## Run
+**Live features:** Menu management, table management, employee management, order processing, QR payment integration (Sepay/VietQR), dashboard analytics.
 
-1. Install dependencies: `npm install`
-2. Set up your `.env` file with the database connection details
-3. Start development server: `npm run start:dev`
-
-The app listens on port `3000` by default.
-
-## Menu CRUD API
-
-- `POST /menus` - create a new menu
-- `GET /menus` - get all menus
-- `GET /menus/:id` - get menu by id
-- `PATCH /menus/:id` - update menu
-- `DELETE /menus/:id` - delete menu
-
-## Menu Item CRUD API
-
-- `POST /menu-items` - create a new menu item
-- `GET /menu-items` - get all menu items
-- `GET /menu-items/:id` - get menu item by id
-- `PATCH /menu-items/:id` - update menu item
-- `DELETE /menu-items/:id` - delete menu item
-
-## Table CRUD API
-
-- `POST /tables` - create a new table
-- `GET /tables` - get all tables
-- `GET /tables/:id` - get table by id
-- `PATCH /tables/:id` - update table
-- `DELETE /tables/:id` - delete table
-
-## Employee CRUD API
-
-- `POST /employees` - create a new employee
-- `GET /employees` - get all employees
-- `GET /employees/:id` - get employee by id
-- `PATCH /employees/:id` - update employee
-- `DELETE /employees/:id` - delete employee
-
-## Order CRUD API
-
-- `POST /orders` - create a new order (with items)
-- `GET /orders` - get all orders
-- `GET /orders/:id` - get order by id
-- `PATCH /orders/:id` - update order status or table
-- `DELETE /orders/:id` - delete order
-- `POST /orders/:id/items` - add item to an existing order
-
-## Payment API
-
-- `POST /payments/qr` - create a QR payment for an order
-- `GET /payments/:id` - get payment details
-- `GET /payments/order/:orderId` - get all payments for an order
-- `POST /payments/:id/verify` - verify a payment via Sepay
-
-## Authentication & Authorization
-
-The project uses **JWT** (JSON Web Token) for authentication, with **HTTP-only cookies** for secure token storage and **express-session** for session management. Passwords are hashed with **argon2id**.
-
-### Auth endpoints
-
-| Method | Endpoint | Auth Required | Description |
-|--------|----------|:---:|-------------|
-| POST | `/auth/register` | No | Register a new user with `username`, `password` (min 8 chars, one uppercase, one number), and optional `fullName`/`phone` |
-| POST | `/auth/login` | No | Login with `username` and `password`, receive access and refresh tokens as HTTP-only cookies |
-| GET | `/auth/profile` | Yes | Get the profile info of the currently authenticated user |
-
-### Register example
+## Quick Start
 
 ```bash
-curl -X POST http://localhost:3000/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"username": "yourname", "password": "YourPass1", "fullName": "Your Name"}'
+git clone <repo-url>
+cd WNC-2026-N01.LT2
+cp .env.example .env          # configure MySQL + secrets
+npm install
+npm run start:dev             # backend on :3000
+cd frontend && npm install && npm run dev  # frontend on :5173
 ```
 
-**Response:**
-```json
-{
-  "message": "Registration successful",
-  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
-  "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
-  "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "username": "yourname",
-    "createdAt": "2026-06-25T00:00:00.000Z"
-  }
-}
-```
+Swagger API docs: `http://localhost:3000/api/docs`
 
-### Login example
+## Deploy
+
+Three deployment methods are supported:
+
+### 1. From Source
 
 ```bash
-curl -X POST http://localhost:3000/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "yourname", "password": "yourpassword"}'
+cp .env.example .env && npm install && npm run build && npm run start:prod
+cd frontend && npm install && npm run build   # serve dist/ with nginx
 ```
 
-### Profile example (authenticated)
+### 2. Docker Compose
 
 ```bash
-curl http://localhost:3000/auth/profile \
-  -H "Authorization: Bearer <your-access-token>"
+cp .env.example .env
+docker compose up -d
 ```
 
-**Response:**
-```json
-{
-  "message": "Authenticated user profile",
-  "user": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "username": "yourname"
-  },
-  "session": null
-}
-```
+Runs backend + MySQL in containers. App on port 80, MySQL internal.
 
-### .env configuration
+### 3. AWS (ECS Fargate + RDS)
 
-Add the following to your `.env` file:
+Push to `main` triggers automatic deploy via GitHub Actions. Requires AWS credentials in GitHub secrets (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`).
 
-```env
-JWT_SECRET=your-jwt-secret-key
-SESSION_SECRET=your-session-secret-key
+Manual trigger: `gh workflow run deploy-aws.yml`
 
-# Sepay payment integration
-SEPAY_API_KEY=your-sepay-api-key
-SEPAY_ACCOUNT_NUMBER=your-account-number
-SEPAY_BANK_NAME=your-bank-name
-```
+See [docs/deployment.md](docs/deployment.md) for full setup instructions.
 
-## Activity Diagram
+## Documentation
 
-- Menu CRUD flow: [docs/menu-crud-activity-diagram.md](docs/menu-crud-activity-diagram.md)
-- Menu Item CRUD flow: [docs/menu-item-crud-activity-diagram.md](docs/menu-item-crud-activity-diagram.md)
-- Table CRUD flow: [docs/table-crud-activity-diagram.md](docs/table-crud-activity-diagram.md)
-- Employee CRUD flow: [docs/employee-crud-activity-diagram.md](docs/employee-crud-activity-diagram.md)
+| Doc | Description |
+|-----|-------------|
+| [Architecture](docs/architecture.md) | System design, modules, auth flow |
+| [Getting Started](docs/getting-started.md) | Developer onboarding |
+| [API Reference](docs/api-reference.md) | REST endpoints |
+| [Database](docs/database.md) | Schema and relationships |
+| [Environment Variables](docs/environment-variables.md) | Configuration reference |
+| [Deployment](docs/deployment.md) | All three deploy methods |
+| [CI/CD](docs/ci-cd.md) | GitHub Actions pipelines |
+| [Runbook](docs/runbook.md) | Troubleshooting and operations |
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | NestJS 11, TypeScript, TypeORM 0.3 |
+| Frontend | React 19, Vite 6, TypeScript |
+| Database | MySQL 8 |
+| Auth | JWT + argon2id, HTTP-only cookies |
+| Payment | Sepay API + VietQR |
+| Hosting | AWS ECS Fargate + RDS + Cloudflare |
