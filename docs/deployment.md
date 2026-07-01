@@ -148,7 +148,7 @@ gh workflow run deploy-aws.yml
 The following AWS resources must exist before deploying. The deployment workflow assumes they are already provisioned.
 
 - **ECR** — Container registry for the Docker image.
-- **ECS Cluster + Service** — Runs the Fargate Spot task. Task definition is at `.aws/task-definition.json`.
+- **ECS Cluster + Service** — Runs the Fargate Spot task. The cluster and service must be configured with `FARGATE_SPOT` as the capacity provider (not the default `FARGATE` launch type). The deploy workflow does not specify a launch type — it relies on the service's capacity provider strategy.
 - **RDS MySQL** — Managed database. Connection details injected via AWS Secrets Manager.
 - **Security Groups** — ECS: port 3000 from ALB SG. RDS: port 3306 from ECS SG only. ALB: ports 80, 443 from anywhere.
 - **ALB** — HTTPS listener with Origin CA cert, HTTP→HTTPS redirect.
