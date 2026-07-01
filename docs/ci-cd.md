@@ -59,7 +59,7 @@ Docker image build and push to GitHub Container Registry. Produces multi-platfor
 
 ### Deploy AWS (`deploy-aws.yml`)
 
-Full deployment pipeline: build, push to ECR, and update the ECS service.
+Full deployment pipeline: build, push to ECR, and update the ECS service. All infrastructure-specific values (region, cluster, service names) are configured via GitHub secrets — no hardcoded values in the workflow.
 
 **Triggers:**
 - Push to `main`
@@ -70,6 +70,15 @@ Full deployment pipeline: build, push to ECR, and update the ECS service.
 | Job | Description |
 |-----|-------------|
 | `deploy` | Build Docker image → push to ECR → update ECS task definition → deploy to ECS |
+
+**Deploy steps:**
+
+1. Authenticate to AWS using `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
+2. Log in to ECR
+3. Build Docker image (linux/amd64) and push to ECR
+4. Replace placeholders in `.aws/task-definition.json` (`<AWS_ACCOUNT_ID>`, `<AWS_REGION>`, `<YOUR_DOMAIN>`)
+5. Render the task definition with the new image tag
+6. Deploy the updated task definition to ECS
 
 **Actions used:**
 
@@ -122,15 +131,20 @@ Runs on every PR and merge to `main` to catch security issues early in the devel
 
 ## GitHub Secrets
 
-Required secrets for CI/CD workflows:
+Required secrets for CI/CD workflows (configure in **Settings → Secrets and variables → Actions**):
 
-| Secret | Purpose |
-|--------|---------|
-| `AWS_ACCESS_KEY_ID` | ECR push and ECS deploy authentication |
-| `AWS_SECRET_ACCESS_KEY` | Same — paired with the access key above |
-| `GITHUB_TOKEN` | Auto-provided by GitHub Actions. Used for GHCR push and CodeQL analysis |
-
-No manual secret configuration is needed for `GITHUB_TOKEN`. The AWS credentials must be added in **Settings → Secrets and variables → Actions**.
+| Secret | Workflow | Purpose |
+|--------|----------|---------|
+| `AWS_ACCESS_KEY_ID` | Deploy AWS | IAM access key for ECR push and ECS deploy |
+| `AWS_SECRET_ACCESS_KEY` | Deploy AWS | IAM secret key (paired with access key) |
+| `AWS_ACCOUNT_ID` | Deploy AWS | AWS account ID — used in task definition placeholders |
+| `AWS_REGION` | Deploy AWS | Target AWS region for all resources |
+| `ECR_REPOSITORY` | Deploy AWS | ECR repository name |
+| `ECS_CLUSTER` | Deploy AWS | ECS cluster name |
+| `ECS_SERVICE` | Deploy AWS | ECS service name |
+| `CONTAINER_NAME` | Deploy AWS | Container name in the task definition |
+| `FRONTEND_URL` | Deploy AWS | Production domain for CORS and task definition |
+| `GITHUB_TOKEN` | CI, CD, CodeQL | Auto-provided by GitHub Actions (no manual config) |
 
 ---
 

@@ -97,10 +97,21 @@ Production deployment on AWS using ECS Fargate for compute and RDS MySQL for the
 
 ### Prerequisites
 
-- GitHub repository with the following **Repository Secrets** configured:
-  - `AWS_ACCESS_KEY_ID`
-  - `AWS_SECRET_ACCESS_KEY`
-- The following AWS resources provisioned (see [AWS Resources](#aws-resources-required) below).
+The following **GitHub Repository Secrets** must be configured in **Settings → Secrets and variables → Actions**:
+
+| Secret | Description |
+|--------|-------------|
+| `AWS_ACCESS_KEY_ID` | AWS IAM access key for ECR push and ECS deploy |
+| `AWS_SECRET_ACCESS_KEY` | AWS IAM secret key (paired with the access key above) |
+| `AWS_ACCOUNT_ID` | AWS account ID (used in task definition placeholders) |
+| `AWS_REGION` | AWS region for all resources (e.g. `ap-east-1`) |
+| `ECR_REPOSITORY` | ECR repository name (e.g. `coffee-shop-pos`) |
+| `ECS_CLUSTER` | ECS cluster name |
+| `ECS_SERVICE` | ECS service name |
+| `CONTAINER_NAME` | Container name in the task definition |
+| `FRONTEND_URL` | Production domain (e.g. `cafe.example.com`) |
+
+The following AWS resources must also be provisioned (see [AWS Resources](#aws-resources-required) below).
 
 ### Automatic Deploy
 
@@ -124,13 +135,13 @@ gh workflow run deploy-aws.yml
 
 | Resource | Details |
 | --- | --- |
-| **AWS Region** | Configured in `deploy-aws.yml` (`env.AWS_REGION`) |
-| **ECR Repository** | `coffee-shop-pos` |
-| **ECS Cluster** | `coffee-shop-pos` |
-| **ECS Service** | `coffee-shop-pos` (1 Fargate task, 1 vCPU, 2 GB RAM) |
+| **AWS Region** | Set via `AWS_REGION` GitHub secret |
+| **ECR Repository** | Set via `ECR_REPOSITORY` GitHub secret |
+| **ECS Cluster** | Set via `ECS_CLUSTER` GitHub secret |
+| **ECS Service** | 1 Fargate task, 1 vCPU, 2 GB RAM |
 | **RDS MySQL** | `coffee-shop-db` (endpoint in Secrets Manager) |
-| **ALB** | Created during infra setup (DNS in AWS console) |
-| **SSL** | Cloudflare Origin CA certificate |
+| **ALB** | HTTPS listener with Origin CA cert, HTTP→HTTPS redirect |
+| **SSL** | Cloudflare Origin CA certificate (Full Strict mode) |
 
 ### AWS Resources Required
 
@@ -138,21 +149,35 @@ The following AWS resources must exist before deploying. The deployment workflow
 
 - **ECR** — Container registry for the Docker image.
 - **ECS Cluster + Service** — Runs the Fargate task. Task definition is at `.aws/task-definition.json`.
-- **RDS MySQL** — Managed database. Connection details injected via AWS Secrets Manager (`db-host`, `db-password`).
-- **Security Groups** — ECS: ports 80, 443, 3000. RDS: port 3306 from ECS SG only.
+- **RDS MySQL** — Managed database. Connection details injected via AWS Secrets Manager.
+- **Security Groups** — ECS: port 3000 from ALB SG. RDS: port 3306 from ECS SG only. ALB: ports 80, 443 from anywhere.
 - **ALB** — HTTPS listener with Origin CA cert, HTTP→HTTPS redirect.
-- **IAM** — `ecsTaskExecutionRole` with ECR pull, CloudWatch Logs, Secrets Manager read.
-- **Secrets Manager** — Stores `db-host` and `db-password`.
+- **IAM Roles**:
+  - `ecsTaskExecutionRole` — ECR pull, CloudWatch Logs, Secrets Manager read, SSM Managed Instance Core.
+  - `ecsTaskRole` — Application-level permissions (ECS Exec support).
+- **Secrets Manager** — Stores `db-host` and `db-password` (injected into the container at startup).
 - **CloudWatch** — Log group `/ecs/coffee-shop-pos`.
 
-The production domain is configured as follows:
+### SSL / Domain Setup
 
-1. **DNS:** Cloudflare DNS record (CNAME) points `<YOUR_DOMAIN>` to the ALB DNS name.
-2. **Cloudflare SSL Mode:** Full (Strict) — Cloudflare terminates the public TLS connection and re-encrypts to the origin.
-3. **Origin Certificate:** A Cloudflare Origin CA certificate is installed on the ALB's HTTPS listener. This certificate expires in 2041.
+1. **DNS:** Cloudflare CNAME record points the production domain to the ALB DNS name.
+2. **Cloudflare SSL Mode:** Full (Strict) — Cloudflare terminates public TLS and re-encrypts to the origin.
+3. **Origin Certificate:** A Cloudflare Origin CA certificate is installed on the ALB HTTPS listener.
 4. **HTTP → HTTPS Redirect:** The ALB redirects all HTTP traffic (port 80) to HTTPS (port 443).
 
-This setup ensures end-to-end encryption: public traffic is encrypted via Cloudflare's edge, and the origin connection between Cloudflare and the ALB is encrypted with the Origin CA certificate.
+This ensures end-to-end encryption: public traffic is encrypted via Cloudflare's edge, and the origin connection between Cloudflare and the ALB is encrypted with the Origin CA certificate.
+
+### Task Definition
+
+The task definition template (`.aws/task-definition.json`) uses placeholders that are replaced at deploy time:
+
+| Placeholder | Replaced with |
+| --- | --- |
+| `<AWS_ACCOUNT_ID>` | `AWS_ACCOUNT_ID` secret |
+| `<AWS_REGION>` | `AWS_REGION` secret |
+| `<YOUR_DOMAIN>` | `FRONTEND_URL` secret |
+
+Container environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `FRONTEND_URL`) are set directly in the task definition. Sensitive values (`DB_HOST`, `DB_PASSWORD`) are injected from AWS Secrets Manager.
 
 ---
 
