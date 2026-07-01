@@ -28,7 +28,7 @@ AppModule
 ├── MenuModule ─────────── exports TypeOrmModule
 ├── MenuItemModule ─────── imports MenuModule, exports TypeOrmModule
 ├── TableModule ────────── exports TypeOrmModule
-├── EmployeeModule
+├── EmployeeModule ─────── imports UsersModule
 ├── OrderModule ────────── imports MenuItemModule, UsersModule, TableModule
 ├── UsersModule ────────── exports UsersService + TypeOrmModule
 ├── AuthModule ─────────── imports UsersModule, exports AuthService
@@ -48,7 +48,7 @@ src/
   menus/               — Menu entity (DB table: categories), CRUD
   menu-items/          — MenuItem entity (DB table: products), FK → Menu, CRUD
   tables/              — Table entity, TableStatus enum, CRUD
-  employees/           — Employee entity, CRUD
+  employees/           — Employee entity, CRUD, FK → User
   orders/              — Order + OrderItem entities, relational CRUD, addItem
   payments/            — Payment entity, QR generation, Sepay verification
 test/
