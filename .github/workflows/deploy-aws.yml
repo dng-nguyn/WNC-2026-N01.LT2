@@ -3,6 +3,14 @@ name: Deploy to AWS ECS
 on:
   push:
     branches: [main]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - '.aws/**'
   workflow_dispatch:
 
 env:
