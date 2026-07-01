@@ -2,28 +2,30 @@
 
 ## Project Overview
 
-NestJS backend for a coffee shop management system. MySQL-backed REST API with JWT authentication, 6 domain modules (menus, menu-items, tables, employees, orders, users), and full CRUD with relational data. TypeORM with `synchronize: true` for dev schema management.
+Full-stack coffee shop POS/management system. NestJS backend with MySQL, React/Vite frontend, deployed on AWS ECS Fargate + RDS. Production domain: configured via environment.
 
-## Architecture & Data Flow
+**Stack:** NestJS 11 · React 19 · Vite 6 · MySQL 8 · TypeORM 0.3 · TypeScript · JWT auth · Sepay payments
+
+## Architecture
 
 ```
-HTTP Request → Global Pipes (ValidationPipe) → Controller → Service → TypeORM Repository → MySQL
-                    ↑                                                              |
-              class-validator DTOs                                          Entities map to
-              (whitelist + transform)                                       SQL tables
+Browser → React SPA (Vite) → NestJS API (:3000) → MySQL
+                                     ↓
+                              Sepay Payment API
 ```
 
-- **NestJS** with CommonJS modules (`"type": "commonjs"` in package.json)
-- **TypeORM** with `autoLoadEntities: true`, repositories injected via `@InjectRepository()`
-- **JWT auth** via `@nestjs/jwt` + `passport-jwt`, passwords hashed with `argon2id`
-- **Validation** via `class-validator` + `class-transformer` DTOs, global `ValidationPipe` with `whitelist: true, transform: true`
-- **Session** via `express-session` with memory store
+**Monorepo layout:**
+- `backend/src/` — NestJS source code
+- `frontend/` — React/Vite app
+- Root `package.json` — backend build/test scripts
+- `frontend/package.json` — frontend build/test scripts
 
-### Module dependency graph
+## Module Dependency Graph
 
 ```
 AppModule
 ├── ConfigModule (global)
+├── ThrottlerModule (rate limiting: 10 req/min)
 ├── TypeOrmModule.forRoot (MySQL)
 ├── MenuModule ─────────── exports TypeOrmModule
 ├── MenuItemModule ─────── imports MenuModule, exports TypeOrmModule
@@ -35,73 +37,79 @@ AppModule
 └── PaymentModule ──────── imports HttpModule, registers Payment + Order entities
 ```
 
-Modules that are consumed by `OrderModule` MUST export `TypeOrmModule` so the consuming module can `@InjectRepository()` cross-module entities.
+Modules consumed by `OrderModule` MUST export `TypeOrmModule` so the consuming module can `@InjectRepository()` cross-module entities.
 
 ## Key Directories
 
 ```
-src/
-  main.ts              — bootstrap, cookie-parser, session, ValidationPipe, PORT env
-  app.module.ts        — root module, ConfigModule, TypeORM config, all feature modules
-  auth/                — register/login/profile, JWT strategy, guards
-  users/               — User entity, service, DTOs, module
-  menus/               — Menu entity (DB table: categories), CRUD
-  menu-items/          — MenuItem entity (DB table: products), FK → Menu, CRUD
-  tables/              — Table entity, TableStatus enum, CRUD
-  employees/           — Employee entity, CRUD
-  orders/              — Order + OrderItem entities, relational CRUD, addItem
-  payments/            — Payment entity, QR generation, Sepay verification
-test/
-  app.e2e-spec.ts      — 45 E2E tests via supertest
-docs/                  — Mermaid activity diagrams per module
-database.sql           — Reference SQL schema (7 tables)
-.env.example           — Required environment variables
-jest.config.js         — ts-jest + dotenv preload
-.github/workflows/ci.yml  — CI with MySQL 8 service container
+WNC-2026-N01.LT2/
+├── backend/
+│   └── src/
+│       ├── main.ts              — bootstrap, cookie-parser, session, ValidationPipe
+│       ├── app.module.ts        — root module, ConfigModule, TypeORM config
+│       ├── auth/                — register/login/profile, JWT strategy, guards
+│       ├── users/               — User entity, service, DTOs
+│       ├── menus/               — Menu entity (DB table: categories), CRUD
+│       ├── menu-items/          — MenuItem entity (DB table: products), CRUD
+│       ├── tables/              — Table entity, TableStatus enum, CRUD
+│       ├── employees/           — Employee entity, CRUD
+│       ├── orders/              — Order + OrderItem entities, CRUD
+│       ├── payments/            — Payment entity, QR generation, Sepay verification
+│       └── common/filters/      — AllExceptionsFilter
+├── frontend/
+│   └── src/
+│       ├── pages/               — Login, Register, Dashboard, POS, Menu, MenuItem
+│       ├── components/          — UI primitives + domain components
+│       ├── hooks/               — useCart, useOrders, useDashboardStats, etc.
+│       ├── services/            — api.ts (fetch wrapper), auth, menu, order, etc.
+│       ├── styles/              — auth.css, dashboard.css, pos.css
+│       ├── i18n/                — English + Vietnamese
+│       └── types/               — TypeScript interfaces
+├── test/                        — Backend E2E tests (supertest)
+├── docs/                        — Project documentation
+├── .github/workflows/           — CI, CD, deploy-aws, lighthouse, codeql
+├── .aws/task-definition.json    — ECS Fargate task definition
+├── Dockerfile                   — 3-stage multi-arch build (node:24)
+├── docker-compose.yml           — Dev compose with env vars
+├── docker-compose.standalone.yml — Standalone deploy
+├── database.sql                 — Reference SQL schema
+├── .env.example                 — Environment variable template
+└── package.json                 — Backend scripts
 ```
 
 ## Development Commands
 
 ```bash
-npm install              # install dependencies
-npm run build            # nest build (TypeScript compile to dist/)
-npm run start:dev        # nest start --watch (port 3000)
-npm run start:prod       # node dist/main.js
-npm test                 # jest --forceExit --detectOpenHandles (45 E2E tests)
+# Backend (from project root)
+npm install                    # install dependencies
+npm run build                  # nest build → dist/
+npm run start:dev              # nest start --watch (port 3000)
+npm run start:prod             # node dist/main.js
+npm test                       # jest E2E tests
+
+# Frontend
+cd frontend
+npm install
+npm run dev                    # Vite dev server (port 5173)
+npm test                       # Vitest unit tests
+npm run test:e2e               # Playwright E2E tests
 ```
 
-## Code Conventions & Common Patterns
+## Code Conventions
 
-### Entity definition (canonical)
+### Entity pattern
 
 ```typescript
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-
-@Entity('table_name')  // explicit table name to avoid class-name collisions
+@Entity('table_name')  // explicit table name
 export class EntityName {
   @PrimaryGeneratedColumn('uuid')
-  id: string;                              // ALWAYS UUID string
+  id: string;                              // ALWAYS UUID
 
   @Column({ name: 'snake_case', type: 'varchar', length: 100 })
-  camelCaseField: string;                  // camelCase in TS, snake_case in DB via `name`
-
-  @Column({ nullable: true, type: 'varchar' })
-  optionalField: string | null;            // nullable = explicit `| null`
-
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  price: number;                           // decimal for currency
-
-  @Column({ type: 'enum', enum: SomeEnum, default: SomeEnum.DEFAULT })
-  status: SomeEnum;                        // enum with import from separate file
-
-  @Column({ type: 'boolean', default: true })
-  isActive: boolean;
+  camelCaseField: string;                  // camelCase in TS, snake_case in DB
 
   @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;                         // always named column
-
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;                         // only on entities with update semantics
+  createdAt: Date;
 }
 ```
 
@@ -111,17 +119,12 @@ export class EntityName {
 @ManyToOne(() => TargetEntity, { nullable: false, onDelete: 'CASCADE' })
 @JoinColumn({ name: 'snake_case_fk' })
 target: TargetEntity;
-
-@OneToMany(() => ChildEntity, (child) => child.parent, { cascade: true })
-children: ChildEntity[];
 ```
 
-### DTO validation pattern
+### DTO validation
 
 ```typescript
 // Create DTO — required fields have validators
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
-
 export class CreateThingDto {
   @IsString() @IsNotEmpty() @MaxLength(100)
   name: string;
@@ -130,21 +133,12 @@ export class CreateThingDto {
   description?: string;
 }
 
-// Update DTO — all fields optional (Partial pattern)
+// Update DTO — all fields optional
 export class UpdateThingDto {
   @IsOptional() @IsString() @MaxLength(100)
   name?: string;
-
-  @IsOptional() @IsString()
-  description?: string;
 }
 ```
-
-- Use `@Type(() => Number)` from `class-transformer` for numeric fields in DTOs
-- Use `@ValidateNested({ each: true })` + `@Type(() => NestedDto)` for nested arrays
-- Use `@ArrayMinSize(1)` to reject empty arrays
-- Use `@IsUUID()` for relational ID fields
-- Use `@IsEnum(EnumType)` for enum fields
 
 ### Service pattern
 
@@ -161,127 +155,25 @@ export class ThingService {
     return this.thingRepository.save(thing);
   }
 
-  async findAll(): Promise<Thing[]> {
-    return this.thingRepository.find({ order: { createdAt: 'DESC' } });
-  }
-
   async findOne(id: string): Promise<Thing> {
     const thing = await this.thingRepository.findOne({ where: { id } });
     if (!thing) throw new NotFoundException(`Thing with id ${id} not found`);
     return thing;
   }
-
-  async update(id: string, dto: UpdateThingDto): Promise<Thing> {
-    const thing = await this.findOne(id);
-    Object.assign(thing, dto);
-    return this.thingRepository.save(thing);
-  }
-
-  async remove(id: string): Promise<void> {
-    const thing = await this.findOne(id);
-    await this.thingRepository.remove(thing);
-  }
 }
 ```
 
-- FK resolution in `create`/`update`: fetch related entity via its repository, throw `NotFoundException` if missing, assign
-- Price capture in orders: read `menuItem.price` at order time, store in `OrderItem.price`
+### Auth
 
-### Controller pattern
-
-```typescript
-@Controller('things')          // plural, kebab-case route
-export class ThingController {
-  constructor(private readonly thingService: ThingService) {}
-
-  @Post()                      create(@Body() dto: CreateThingDto): Promise<Thing>
-  @Get()                       findAll(): Promise<Thing[]>
-  @Get(':id')                  findOne(@Param('id') id: string): Promise<Thing>
-  @Patch(':id')                update(@Param('id') id: string, @Body() dto: UpdateThingDto): Promise<Thing>
-  @Delete(':id')               remove(@Param('id') id: string): Promise<void>
-}
-```
-
-- No `ParseIntPipe` — all IDs are UUID strings
-- No `@UseGuards(JwtAuthGuard)` on CRUD endpoints (auth not required for these)
-
-### Module pattern
-
-```typescript
-@Module({
-  imports: [TypeOrmModule.forFeature([Thing])],
-  controllers: [ThingController],
-  providers: [ThingService],
-  exports: [TypeOrmModule],   // ONLY if another module needs @InjectRepository(Thing)
-})
-export class ThingModule {}
-```
-
-### Enums
-
-- Separate file per enum: `src/<module>/<name>.enum.ts`
-- UPPERCASE values: `PENDING = 'PENDING'`
-- Default values set in entity `@Column` decorator
-
-### Auth patterns
-
-- Passwords hashed with `argon2id` via `argon2.hash(password, { type: argon2.argon2id })`
-- Access token: 15 min. Refresh token: 7 days. Both returned in JSON and set as HTTP-only cookies.
+- Passwords: `argon2id` via `argon2.hash(password, { type: argon2.argon2id })`
+- Access token: 15 min. Refresh token: 7 days.
 - JWT payload: `{ sub: user.id, username: user.username, role: user.role }`
-- Role-based access: `@Roles(UserRole.MANAGER)` decorator + `RolesGuard` for endpoint-level authorization
-- `JwtStrategy` reads `JWT_SECRET` from `ConfigService` with fallback `'default-secret-change-me'`
-- `JwtAuthGuard` extends `AuthGuard('jwt')` — apply with `@UseGuards(JwtAuthGuard)`
-
-## Important Files
-
-| File | Role |
-|---|---|
-| `src/main.ts` | Entry point. `import 'dotenv/config'` MUST be second import (after `reflect-metadata`). Global pipes, cookie-parser, session. |
-| `src/app.module.ts` | Root module. TypeORM config reads `process.env.*` directly (not ConfigService). SSL enabled for cloud MySQL. |
-| `src/auth/auth.service.ts` | `register()` creates user via `UsersService`, signs JWT. `login()` verifies password, signs JWT. |
-| `src/auth/strategies/jwt.strategy.ts` | Validates JWT payload. `sub: string` (UUID). |
-| `src/orders/orders.service.ts` | Most complex service. Multi-repository injection. `create()` fetches User, Table, MenuItem; captures prices; computes `totalAmount`. `addItem()` appends item and recalculates. |
-| `src/payments/payment.service.ts` | QR generation, Sepay API integration, transaction verification. |
-| `src/common/filters/http-exception.filter.ts` | Global exception filter. Catches HttpException, QueryFailedError, and unhandled errors. |
-| `src/auth/guards/roles.guard.ts` | Role-based access control. Reads `@Roles()` metadata. |
-| `test/app.e2e-spec.ts` | E2E test suite. Bootstraps AppModule via `Test.createTestingModule`. Uses `supertest` for HTTP. 45 tests in ordered describe blocks. |
-| `jest.config.js` | `require('dotenv').config()` at top (loaded BEFORE any test file). ts-jest with decorator metadata enabled. 120s timeout. |
-| `.github/workflows/ci.yml` | MySQL 8 service container. Runs `npm ci` → `npm run build` → `npm test`. Env vars set via `env:` block. |
-| `database.sql` | Reference SQL schema. Note: `categories` table = `Menu` entity, `products` table = `MenuItem` entity. |
-| `.env.example` | Template for required env vars. `.env` is gitignored. |
-
-## Runtime/Tooling Preferences
-
-- **Runtime**: Node.js 22+ (target ES2022)
-- **Package manager**: npm
-- **Framework**: NestJS 11 with Express platform
-- **ORM**: TypeORM 0.3 with `mysql2` driver
-- **Auth**: `@nestjs/jwt` + `passport-jwt` + `argon2`
-- **Validation**: `class-validator` 0.15 + `class-transformer` 0.5
-- **TypeScript**: 5.8, strict mode, `commonjs` modules
-- **Build**: `@nestjs/cli` (`nest build`)
-- **Environment**: `dotenv` loaded at entry point (NOT only via ConfigModule)
-
-## Testing & QA
-
-- **Framework**: Jest 29+ with ts-jest
-- **HTTP testing**: supertest against `app.getHttpServer()`
-- **Database**: Real MySQL required (no mocking). CI provides MySQL 8 service container.
-- **Test command**: `npm test`
-- **Timeout**: 120s (cloud MySQL may be slow)
-- **Test structure**:
-  - Single `beforeAll` bootstraps `Test.createTestingModule({ imports: [AppModule] })`
-  - `describe` blocks per module, ordered: Auth → Menus → MenuItems → Tables → Orders → Edge cases
-  - Variables (`token`, `userId`, `menuId`, etc.) shared across tests via closure
-  - Each test creates unique data using `Date.now()` suffixes
-  - Tests cascade: register user → get token → use token in subsequent auth tests
-  - `afterAll` calls `app.close()`
-- **Env vars for tests**: `JWT_SECRET`, `SESSION_SECRET`, `DB_*`, `NODE_ENV=test`
+- Role-based: `@Roles(UserRole.MANAGER)` + `RolesGuard`
 
 ## Entity-to-Table Mapping
 
-| Entity Class | `@Entity()` | SQL Table |
-|---|---|---|
+| Entity | `@Entity()` | SQL Table |
+|--------|-------------|-----------|
 | `User` | `users` | `users` |
 | `Menu` | `categories` | `categories` |
 | `MenuItem` | `products` | `products` |
@@ -291,14 +183,48 @@ export class ThingModule {}
 | `Employee` | `employees` | `employees` |
 | `Payment` | `payment_requests` | `payment_requests` |
 
-Note the deliberate mismatch: `Menu` maps to `categories` table and `MenuItem` maps to `products` table. This is because the SQL schema uses those names but the NestJS API uses `menus`/`menu-items` routes.
+**Note:** `Menu` → `categories` and `MenuItem` → `products` is deliberate. SQL schema uses category/product names; API uses menu/menu-item routes.
 
-## New Infrastructure
+## Runtime/Tooling
 
-Recent additions not covered in the original architecture:
+- **Runtime**: Node.js 22+ (Dockerfile: node:24)
+- **Package manager**: npm
+- **Framework**: NestJS 11 with Express platform
+- **ORM**: TypeORM 0.3 with `mysql2` driver
+- **Frontend**: React 19, Vite 6, React Router v7
+- **TypeScript**: 6.0, strict mode, `node16` module resolution
 
-- **Rate limiting**: `ThrottlerModule` — 10 requests/minute globally
-- **OpenAPI docs**: Swagger at `/api/docs` via `@nestjs/swagger`
-- **CORS**: enabled for `FRONTEND_URL` with credentials
-- **Global exception filter**: `AllExceptionsFilter` in `common/filters/`
-- **Class serialization**: `ClassSerializerInterceptor` for response DTO scrubbing
+## Testing
+
+- **Backend**: Jest 29 + supertest, real MySQL required
+- **Frontend**: Vitest 4 + testing-library, Playwright for E2E
+- **CI**: MySQL 8 service container, Node 22 runners
+- **Timeout**: 120s (cloud DB may be slow)
+
+## CI/CD
+
+| Workflow | Trigger | What |
+|----------|---------|------|
+| `ci.yml` | push/PR to main | Backend test + frontend test + Playwright E2E |
+| `cd.yml` | push to main | Docker build → GHCR |
+| `deploy-aws.yml` | push to main | Docker build → ECR → ECS deploy |
+| `lighthouse.yml` | push/PR to main | Perf/a11y/best-practices audit |
+| `codeql.yml` | push/PR to main | Security analysis |
+
+## Deployment
+
+Three methods: source code, Docker Compose, AWS ECS Fargate. See [docs/deployment.md](docs/deployment.md).
+
+## Documentation
+
+| Doc | Description |
+|-----|-------------|
+| [docs/README.md](docs/README.md) | Documentation index |
+| [docs/architecture.md](docs/architecture.md) | System architecture with Mermaid diagrams |
+| [docs/getting-started.md](docs/getting-started.md) | Developer onboarding |
+| [docs/api-reference.md](docs/api-reference.md) | REST API endpoints |
+| [docs/database.md](docs/database.md) | Schema, tables, relationships |
+| [docs/environment-variables.md](docs/environment-variables.md) | All config vars |
+| [docs/deployment.md](docs/deployment.md) | Three deploy methods |
+| [docs/ci-cd.md](docs/ci-cd.md) | GitHub Actions workflows |
+| [docs/runbook.md](docs/runbook.md) | Operational troubleshooting |
