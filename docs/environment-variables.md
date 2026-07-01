@@ -51,7 +51,16 @@ This document covers all environment variables used by the NestJS backend and Re
 
 ### AWS Secrets Manager
 
-Production secret values (`DB_PASSWORD`, `JWT_SECRET`, `SESSION_SECRET`, `SEPAY_API_KEY`) are stored in AWS Secrets Manager and injected at container startup on ECS Fargate. Do **not** hard-code production secrets in environment files or CI pipelines.
+On ECS Fargate, sensitive values are injected from AWS Secrets Manager at container startup. The task definition (`.aws/task-definition.json`) references these secrets:
+
+| Secret Name | Injected As | Description |
+| --- | --- | --- |
+| `coffee-shop-pos/db-host` | `DB_HOST` | RDS endpoint address |
+| `coffee-shop-pos/db-password` | `DB_PASSWORD` | Database password |
+
+Other environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `FRONTEND_URL`) are set directly in the task definition as plain environment variables.
+
+Do **not** hard-code production secrets in environment files or CI pipelines.
 
 ---
 
