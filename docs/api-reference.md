@@ -77,12 +77,11 @@ On successful login or registration the server sets access and refresh tokens as
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/employees` | Create an employee. |
-| `GET` | `/employees` | List all employees. |
-| `GET` | `/employees/:id` | Get an employee by ID. |
-| `PATCH` | `/employees/:id` | Update an employee. |
+| `POST` | `/employees` | Create an employee. Body: `fullName`, `email`, optional `userId` (UUID), `phone`, `position`, `department`, `salary`. |
+| `GET` | `/employees` | List all employees (includes linked user). |
+| `GET` | `/employees/:id` | Get an employee by ID (includes linked user). |
+| `PATCH` | `/employees/:id` | Update an employee. All fields optional; set `userId: null` to unlink user. |
 | `DELETE` | `/employees/:id` | Delete an employee. |
-
 ---
 
 ### Orders (`/orders`)
