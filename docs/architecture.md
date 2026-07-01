@@ -23,7 +23,7 @@ graph TD
     CF -->|Origin CA cert| ALB[ALB :443]
     ALB --> ECS[ECS Fargate<br/>coffee-shop-pos]
     ECS --> NestJS[NestJS :3000]
-    NestJS --> RDS[RDS MySQL 8<br/>ap-southeast-1]
+    NestJS --> RDS[RDS MySQL 8]
     NestJS --> Sepay[Sepay Payment API]
     Browser -->|POST /payments/:id/verify| NestJS
 ```
@@ -252,9 +252,9 @@ The backend calls the Sepay API at `https://my.sepay.vn/userapi/transactions/lis
 ```mermaid
 graph LR
     GH[GitHub] -->|push main| CI[GitHub Actions CI]
-    CI -->|build + push| ECR[ECR<br/>ap-southeast-1]
+    CI -->|build + push| ECR[ECR]
     ECR -->|deploy| ECS[ECS Fargate<br/>coffee-shop-pos]
-    ECS --> RDS[RDS MySQL 8<br/>ap-southeast-1]
+    ECS --> RDS[RDS MySQL 8]
     CF[Cloudflare] -->|HTTPS| ALB[ALB :443]
     ALB --> ECS
 ```
@@ -262,7 +262,7 @@ graph LR
 - **CI/CD**: GitHub Actions (`ci.yml`, `cd.yml`, `deploy-aws.yml`)
 - **Container**: Single Docker image containing the NestJS backend (static frontend build served separately or via CDN)
 - **ECS Fargate**: 1024 CPU / 2048 MB memory, container port 3000
-- **Logs**: CloudWatch Logs group `/ecs/coffee-shop-pos`, region `ap-southeast-1`
+- **Logs**: CloudWatch Logs group `/ecs/coffee-shop-pos`
 - **Secrets**: AWS Secrets Manager for `DB_HOST` and `DB_PASSWORD`
 - **Domain**: `<YOUR_DOMAIN>` via Cloudflare → ALB → ECS
 
