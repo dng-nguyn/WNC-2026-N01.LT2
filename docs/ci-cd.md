@@ -76,9 +76,9 @@ Full deployment pipeline: build, push to ECR, and update the ECS service. All in
 1. Authenticate to AWS using `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY`
 2. Log in to ECR
 3. Build Docker image (linux/amd64) and push to ECR
-4. Replace placeholders in `.aws/task-definition.json` (`<AWS_ACCOUNT_ID>`, `<AWS_REGION>`, `<YOUR_DOMAIN>`)
+4. Replace infrastructure placeholders in `.aws/task-definition.json` (`<AWS_ACCOUNT_ID>`, `<AWS_REGION>`, `<YOUR_DOMAIN>`)
 5. Render the task definition with the new image tag
-6. Deploy the updated task definition to ECS
+6. Deploy the updated task definition to ECS (secrets injected from AWS Secrets Manager at container startup)
 
 **Actions used:**
 
