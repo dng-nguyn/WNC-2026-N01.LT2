@@ -111,7 +111,7 @@ The following **GitHub Repository Secrets** must be configured in **Settings →
 | `CONTAINER_NAME` | Container name in the task definition |
 | `FRONTEND_URL` | Production domain (e.g. `cafe.example.com`) |
 
-The following AWS resources must also be provisioned (see [AWS Resources](#aws-resources-required) below).
+The following **AWS Secrets Manager** secrets must also exist (see [Secrets Manager Setup](#secrets-manager-setup) below).
 
 ### Automatic Deploy
 
@@ -142,6 +142,7 @@ gh workflow run deploy-aws.yml
 | **RDS MySQL** | `coffee-shop-db` (endpoint in Secrets Manager) |
 | **ALB** | HTTPS listener with Origin CA cert, HTTP→HTTPS redirect |
 | **SSL** | Cloudflare Origin CA certificate (Full Strict mode) |
+| **Secrets** | AWS Secrets Manager (7 secrets, see below) |
 
 ### AWS Resources Required
 
@@ -155,8 +156,7 @@ The following AWS resources must exist before deploying. The deployment workflow
 - **IAM Roles**:
   - `ecsTaskExecutionRole` — ECR pull, CloudWatch Logs, Secrets Manager read, SSM Managed Instance Core.
   - `ecsTaskRole` — Application-level permissions (ECS Exec support).
-- **Secrets Manager** — Stores `db-host` and `db-password` (injected into the container at startup).
-- **CloudWatch** — Log group `/ecs/coffee-shop-pos`.
+- **Secrets Manager** — Stores all sensitive config (see [Secrets Manager Setup](#secrets-manager-setup) below).
 
 ### SSL / Domain Setup
 
@@ -177,9 +177,37 @@ The task definition template (`.aws/task-definition.json`) uses placeholders tha
 | `<AWS_REGION>` | `AWS_REGION` secret |
 | `<YOUR_DOMAIN>` | `FRONTEND_URL` secret |
 
-Container environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `FRONTEND_URL`) are set directly in the task definition. Sensitive values (`DB_HOST`, `DB_PASSWORD`) are injected from AWS Secrets Manager.
+Container environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_SYNC`, `FRONTEND_URL`) are set directly in the task definition. All sensitive values are injected from AWS Secrets Manager at container startup.
 
----
+### Secrets Manager Setup
+
+The following secrets must exist in AWS Secrets Manager (same region as ECS). Create them via the AWS Console or CLI:
+
+| Secret Name | Injected As | Description |
+| --- | --- | --- |
+| `coffee-shop-pos/db-host` | `DB_HOST` | RDS endpoint address |
+| `coffee-shop-pos/db-password` | `DB_PASSWORD` | Database password |
+| `coffee-shop-pos/jwt-secret` | `JWT_SECRET` | JWT signing key (generate with `openssl rand -base64 48`) |
+| `coffee-shop-pos/session-secret` | `SESSION_SECRET` | Express session key (generate with `openssl rand -base64 48`) |
+| `coffee-shop-pos/sepay-api-key` | `SEPAY_API_KEY` | Sepay payment API key |
+| `coffee-shop-pos/sepay-account-number` | `SEPAY_ACCOUNT_NUMBER` | Sepay bank account number |
+| `coffee-shop-pos/sepay-bank-name` | `SEPAY_BANK_NAME` | Sepay bank name |
+
+> **Important:** Secrets Manager appends a random suffix to each secret's ARN (e.g. `jwt-secret-3CMEXn`). The task definition must reference the **full ARN** including this suffix.
+
+Example — create a secret:
+
+```bash
+aws secretsmanager create-secret \
+  --name coffee-shop-pos/jwt-secret \
+  --secret-string "$(openssl rand -base64 48)" \
+  --region ap-east-1
+```
+
+Then copy the full ARN (with suffix) from the output into `.aws/task-definition.json`.
+
+Do **not** hard-code production secrets in environment files, the task definition, or CI pipelines.
+
 
 ## See Also
 

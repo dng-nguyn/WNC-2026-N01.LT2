@@ -263,7 +263,7 @@ graph LR
 - **Container**: Single Docker image containing the NestJS backend (static frontend build served separately or via CDN)
 - **ECS Fargate**: 1024 CPU / 2048 MB memory, container port 3000
 - **Logs**: CloudWatch Logs group `/ecs/coffee-shop-pos`
-- **Secrets**: AWS Secrets Manager for `DB_HOST` and `DB_PASSWORD`
+- **Secrets**: AWS Secrets Manager for `DB_HOST`, `DB_PASSWORD`, `JWT_SECRET`, `SESSION_SECRET`, `SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, `SEPAY_BANK_NAME`
 - **Domain**: `<YOUR_DOMAIN>` via Cloudflare → ALB → ECS
 
 ### Environment Variables
