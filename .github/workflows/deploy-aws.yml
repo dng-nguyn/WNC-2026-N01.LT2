@@ -59,6 +59,34 @@ jobs:
             --push .
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Provision missing secrets in Secrets Manager
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          SECRET_ARN_PREFIX="arn:aws:secretsmanager:${{ env.AWS_REGION }}:${AWS_ACCOUNT_ID}:secret:coffee-shop-pos"
+
+          # Create JWT_SECRET if missing
+          if ! aws secretsmanager describe-secret --secret-id coffee-shop-pos/jwt-secret --region ${{ env.AWS_REGION }} 2>/dev/null; then
+            echo "Creating JWT_SECRET..."
+            aws secretsmanager create-secret \
+              --name coffee-shop-pos/jwt-secret \
+              --secret-string "$(openssl rand -base64 48)" \
+              --region ${{ env.AWS_REGION }}
+          else
+            echo "JWT_SECRET already exists."
+          fi
+
+          # Create SESSION_SECRET if missing
+          if ! aws secretsmanager describe-secret --secret-id coffee-shop-pos/session-secret --region ${{ env.AWS_REGION }} 2>/dev/null; then
+            echo "Creating SESSION_SECRET..."
+            aws secretsmanager create-secret \
+              --name coffee-shop-pos/session-secret \
+              --secret-string "$(openssl rand -base64 48)" \
+              --region ${{ env.AWS_REGION }}
+          else
+            echo "SESSION_SECRET already exists."
+          fi
+
       - name: Replace task definition placeholders
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
