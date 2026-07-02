@@ -57,10 +57,16 @@ On ECS Fargate, sensitive values are injected from AWS Secrets Manager at contai
 | --- | --- | --- |
 | `coffee-shop-pos/db-host` | `DB_HOST` | RDS endpoint address |
 | `coffee-shop-pos/db-password` | `DB_PASSWORD` | Database password |
+| `coffee-shop-pos/jwt-secret` | `JWT_SECRET` | JWT signing key |
+| `coffee-shop-pos/session-secret` | `SESSION_SECRET` | Express session key |
+| `coffee-shop-pos/sepay-api-key` | `SEPAY_API_KEY` | Sepay payment API key |
+| `coffee-shop-pos/sepay-account-number` | `SEPAY_ACCOUNT_NUMBER` | Sepay bank account number |
+| `coffee-shop-pos/sepay-bank-name` | `SEPAY_BANK_NAME` | Sepay bank name |
 
-Other environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `FRONTEND_URL`) are set directly in the task definition as plain environment variables.
+Other environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_SYNC`, `FRONTEND_URL`) are set directly in the task definition as plain environment variables.
 
 Do **not** hard-code production secrets in environment files or CI pipelines.
+
 
 ---
 

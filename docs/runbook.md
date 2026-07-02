@@ -125,6 +125,7 @@ aws ecs describe-services \
 - Expired or missing AWS credentials in GitHub secrets.
 - ECR image tag not found (check the tag pushed matches what the task def expects).
 - Insufficient IAM permissions for the deployment role.
+- Secrets Manager `ResourceNotFoundException` — secret ARN must include the random suffix (e.g. `jwt-secret-3CMEXn`). Check with `aws secretsmanager list-secrets`.
 
 ---
 
