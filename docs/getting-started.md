@@ -38,6 +38,8 @@ npm run start:dev
 
 The backend runs on **http://localhost:3000**.
 
+If the `IMMUDB_HOST` environment variable is not set, the application degrades gracefully — immudb-backed transaction verification will be disabled but all other features remain functional.
+
 Swagger API documentation is available at **http://localhost:3000/api/docs**.
 
 ## Frontend Setup
@@ -71,6 +73,11 @@ Copy `.env.example` to `.env` at the project root and configure:
 | `SEPAY_API_KEY` | Sepay API key for QR payments | `your_sepay_api_key` |
 | `SEPAY_ACCOUNT_NUMBER` | Sepay account number | `3669420000` |
 | `SEPAY_BANK_NAME` | Sepay bank name | `MBBank` |
+| `IMMUDB_HOST` | immudb host (optional — app degrades gracefully if unset) | `localhost` |
+| `IMMUDB_PORT` | immudb port (optional) | `3322` |
+| `IMMUDB_USER` | immudb username (optional) | `immudb` |
+| `IMMUDB_PASSWORD` | immudb password (optional) | `immudb` |
+| `IMMUDB_DATABASE` | immudb database name (optional) | `defaultdb` |
 | `FRONTEND_URL` | Frontend origin for CORS | `http://localhost:5173` |
 | `VITE_PORT` | Vite dev server port | `5173` |
 | `VITE_API_BASE_URL` | API base URL for frontend | `http://localhost:3000` |
@@ -102,6 +109,7 @@ WNC-2026-N01.LT2/
 │   │   ├── employees/          # Employee CRUD, FK → User
 │   │   ├── orders/             # Order + OrderItem management
 │   │   ├── payments/           # Payment (QR, Sepay verification)
+│   │   ├── transactions/       # Transaction history, immudb verification
 │   │   ├── common/             # Shared filters, interceptors
 │   │   ├── main.ts             # Entry point
 │   │   └── app.module.ts       # Root module
@@ -111,9 +119,13 @@ WNC-2026-N01.LT2/
 ├── frontend/                   # React + Vite frontend
 │   ├── src/
 │   │   ├── pages/              # Route pages
+│   │   │   ├── TablesPage.tsx
+│   │   │   ├── TableManagementPage.tsx
+│   │   │   └── TransactionHistoryPage.tsx
 │   │   ├── components/         # Reusable components
 │   │   ├── hooks/              # Custom React hooks
 │   │   ├── services/           # API service layer
+│   │   │   └── transaction.service.ts
 │   │   ├── styles/             # CSS files
 │   │   ├── i18n/               # Internationalization (en, vi)
 │   │   └── types/              # TypeScript types
@@ -135,6 +147,8 @@ You can run the entire stack with Docker Compose:
 ```bash
 docker-compose up
 ```
+
+The `docker-compose.yml` includes an `immudb` service that starts automatically. If you have set the `IMMUDB_*` environment variables, the backend will connect to it for tamper-proof transaction verification. If you do not need immudb, you can remove the `immudb` service from `docker-compose.yml` or simply leave the `IMMUDB_HOST` variable unset.
 
 Or for a standalone backend build:
 

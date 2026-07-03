@@ -80,6 +80,7 @@ Full deployment pipeline: build, push to ECR, and update the ECS service. All in
 5. Render the task definition with the new image tag
 6. Deploy the updated task definition to ECS (secrets injected from AWS Secrets Manager at container startup)
 
+  > **Note:** The ECS task definition includes an immudb sidecar container alongside the application container. Both containers run in the same task and share the `localhost` network namespace, so the app connects to immudb via `localhost:3322`.
 **Actions used:**
 
 | Action | Purpose |
@@ -145,8 +146,23 @@ Required secrets for CI/CD workflows (configure in **Settings → Secrets and va
 | `CONTAINER_NAME` | Deploy AWS | Container name in the task definition |
 | `FRONTEND_URL` | Deploy AWS | Production domain for CORS and task definition |
 | `GITHUB_TOKEN` | CI, CD, CodeQL | Auto-provided by GitHub Actions (no manual config) |
+| `IMMUDB_PASSWORD` | Deploy AWS | immudb admin password, stored in AWS Secrets Manager |
 
 ---
+## Environment Variables
+
+The application container expects the following environment variables at runtime. Most are injected via the ECS task definition; secrets are resolved from AWS Secrets Manager.
+
+| Variable | Value | Source |
+|----------|-------|--------|
+| `IMMUDB_HOST` | `localhost` | Sidecar network namespace (immudb runs as a sidecar in the same ECS task) |
+| `IMMUDB_PORT` | `3322` | immudb default gRPC port |
+| `IMMUDB_USER` | `immudb` | Application configuration |
+| `IMMUDB_PASSWORD` | *(secret)* | AWS Secrets Manager — injected at container startup via the ECS task definition |
+| `IMMUDB_DATABASE` | `defaultdb` | Application configuration |
+
+> **Note on immudb persistence:** immudb data is ephemeral on AWS Fargate — it is lost when the ECS task is stopped or restarted. This is acceptable because MySQL serves as the primary/secondary store for transactional data; immudb is used as an additional immutable audit layer and can be re-synced from MySQL if needed.
+
 
 ## Adding a New Deploy Target
 
