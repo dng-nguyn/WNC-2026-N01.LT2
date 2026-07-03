@@ -125,12 +125,12 @@ async function bootstrap() {
           fullName: adminUsername,
           role: UserRole.MANAGER,
         });
-        console.log(`Admin user "${adminUsername}" created with MANAGER role`);
+        console.log('Admin user created with MANAGER role');
       } else {
-        console.log('MANAGER user already exists — skipping admin auto-create');
+        console.log('Admin auto-create skipped — MANAGER user exists');
       }
     } catch (err) {
-      console.error('Admin auto-create failed:', err);
+      console.error('Admin auto-create failed:', err instanceof Error ? err.message : 'unknown');
     }
   }
 }
