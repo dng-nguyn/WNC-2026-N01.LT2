@@ -165,6 +165,7 @@ export interface UpdateOrderDto {
 
 export interface Employee {
   id: string;
+  user: User | null;
   fullName: string;
   email: string;
   phone: string | null;
