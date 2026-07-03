@@ -79,6 +79,8 @@ jobs:
           SEPAY_API_KEY: ci-dummy-key
           SEPAY_ACCOUNT_NUMBER: '0000000000'
           SEPAY_BANK_NAME: MBBank
+          ADMIN_USERNAME: admin
+          ADMIN_PASSWORD: Admin123!
         run: npm test
 
   # ── Frontend unit/component tests (Vitest) ─────────────────────────
@@ -162,6 +164,8 @@ jobs:
           SEPAY_API_KEY: ci-dummy-key
           SEPAY_ACCOUNT_NUMBER: '0000000000'
           SEPAY_BANK_NAME: MBBank
+          ADMIN_USERNAME: admin
+          ADMIN_PASSWORD: Admin123!
 
       - name: Run frontend E2E tests
         working-directory: frontend
