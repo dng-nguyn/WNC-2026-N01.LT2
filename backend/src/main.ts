@@ -63,12 +63,26 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
   // Serve frontend static files (single-image deployment)
-  // Registered BEFORE app.init() so static files are served before NestJS routing.
-  // SPA routing (e.g. /dashboard → index.html) is handled by the external reverse proxy.
   const publicPath = join(__dirname, '..', 'public');
   if (existsSync(publicPath)) {
     app.use(express.static(publicPath));
+
+    // SPA catch-all: serve index.html for browser navigations to frontend routes.
+    // Browsers send Accept: text/html; API clients (fetch/axios) send Accept: application/json.
+    // Must be BEFORE app.init() so it runs before NestJS controllers claim the route.
+    app.use((req: any, res: any, next: any) => {
+      if (req.method !== 'GET') return next();
+      if (req.path.startsWith('/api')) return next();
+      if (req.path === '/health') return next();
+      if (req.path.includes('.')) return next();
+      const accept = req.headers.accept ?? '';
+      if (accept.includes('text/html')) {
+        return res.sendFile(join(publicPath, 'index.html'));
+      }
+      next();
+    });
   }
 
   await app.init();
