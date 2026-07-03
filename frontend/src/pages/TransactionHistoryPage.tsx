@@ -128,7 +128,7 @@ export default function TransactionHistoryPage() {
                 <tr key={tx.id}>
                   <td>{formatDateTime(tx.verifiedAt)}</td>
                   <td>
-                    <code style={{ fontSize: '0.8rem' }}>{tx.order.id}</code>
+                    <code style={{ fontSize: '0.8rem' }}>{tx.order?.id ?? '—'}</code>
                   </td>
                   <td>{formatCurrency(Number(tx.amount))}</td>
                   <td>

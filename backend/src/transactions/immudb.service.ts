@@ -1,6 +1,15 @@
 import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+export interface ImmudbTransactionData {
+  transactionId: string;
+  orderId: string;
+  amount: number;
+  verificationType: string;
+  sepayTransactionId?: string;
+  verifiedAt: string;
+}
+
 @Injectable()
 export class ImmudbService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(ImmudbService.name);
@@ -24,7 +33,6 @@ export class ImmudbService implements OnModuleInit, OnModuleDestroy {
     try {
       const ImmudbClient = require('immudb-node').default;
       this.client = new ImmudbClient({ address: `${host}:${port}` });
-
       await this.client.login({ user, password });
       await this.client.useDatabase({ databasename: database });
       this.connected = true;
@@ -35,29 +43,21 @@ export class ImmudbService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy() {
-    // immudb-node client doesn't have an explicit close method
     this.client = null;
     this.connected = false;
   }
 
-  async logTransaction(data: {
-    transactionId: string;
-    orderId: string;
-    amount: number;
-    verificationType: string;
-    sepayTransactionId?: string;
-    verifiedAt: string;
-  }): Promise<number | null> {
-    if (!this.connected || !this.client) {
-      this.logger.debug('Immudb not connected — skipping log');
-      return null;
-    }
+  get isConnected(): boolean {
+    return this.connected;
+  }
+
+  async logTransaction(data: ImmudbTransactionData): Promise<number | null> {
+    if (!this.connected || !this.client) return null;
 
     try {
-      const key = `txn:${data.transactionId}`;
       const value = JSON.stringify(data);
-      const res = await this.client.set({ key, value });
-      this.logger.debug(`Immudb logged: ${key} -> id ${res.id}`);
+      const res = await this.client.set({ key: `txn:${data.transactionId}`, value });
+      await this.client.set({ key: `order:${data.orderId}:${data.transactionId}`, value });
       return res.id;
     } catch (err: unknown) {
       this.logger.warn(`Immudb set failed: ${err instanceof Error ? err.message : err}`);
@@ -65,17 +65,48 @@ export class ImmudbService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async verifyTransaction(transactionId: string): Promise<string | null> {
-    if (!this.connected || !this.client) {
-      return null;
-    }
+  async getTransaction(transactionId: string): Promise<ImmudbTransactionData | null> {
+    if (!this.connected || !this.client) return null;
 
     try {
-      const key = `txn:${transactionId}`;
-      const res = await this.client.get({ key });
-      return res.value ?? null;
+      const res = await this.client.get({ key: `txn:${transactionId}` });
+      if (res?.value) return JSON.parse(res.value.toString());
+      return null;
     } catch {
       return null;
+    }
+  }
+
+  async scanTransactions(limit = 2500): Promise<ImmudbTransactionData[]> {
+    if (!this.connected || !this.client) return [];
+
+    try {
+      const safeLimit = Math.min(limit, 2500);
+      const res = await this.client.scan({ prefix: 'txn:', limit: safeLimit });
+      return (res.entriesList ?? [])
+        .map((entry: any) => {
+          try { return JSON.parse(entry.value.toString()); } catch { return null; }
+        })
+        .filter(Boolean);
+    } catch (err: unknown) {
+      this.logger.warn(`Immudb scan failed: ${err instanceof Error ? err.message : err}`);
+      return [];
+    }
+  }
+
+  async findByOrderId(orderId: string): Promise<ImmudbTransactionData[]> {
+    if (!this.connected || !this.client) return [];
+
+    try {
+      const res = await this.client.scan({ prefix: `order:${orderId}:`, limit: 100 });
+      return (res.entriesList ?? [])
+        .map((entry: any) => {
+          try { return JSON.parse(entry.value.toString()); } catch { return null; }
+        })
+        .filter(Boolean);
+    } catch (err: unknown) {
+      this.logger.warn(`Immudb order scan failed: ${err instanceof Error ? err.message : err}`);
+      return [];
     }
   }
 }

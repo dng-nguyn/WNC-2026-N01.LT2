@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { Transaction } from './transaction.entity';
 import { VerificationType } from './verification-type.enum';
-import { ImmudbService } from './immudb.service';
+import { ImmudbService, ImmudbTransactionData } from './immudb.service';
 
 @Injectable()
 export class TransactionsService {
@@ -22,18 +22,33 @@ export class TransactionsService {
     verificationType: VerificationType;
     sepayTransactionId?: string;
   }): Promise<Transaction> {
-    const transaction = this.transactionRepository.create({
-      order: { id: params.orderId },
-      payment: params.paymentId ? { id: params.paymentId } : null,
-      amount: params.amount,
-      verificationType: params.verificationType,
-      verifiedAt: new Date(),
-      sepayTransactionId: params.sepayTransactionId ?? null,
-    });
+    const now = new Date();
 
-    const saved = await this.transactionRepository.save(transaction);
+    // Write to MySQL first to get the ID
+    let saved: Transaction;
+    try {
+      const transaction = this.transactionRepository.create({
+        order: { id: params.orderId },
+        payment: params.paymentId ? { id: params.paymentId } : null,
+        amount: params.amount,
+        verificationType: params.verificationType,
+        verifiedAt: now,
+        sepayTransactionId: params.sepayTransactionId ?? null,
+      });
+      saved = await this.transactionRepository.save(transaction);
+    } catch (err: unknown) {
+      this.logger.warn(`MySQL write failed: ${err instanceof Error ? err.message : err}`);
+      return this.immudbDataToTransaction({
+        transactionId: '',
+        orderId: params.orderId,
+        amount: params.amount,
+        verificationType: params.verificationType,
+        sepayTransactionId: params.sepayTransactionId,
+        verifiedAt: now.toISOString(),
+      });
+    }
 
-    // Log to immudb (optional — non-blocking)
+    // Log to immudb with the MySQL ID as key (non-blocking)
     try {
       const txId = await this.immudbService.logTransaction({
         transactionId: saved.id,
@@ -41,7 +56,7 @@ export class TransactionsService {
         amount: params.amount,
         verificationType: params.verificationType,
         sepayTransactionId: params.sepayTransactionId,
-        verifiedAt: saved.verifiedAt.toISOString(),
+        verifiedAt: now.toISOString(),
       });
       if (txId != null) {
         saved.immudbTxId = String(txId);
@@ -55,8 +70,14 @@ export class TransactionsService {
   }
 
   async findAll(limit = 50, dateFrom?: string, dateTo?: string): Promise<Transaction[]> {
-    const where: Record<string, unknown> = {};
+    // PRIMARY: Read from immudb
+    if (this.immudbService.isConnected) {
+      return this.findAllFromImmudb(limit, dateFrom, dateTo);
+    }
 
+    // FALLBACK: Read from MySQL
+    this.logger.log('Immudb unavailable — falling back to MySQL');
+    const where: Record<string, unknown> = {};
     if (dateFrom || dateTo) {
       const from = dateFrom ? new Date(dateFrom + 'T00:00:00') : new Date('2000-01-01');
       const to = dateTo ? new Date(dateTo + 'T23:59:59') : new Date();
@@ -71,15 +92,42 @@ export class TransactionsService {
     });
   }
 
+  async findAllFromImmudb(limit = 50, dateFrom?: string, dateTo?: string): Promise<Transaction[]> {
+    const immudbData = await this.immudbService.scanTransactions(limit);
+
+    let filtered = immudbData;
+    if (dateFrom || dateTo) {
+      const from = dateFrom ? new Date(dateFrom + 'T00:00:00') : new Date('2000-01-01');
+      const to = dateTo ? new Date(dateTo + 'T23:59:59') : new Date();
+      filtered = immudbData.filter((d) => {
+        const t = new Date(d.verifiedAt);
+        return t >= from && t <= to;
+      });
+    }
+
+    return filtered
+      .sort((a, b) => new Date(b.verifiedAt).getTime() - new Date(a.verifiedAt).getTime())
+      .slice(0, limit)
+      .map((d) => this.immudbDataToTransaction(d));
+  }
+
   async findById(id: string): Promise<Transaction> {
+    // PRIMARY: Direct key lookup in immudb
+    if (this.immudbService.isConnected) {
+      const match = await this.immudbService.getTransaction(id);
+      if (match) {
+        return this.immudbDataToTransaction(match);
+      }
+    }
+
+    // FALLBACK: Look up in MySQL
     const tx = await this.transactionRepository.findOne({
       where: { id },
       relations: { order: true, payment: true },
     });
-    if (!tx) {
-      throw new Error(`Transaction ${id} not found`);
-    }
-    return tx;
+    if (tx) return tx;
+
+    throw new Error(`Transaction ${id} not found`);
   }
 
   async updateReverified(id: string, sepayTransactionId: string | null): Promise<Transaction> {
@@ -88,6 +136,35 @@ export class TransactionsService {
     if (sepayTransactionId) {
       tx.sepayTransactionId = sepayTransactionId;
     }
-    return this.transactionRepository.save(tx);
+
+    // Update in MySQL if it exists there
+    try {
+      const existing = await this.transactionRepository.findOne({ where: { id } });
+      if (existing) {
+        existing.reverifiedAt = tx.reverifiedAt;
+        existing.sepayTransactionId = tx.sepayTransactionId;
+        return await this.transactionRepository.save(existing);
+      }
+    } catch {
+      // MySQL unavailable — immudb-only is fine
+    }
+
+    return tx;
+  }
+
+  private immudbDataToTransaction(d: ImmudbTransactionData): Transaction {
+    const tx = new Transaction();
+    tx.id = d.transactionId;
+    tx.order = d.orderId ? ({ id: d.orderId } as any) : null as any;
+    tx.payment = null;
+    tx.amount = d.amount;
+    tx.verificationType = d.verificationType as VerificationType;
+    tx.verifiedAt = new Date(d.verifiedAt);
+    tx.reverifiedAt = null;
+    tx.sepayTransactionId = d.sepayTransactionId ?? null;
+    tx.immudbTxId = null;
+    tx.createdAt = new Date(d.verifiedAt);
+    tx.updatedAt = new Date(d.verifiedAt);
+    return tx;
   }
 }
