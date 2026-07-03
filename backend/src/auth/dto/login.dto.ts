@@ -1,4 +1,4 @@
-import { IsString, Length, Matches } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length, Matches } from 'class-validator';
 
 export class LoginDto {
   @IsString()
@@ -12,4 +12,8 @@ export class LoginDto {
   })
   @Matches(/(?=.*\d)/, { message: 'Password must contain at least one number' })
   password!: string;
+
+  @IsOptional()
+  @IsBoolean()
+  rememberMe?: boolean;
 }

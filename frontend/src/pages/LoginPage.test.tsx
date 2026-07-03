@@ -72,7 +72,7 @@ describe('LoginPage', () => {
     await user.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
-      expect(mockLogin).toHaveBeenCalledWith({ username: 'testuser', password: 'testpass123' });
+      expect(mockLogin).toHaveBeenCalledWith({ username: 'testuser', password: 'testpass123', rememberMe: false });
     });
   });
 
