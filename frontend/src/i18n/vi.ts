@@ -22,6 +22,7 @@ const vi = {
   'nav.menuItems': 'Món',
   'nav.tables': 'Bàn',
   'nav.manageTables': 'Quản lý bàn',
+  'nav.transactions': 'Lịch sử giao dịch',
   'nav.logout': 'Đăng xuất',
 
   // ── Auth ──
