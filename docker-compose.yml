@@ -27,12 +27,6 @@ services:
       - immudb_data:/var/lib/immudb
     environment:
       IMMUDB_ADMIN_PASSWORD: ${IMMUDB_ADMIN_PASSWORD:-immudb}
-    healthcheck:
-      test: ["CMD", "immuadmin", "audit", "status"]
-      interval: 15s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     # Ports exposed for local development / direct access
     ports:
       - "${IMMUDB_GRPC_PORT:-3322}:3322"
@@ -46,7 +40,7 @@ services:
       db:
         condition: service_healthy
       immudb:
-        condition: service_healthy
+        condition: service_started
     environment:
       # DB_HOST is the Docker service DNS name — must stay "db"
       DB_HOST: db
