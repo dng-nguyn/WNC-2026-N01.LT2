@@ -24,23 +24,23 @@ test.describe('Navigation', () => {
     await expect(page).toHaveURL(/\/dashboard/);
   });
 
-  test('sidebar links navigate to POS, Categories, Menu Items', async ({ page }) => {
+  test('sidebar links navigate to POS, Tables, Transaction History', async ({ page }) => {
     const sidebar = page.locator('.sidebar-nav');
 
-    await sidebar.getByRole('link', { name: /pos terminal/i }).click();
+    await sidebar.getByRole('link', { name: /pos/i }).click();
     await expect(page).toHaveURL(/\/pos/);
 
     await sidebar.getByRole('link', { name: /dashboard/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await sidebar.getByRole('link', { name: /menu categories/i }).click();
-    await expect(page).toHaveURL(/\/menus/);
+    await sidebar.getByRole('link', { name: /tables/i }).click();
+    await expect(page).toHaveURL(/\/tables/);
 
     await sidebar.getByRole('link', { name: /dashboard/i }).click();
     await expect(page).toHaveURL(/\/dashboard/);
 
-    await sidebar.getByRole('link', { name: /menu items/i }).click();
-    await expect(page).toHaveURL(/\/menu-items/);
+    await sidebar.getByRole('link', { name: /transaction/i }).click();
+    await expect(page).toHaveURL(/\/transactions/);
   });
 
   test('POS has sidebar link back to Dashboard', async ({ page }) => {
