@@ -40,7 +40,7 @@ export async function getProfile(): Promise<ProfileResponse> {
 /**
  * Get the current logged-in user info (from cached token claim or profile).
  */
-export function getLoggedInUser(): { id: string; username: string } | null {
+export function getLoggedInUser(): { id: string; username: string; role?: string } | null {
   const token = localStorage.getItem('access_token');
   if (!token) return null;
 
@@ -50,10 +50,23 @@ export function getLoggedInUser(): { id: string; username: string } | null {
     return {
       id: payload.sub,
       username: payload.username,
+      role: payload.role,
     };
   } catch {
     return null;
   }
+}
+/**
+ * Change the current user's password.
+ */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ message: string }> {
+  return post<{ message: string }>('/auth/change-password', {
+    currentPassword,
+    newPassword,
+  });
 }
 
 /**
