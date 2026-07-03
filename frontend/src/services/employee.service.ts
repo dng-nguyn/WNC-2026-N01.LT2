@@ -12,7 +12,9 @@ export async function fetchEmployee(id: string): Promise<Employee> {
 }
 
 export async function createEmployee(data: {
-  userId?: string;
+  username?: string;
+  password?: string;
+  role?: string;
   fullName: string;
   email: string;
   phone?: string;
@@ -56,18 +58,6 @@ export async function resetEmployeePassword(
 
 export async function deleteUserAccount(id: string): Promise<void> {
   return del<void>(`/users/${id}`);
-}
-
-// ===== User account creation (via /users — also MANAGER guarded) =====
-
-export async function createUserAccount(data: {
-  username: string;
-  password: string;
-  fullName?: string;
-  phone?: string;
-  role?: string;
-}): Promise<User> {
-  return post<User>('/users', data);
 }
 
 export async function updateUserAccount(

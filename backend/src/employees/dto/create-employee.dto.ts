@@ -1,9 +1,20 @@
-import { IsEmail, IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { UserRole } from '../../users/user-role.enum';
 
 export class CreateEmployeeDto {
   @IsOptional()
-  @IsUUID()
-  userId?: string;
+  @IsString()
+  @MaxLength(50)
+  username?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  password?: string;
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 
   @IsString()
   @IsNotEmpty()
