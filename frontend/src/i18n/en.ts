@@ -21,6 +21,7 @@ const en = {
   'nav.categories': 'Menu Categories',
   'nav.menuItems': 'Menu Items',
   'nav.tables': 'Tables',
+  'nav.manageTables': 'Manage Tables',
   'nav.logout': 'Logout',
 
   // ── Auth ──
