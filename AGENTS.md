@@ -188,6 +188,24 @@ export class ThingService {
 
 **Note:** `Menu` → `categories` and `MenuItem` → `products` is deliberate. SQL schema uses category/product names; API uses menu/menu-item routes.
 
+## Transaction History & immudb
+
+**immudb** is the primary data source for transaction history (immutable audit log). MySQL is a secondary cache for `reverifiedAt` and `sepayTransactionId` updates (which can't be written to immudb since it's append-only).
+
+**Data flow:**
+1. Payment verified (auto or manual) → write to MySQL first (get UUID) → write to immudb with same UUID as key
+2. `findAll` → read from immudb (primary) → merge MySQL `reverifiedAt`/`sepayTransactionId` updates
+3. `findById` → direct key lookup in immudb (`client.get({ key: 'txn:{id}' })`) → fallback to MySQL
+
+**immudb key structure:**
+- `txn:{transactionId}` — primary key for transaction data
+- `order:{orderId}:{transactionId}` — secondary key for order-based lookups
+
+**Deployment:** immudb runs as a sidecar container in ECS Fargate (same task, `localhost:3322`). In Docker Compose, it's a separate service. Connection is optional — if `IMMUDB_HOST` is not set, the app degrades gracefully.
+
+**Docker permission note:** immudb runs as UID 3322. Named volumes work automatically. Bind mounts require `sudo chown -R 3322:3322 /path`.
+
+
 ## Runtime/Tooling
 
 - **Runtime**: Node.js 22+ (Dockerfile: node:24)
