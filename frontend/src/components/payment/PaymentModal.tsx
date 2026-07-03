@@ -11,14 +11,16 @@ import type { Payment } from '../../types';
 
 interface PaymentModalProps {
   open: boolean;
-  cart: CartItem[];
-  cartTotal: number;
-  selectedTableId: string;
+  cart?: CartItem[];
+  cartTotal?: number;
+  selectedTableId?: string;
+  existingOrderId?: string;
+  existingOrderTotal?: number;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-type Step = 'select-method' | 'creating-order' | 'show-qr' | 'success' | 'error';
+type Step = 'select-method' | 'creating-order' | 'show-qr' | 'confirm-mark-paid' | 'success' | 'error';
 
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
@@ -34,6 +36,8 @@ export default function PaymentModal({
   cart,
   cartTotal,
   selectedTableId,
+  existingOrderId,
+  existingOrderTotal,
   onClose,
   onSuccess,
 }: PaymentModalProps) {
@@ -118,9 +122,11 @@ export default function PaymentModal({
     [stopPolling],
   );
 
+  const effectiveTotal = existingOrderTotal ?? cartTotal ?? 0;
+
   // Order + Payment creation
   async function handleBankTransfer() {
-    if (!user) {
+    if (!user && !existingOrderId) {
       setError('You must be logged in');
       return;
     }
@@ -128,22 +134,27 @@ export default function PaymentModal({
     setError('');
 
     try {
-      // 1. Create the order
-      const order = await createOrder({
-        userId: user.id,
-        tableId: selectedTableId || undefined,
-        items: cart.map((c) => ({
-          menuItemId: c.menuItem.id,
-          quantity: c.quantity,
-          note: c.note || undefined,
-        })),
-      });
+      let orderId = existingOrderId;
 
-      // 2. Create the payment (QR code)
-      const pay = await createPayment(order.id);
+      // Create order only if not using an existing one
+      if (!orderId) {
+        const order = await createOrder({
+          userId: user!.id,
+          tableId: selectedTableId || undefined,
+          items: cart!.map((c) => ({
+            menuItemId: c.menuItem.id,
+            quantity: c.quantity,
+            note: c.note || undefined,
+          })),
+        });
+        orderId = order.id;
+      }
+
+      // Create the payment (QR code)
+      const pay = await createPayment(orderId!);
       setPayment(pay);
 
-      // 3. Show QR and start polling
+      // Show QR and start polling
       setStep('show-qr');
       startPolling(pay.id);
     } catch (err: unknown) {
@@ -155,7 +166,7 @@ export default function PaymentModal({
   }
 
   async function handleCashPayment() {
-    if (!user) {
+    if (!user && !existingOrderId) {
       setError('You must be logged in');
       return;
     }
@@ -163,15 +174,17 @@ export default function PaymentModal({
     setError('');
 
     try {
-      await createOrder({
-        userId: user.id,
-        tableId: selectedTableId || undefined,
-        items: cart.map((c) => ({
-          menuItemId: c.menuItem.id,
-          quantity: c.quantity,
-          note: c.note || undefined,
-        })),
-      });
+      if (!existingOrderId) {
+        await createOrder({
+          userId: user!.id,
+          tableId: selectedTableId || undefined,
+          items: cart!.map((c) => ({
+            menuItemId: c.menuItem.id,
+            quantity: c.quantity,
+            note: c.note || undefined,
+          })),
+        });
+      }
       setStep('success');
     } catch (err: unknown) {
       const msg =
@@ -181,40 +194,14 @@ export default function PaymentModal({
     }
   }
 
-  // Switch from Bank Transfer to Cash — stop polling, finalize as cash
-  function handleSwitchToCash() {
-    stopPolling();
-    onSuccess();
-    onClose();
+  // Mark as Paid — show confirmation step
+  function handleMarkAsPaid() {
+    setStep('confirm-mark-paid');
   }
 
-  // Manual "I have transferred" — single verify call
-  async function handleManualVerify() {
-    if (!payment) return;
-    setError('');
-    try {
-      const updated = await verifyPayment(payment.id);
-      if (updated.status === 'COMPLETED') {
-        stopPolling();
-        setPayment(updated);
-        setStep('success');
-      } else if (
-        updated.status === 'FAILED' ||
-        updated.status === 'EXPIRED'
-      ) {
-        stopPolling();
-        setError(`Payment ${updated.status.toLowerCase()}.`);
-        setStep('error');
-      } else {
-        setPayment(updated);
-        setError('Transaction not found yet. Please wait a moment and try again.');
-        setStep('show-qr');
-      }
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error ? err.message : 'Verification failed',
-      );
-    }
+  function confirmMarkAsPaid() {
+    stopPolling();
+    setStep('success');
   }
 
   function handleRetry() {
@@ -237,7 +224,7 @@ export default function PaymentModal({
     return (
       <>
         <p className="payment-info">
-          Total: <strong>{formatCurrency(cartTotal)}</strong>
+          Total: <strong>{formatCurrency(effectiveTotal)}</strong>
         </p>
         <div className="payment-methods">
           <button
@@ -264,7 +251,7 @@ export default function PaymentModal({
     return (
       <div className="payment-creating">
         <div className="spinner" />
-        <p>Creating order…</p>
+        <p>{existingOrderId ? 'Creating payment…' : 'Creating order…'}</p>
       </div>
     );
   }
@@ -298,17 +285,10 @@ export default function PaymentModal({
 
         <button
           className="btn btn-primary btn-block"
-          onClick={handleManualVerify}
+          onClick={handleMarkAsPaid}
           style={{ marginTop: 8 }}
         >
-          I have transferred
-        </button>
-
-        <button
-          className="btn-pay-cash"
-          onClick={handleSwitchToCash}
-        >
-          Pay with Cash instead
+          Mark as Paid
         </button>
       </div>
     );
@@ -359,6 +339,35 @@ export default function PaymentModal({
     );
   }
 
+  function renderConfirmMarkPaid() {
+    return (
+      <div className="payment-confirm">
+        <p style={{ fontSize: '1.1rem', marginBottom: 16, textAlign: 'center' }}>
+          Mark this payment as completed?
+        </p>
+        <p className="text-muted" style={{ marginBottom: 24, textAlign: 'center' }}>
+          Only confirm if the customer has transferred the payment.
+        </p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setStep('show-qr')}
+            style={{ flex: 1 }}
+          >
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={confirmMarkAsPaid}
+            style={{ flex: 1 }}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const modalTitle =
     step === 'select-method'
       ? 'Select Payment Method'
@@ -366,6 +375,8 @@ export default function PaymentModal({
       ? 'Processing…'
       : step === 'show-qr'
       ? 'Bank Transfer'
+      : step === 'confirm-mark-paid'
+      ? 'Confirm Payment'
       : step === 'success'
       ? 'Payment Complete'
       : 'Payment Failed';
@@ -375,6 +386,7 @@ export default function PaymentModal({
       {step === 'select-method' && renderMethodSelection()}
       {step === 'creating-order' && renderCreating()}
       {step === 'show-qr' && renderQR()}
+      {step === 'confirm-mark-paid' && renderConfirmMarkPaid()}
       {step === 'success' && renderSuccess()}
       {step === 'error' && renderError()}
     </Modal>

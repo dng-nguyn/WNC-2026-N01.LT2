@@ -14,19 +14,17 @@
 
 .pos-topbar {
   flex-shrink: 0;
-  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 16px 28px;
   background: #ffffff;
-  border-top: 2px solid #2563eb;
   border-bottom: 1px solid #f1f5f9;
   z-index: 10;
 }
 
 .pos-topbar-title {
-  font-size: 1.15rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #0f172a;
   margin: 0;
@@ -245,6 +243,32 @@
   color: #2563eb;
   background: #eff6ff;
   border-radius: 100px;
+}
+
+.cart-controls {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.cart-takeout-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cart-takeout-toggle input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: #2563eb;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .cart-table-selector {
