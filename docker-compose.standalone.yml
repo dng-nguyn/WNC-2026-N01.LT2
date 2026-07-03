@@ -24,11 +24,36 @@ services:
       retries: 5
     ports:
       - "3306:3306"
+
+  immudb:
+    image: codenotary/immudb:latest
+    restart: unless-stopped
+    # IMPORTANT: Use named volumes — do NOT use bind mounts.
+    # immudb runs as UID 3322. Bind mounts cause:
+    #   "permission denied: open /var/lib/immudb/immudb.identifier"
+    # If you must use bind mounts, run: sudo chown -R 3322:3322 /your/path
+    volumes:
+      - immudb_data:/var/lib/immudb
+    environment:
+      IMMUDB_ADMIN_PASSWORD: immudb              # CHANGE for production
+    healthcheck:
+      test: ["CMD", "immuadmin", "audit", "status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    ports:
+      - "3322:3322"                              # gRPC — app connects here
+      - "9497:9497"                              # Web console
+      - "8080:8080"                              # REST API
+
   app:
     image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:latest
     restart: unless-stopped
     depends_on:
       db:
+        condition: service_healthy
+      immudb:
         condition: service_healthy
     environment:
       DB_HOST: db                                # Docker service name — do not change
@@ -46,6 +71,12 @@ services:
       SEPAY_BANK_NAME: MBBank
       INIT_DB_SEED: "true"                        # Set to "false" after first run
       DB_SYNC: "true"                             # Set to "false" once schema is stable
+      # Immudb — accessible via Docker service DNS
+      IMMUDB_HOST: immudb                        # Docker service name — do not change
+      IMMUDB_PORT: "3322"
+      IMMUDB_USER: immudb
+      IMMUDB_PASSWORD: immudb                    # MUST match IMMUDB_ADMIN_PASSWORD
+      IMMUDB_DATABASE: defaultdb
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.js"]
       interval: 10s
@@ -57,3 +88,4 @@ services:
 
 volumes:
   mysql_data:
+  immudb_data:
