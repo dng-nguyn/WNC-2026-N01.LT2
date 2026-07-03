@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import POSPage from './pages/POSPage';
+import TablesPage from './pages/TablesPage';
 import MenuManagementPage from './pages/MenuManagementPage';
 import MenuItemManagementPage from './pages/MenuItemManagementPage';
 export default function App() {
@@ -55,6 +56,17 @@ export default function App() {
           <ProtectedRoute>
             <AppLayout>
               <POSPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/tables"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TablesPage />
             </AppLayout>
           </ProtectedRoute>
         }

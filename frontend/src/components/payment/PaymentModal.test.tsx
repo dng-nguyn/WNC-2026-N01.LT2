@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import PaymentModal from './PaymentModal';
 import type { CartItem } from '../../hooks/useCart';
@@ -46,5 +47,42 @@ describe('PaymentModal', () => {
     const closeBtn = screen.getByRole('button', { name: /close/i });
     closeBtn.click();
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('shows effective total from existingOrderTotal when no cart', () => {
+    render(<PaymentModal open existingOrderId="order-1" existingOrderTotal={120000} onClose={vi.fn()} onSuccess={vi.fn()} />);
+    expect(screen.getByText(/120[,.]000/)).toBeInTheDocument();
+  });
+
+  it('renders payment method selection with existing order', () => {
+    render(<PaymentModal open existingOrderId="order-1" existingOrderTotal={50000} onClose={vi.fn()} onSuccess={vi.fn()} />);
+    expect(screen.getByText(/select payment method/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /cash/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /bank transfer/i })).toBeInTheDocument();
+  });
+
+  it('shows success after cash payment with existing order', async () => {
+    const onSuccess = vi.fn();
+    const user = userEvent.setup();
+    render(<PaymentModal open existingOrderId="order-1" existingOrderTotal={50000} onClose={vi.fn()} onSuccess={onSuccess} />);
+    await user.click(screen.getByRole('button', { name: /cash/i }));
+    expect(screen.getByText(/payment successful/i)).toBeInTheDocument();
+  });
+
+  it('shows confirmation dialog on Mark as Paid', async () => {
+    const createPayment = await import('../../services/payment.service');
+    vi.mocked(createPayment.createPayment).mockResolvedValue({
+      id: 'pay-1', code: 'PAY001', amount: 50000, status: 'PENDING',
+      qrUrl: 'https://example.com/qr.png', sepayTransactionId: null,
+      order: { id: 'order-1', status: 'PENDING', totalAmount: 50000, items: [], createdAt: '', updatedAt: '' } as any,
+      createdAt: '', updatedAt: '',
+    });
+    const user = userEvent.setup();
+    render(<PaymentModal open existingOrderId="order-1" existingOrderTotal={50000} onClose={vi.fn()} onSuccess={vi.fn()} />);
+    await user.click(screen.getByRole('button', { name: /bank transfer/i }));
+    await screen.findByText(/mark as paid/i);
+    await user.click(screen.getByRole('button', { name: /mark as paid/i }));
+    expect(screen.getByText(/confirm payment/i)).toBeInTheDocument();
+    expect(screen.getByText(/mark this payment as completed/i)).toBeInTheDocument();
   });
 });

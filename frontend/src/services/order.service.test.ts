@@ -15,6 +15,7 @@ vi.mock('./api', () => ({
 import {
   fetchOrders,
   fetchOrder,
+  fetchActiveOrders,
   createOrder,
   updateOrder,
   deleteOrder,
@@ -143,6 +144,16 @@ describe('order.service', () => {
     const result = await addOrderItem('1', dto);
 
     expect(mockPost).toHaveBeenCalledWith('/orders/1/items', dto);
+    expect(result).toEqual(expected);
+  });
+
+  it('fetchActiveOrders calls GET /orders/active', async () => {
+    const expected = [{ id: '1', status: 'PENDING', table: { id: 't1', tableNumber: '1', status: 'OCCUPIED', createdAt: '' }, items: [], totalAmount: 50000, createdAt: '2025-01-01' }];
+    mockGet.mockResolvedValue(expected);
+
+    const result = await fetchActiveOrders();
+
+    expect(mockGet).toHaveBeenCalledWith('/orders/active');
     expect(result).toEqual(expected);
   });
 });

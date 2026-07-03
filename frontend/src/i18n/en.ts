@@ -20,6 +20,7 @@ const en = {
   'nav.pos': 'POS Terminal',
   'nav.categories': 'Menu Categories',
   'nav.menuItems': 'Menu Items',
+  'nav.tables': 'Tables',
   'nav.logout': 'Logout',
 
   // ── Auth ──
