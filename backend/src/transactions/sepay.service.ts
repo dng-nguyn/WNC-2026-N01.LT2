@@ -68,6 +68,15 @@ export class SePayService {
     }
   }
 
+  async findTransactionByCode(code: string, amount: number): Promise<SepayTransaction | null> {
+    const txs = await this.listTransactions(100);
+    return txs.find(
+      (tx) =>
+        tx.transaction_content?.includes(code) &&
+        Number(tx.amount_in) === amount,
+    ) ?? null;
+  }
+
   async findTransactionForAmount(amount: number): Promise<SepayTransaction | null> {
     const txs = await this.listTransactions(50);
     return txs.find((tx) => Number(tx.amount_in) === amount) ?? null;
