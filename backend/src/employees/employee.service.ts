@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as argon2 from 'argon2';
 import { Employee } from './employee.entity';
 import { User } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 
@@ -13,6 +15,7 @@ export class EmployeeService {
     private readonly employeeRepository: Repository<Employee>,
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    private readonly usersService: UsersService,
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
@@ -82,5 +85,36 @@ export class EmployeeService {
   async remove(id: string): Promise<void> {
     const employee = await this.findOne(id);
     await this.employeeRepository.remove(employee);
+  }
+
+  async resetPassword(
+    id: string,
+    newPassword?: string,
+  ): Promise<{ message: string; newPassword: string }> {
+    const employee = await this.findOne(id);
+
+    if (!employee.user) {
+      throw new BadRequestException(
+        `Employee with id ${id} has no associated user account`,
+      );
+    }
+
+    const password = newPassword ?? this.generateRandomPassword();
+    const hashedPassword = await argon2.hash(password, {
+      type: argon2.argon2id,
+    });
+    await this.usersService.updatePassword(employee.user.id, hashedPassword);
+
+    return { message: 'Password reset successfully', newPassword: password };
+  }
+
+  private generateRandomPassword(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    // Ensure it meets complexity requirements
+    return 'A1' + password;
   }
 }

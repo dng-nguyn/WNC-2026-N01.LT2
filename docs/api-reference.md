@@ -32,6 +32,20 @@ On successful login or registration the server sets access and refresh tokens as
 | `POST` | `/auth/register` | No | Register a new user. Body: `username`, `password`, optional `fullName`, `phone`. |
 | `POST` | `/auth/login` | No | Login. Returns tokens in HTTP-only cookies. Body: `username`, `password`. |
 | `GET` | `/auth/profile` | Yes | Get the current authenticated user's profile. |
+| `POST` | `/auth/change-password` | Yes | Change the authenticated user's password. Body: `currentPassword`, `newPassword`. |
+
+---
+
+### Users (`/users`)
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/users` | Yes (MANAGER) | Create a new user. Body: `username`, `password`, optional `fullName`, `phone`, `role`. Requires MANAGER role. |
+| `GET` | `/users` | Yes | List all users. |
+| `GET` | `/users/:id` | Yes | Get a user by ID. |
+| `PATCH` | `/users/:id` | Yes (MANAGER) | Update a user. Requires MANAGER role. |
+| `DELETE` | `/users/:id` | Yes | Delete a user. |
+| `POST` | `/users/:id/reset-password` | Yes (MANAGER) | Reset a user's password. Body: optional `password` (if omitted, a random password is generated). Requires MANAGER role. |
 
 ---
 

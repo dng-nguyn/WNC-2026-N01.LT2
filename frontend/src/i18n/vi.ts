@@ -24,6 +24,8 @@ const vi = {
   'nav.manageTables': 'Quản lý bàn',
   'nav.transactions': 'Lịch sử giao dịch',
   'nav.logout': 'Đăng xuất',
+  'nav.employees': 'Quản lý nhân viên',
+  'nav.settings': 'Cài đặt',
 
   // ── Auth ──
   'auth.login': 'Đăng nhập',

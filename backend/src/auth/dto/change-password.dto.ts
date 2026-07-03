@@ -1,9 +1,8 @@
-import { IsBoolean, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { IsString, Length, Matches } from 'class-validator';
 
-export class LoginDto {
+export class ChangePasswordDto {
   @IsString()
-  @Length(3, 50)
-  username!: string;
+  currentPassword!: string;
 
   @IsString()
   @Length(8, 100, { message: 'Password must be between 8 and 100 characters' })
@@ -11,9 +10,5 @@ export class LoginDto {
     message: 'Password must contain at least one uppercase letter',
   })
   @Matches(/(?=.*\d)/, { message: 'Password must contain at least one number' })
-  password!: string;
-
-  @IsOptional()
-  @IsBoolean()
-  rememberMe?: boolean;
+  newPassword!: string;
 }

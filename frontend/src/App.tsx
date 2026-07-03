@@ -11,6 +11,8 @@ import MenuManagementPage from './pages/MenuManagementPage';
 import MenuItemManagementPage from './pages/MenuItemManagementPage';
 import TableManagementPage from './pages/TableManagementPage';
 import TransactionHistoryPage from './pages/TransactionHistoryPage';
+import EmployeeManagementPage from './pages/EmployeeManagementPage';
+import SettingsPage from './pages/SettingsPage';
 export default function App() {
   return (
     <I18nProvider>
@@ -91,6 +93,27 @@ export default function App() {
           <ProtectedRoute>
             <AppLayout>
               <TableManagementPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <EmployeeManagementPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <SettingsPage />
             </AppLayout>
           </ProtectedRoute>
         }

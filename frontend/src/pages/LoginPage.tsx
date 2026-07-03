@@ -8,6 +8,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    return localStorage.getItem('remember_me') === 'true';
+  });
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -15,7 +18,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login({ username, password });
+      await login({ username, password, rememberMe });
+      localStorage.setItem('remember_me', String(rememberMe));
       navigate('/dashboard', { replace: true });
     } catch (err: unknown) {
       const msg =
@@ -58,6 +62,19 @@ export default function LoginPage() {
               placeholder="Enter your password"
               required
             />
+          </div>
+
+          <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              id="rememberMe"
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              style={{ width: 16, height: 16, accentColor: '#2563eb' }}
+            />
+            <label htmlFor="rememberMe" style={{ margin: 0, cursor: 'pointer', fontSize: '0.9rem' }}>
+              Remember me
+            </label>
           </div>
 
           <button type="submit" className="btn btn-primary btn-block" disabled={loading}>

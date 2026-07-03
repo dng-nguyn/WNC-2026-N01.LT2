@@ -73,6 +73,9 @@ services:
       IMMUDB_USER: immudb
       IMMUDB_PASSWORD: immudb                    # MUST match IMMUDB_ADMIN_PASSWORD
       IMMUDB_DATABASE: defaultdb
+      # Admin auto-created on first boot
+      ADMIN_USERNAME: admin                       # CHANGE
+      ADMIN_PASSWORD: change-me-in-production     # CHANGE
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.js"]
       interval: 10s
