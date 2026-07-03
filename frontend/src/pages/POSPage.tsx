@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { usePOSData } from '../hooks/usePOSData';
 import { useCart } from '../hooks/useCart';
 import { CategoryTabs, ProductCard, CartSummary } from '../components/pos';
@@ -7,6 +8,8 @@ import { PaymentModal } from '../components/payment';
 
 export default function POSPage() {
   const [showPayment, setShowPayment] = useState(false);
+  const [takeout, setTakeout] = useState(true);
+  const navigate = useNavigate();
   const {
     tables,
     categories,
@@ -30,13 +33,24 @@ export default function POSPage() {
     updateQuantity,
     clearCart,
     clearMessages,
+    handleCheckout,
   } = useCart();
 
   const displayError = dataError || cartError;
 
-  function handlePayClick() {
+  async function handleButtonClick() {
     if (cart.length === 0) return;
-    setShowPayment(true);
+    if (!takeout && !selectedTableId) return;
+    if (takeout) {
+      setShowPayment(true);
+    } else {
+      try {
+        await handleCheckout();
+        navigate('/tables');
+      } catch {
+        // error displayed via cartError state
+      }
+    }
   }
 
   function handlePaymentSuccess() {
@@ -106,24 +120,41 @@ export default function POSPage() {
             onUpdateQuantity={updateQuantity}
             onSetQuantity={handleSetQuantity}
             onClear={clearCart}
-            onCheckout={handlePayClick}
+            onCheckout={handleButtonClick}
+            checkoutDisabled={!takeout && !selectedTableId}
+            buttonLabel={takeout ? 'Pay' : 'Order'}
           >
-            {/* Table selector */}
-            <div className="cart-table-selector">
-              <label htmlFor="pos-table">Table</label>
-              <select
-                id="pos-table"
-                value={selectedTableId}
-                onChange={(e) => setSelectedTableId(e.target.value)}
-              >
-                <option value="">Takeaway</option>
-                {tables.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.tableNumber}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {/* Takeout checkbox */}
+            <label className="cart-takeout-toggle">
+              <input
+                type="checkbox"
+                checked={takeout}
+                onChange={(e) => {
+                  setTakeout(e.target.checked);
+                  if (e.target.checked) setSelectedTableId('');
+                }}
+              />
+              Takeout
+            </label>
+
+            {/* Table selector — only when not takeout */}
+            {!takeout && (
+              <div className="cart-table-selector">
+                <label htmlFor="pos-table">Table</label>
+                <select
+                  id="pos-table"
+                  value={selectedTableId}
+                  onChange={(e) => setSelectedTableId(e.target.value)}
+                >
+                  <option value="">Select a table…</option>
+                  {tables.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.tableNumber}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </CartSummary>
         </div>
       </div>

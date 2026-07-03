@@ -81,4 +81,30 @@ describe('CartSummary', () => {
     await user.click(screen.getByRole('button', { name: /clear/i }));
     expect(onClear).toHaveBeenCalledOnce();
   });
+
+  it('uses custom buttonLabel', () => {
+    render(
+      <CartSummary cart={mockCart} cartTotal={90000} cartItemCount={2}
+        submitting={false} onUpdateQuantity={vi.fn()} onClear={vi.fn()} onCheckout={vi.fn()} buttonLabel="Order" />
+    );
+    expect(screen.getByRole('button', { name: /order/i })).toBeInTheDocument();
+  });
+
+  it('disables checkout button when checkoutDisabled is true', () => {
+    render(
+      <CartSummary cart={mockCart} cartTotal={90000} cartItemCount={2}
+        submitting={false} onUpdateQuantity={vi.fn()} onClear={vi.fn()} onCheckout={vi.fn()} checkoutDisabled />
+    );
+    expect(screen.getByRole('button', { name: /pay/i })).toBeDisabled();
+  });
+
+  it('renders children between totals and button', () => {
+    render(
+      <CartSummary cart={mockCart} cartTotal={90000} cartItemCount={2}
+        submitting={false} onUpdateQuantity={vi.fn()} onClear={vi.fn()} onCheckout={vi.fn()}>
+        <div data-testid="child-content">Takeout</div>
+      </CartSummary>
+    );
+    expect(screen.getByTestId('child-content')).toBeInTheDocument();
+  });
 });

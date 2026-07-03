@@ -23,6 +23,8 @@ const mockUsePOSData = {
   refetch: vi.fn(),
 };
 
+const mockHandleCheckout = vi.fn().mockResolvedValue(undefined);
+
 const mockUseCart = {
   cart: [] as { menuItem: MenuItem; quantity: number; note: string }[],
   selectedTableId: '',
@@ -36,6 +38,7 @@ const mockUseCart = {
   updateQuantity: mockUpdateQuantity,
   clearCart: mockClearCart,
   clearMessages: mockClearMessages,
+  handleCheckout: mockHandleCheckout,
 };
 
 vi.mock('../hooks/usePOSData', () => ({ usePOSData: () => mockUsePOSData }));
@@ -115,5 +118,49 @@ describe('POSPage', () => {
     mockUseCart.success = 'Order placed!';
     render(<MemoryRouter><POSPage /></MemoryRouter>);
     expect(screen.getByText('Order placed!')).toBeInTheDocument();
+  });
+
+  it('renders takeout checkbox', () => {
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(screen.getByLabelText(/takeout/i)).toBeInTheDocument();
+  });
+
+  it('shows Pay button when takeout is checked (default)', () => {
+    mockUseCart.cart = [{ menuItem: item1, quantity: 1, note: '' }];
+    mockUseCart.cartItemCount = 1;
+    mockUseCart.cartTotal = 45000;
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    expect(screen.getByRole('button', { name: /pay/i })).toBeInTheDocument();
+  });
+
+  it('shows Order button when takeout is unchecked', async () => {
+    mockUseCart.cart = [{ menuItem: item1, quantity: 1, note: '' }];
+    mockUseCart.cartItemCount = 1;
+    mockUseCart.cartTotal = 45000;
+    const user = userEvent.setup();
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    await user.click(screen.getByLabelText(/takeout/i));
+    expect(screen.getByRole('button', { name: /order/i })).toBeInTheDocument();
+  });
+
+  it('disables Order button when no table selected and takeout unchecked', async () => {
+    mockUseCart.cart = [{ menuItem: item1, quantity: 1, note: '' }];
+    mockUseCart.cartItemCount = 1;
+    mockUseCart.cartTotal = 45000;
+    mockUseCart.selectedTableId = '';
+    const user = userEvent.setup();
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    await user.click(screen.getByLabelText(/takeout/i));
+    expect(screen.getByRole('button', { name: /order/i })).toBeDisabled();
+  });
+
+  it('opens payment modal when Pay is clicked in takeout mode', async () => {
+    mockUseCart.cart = [{ menuItem: item1, quantity: 1, note: '' }];
+    mockUseCart.cartItemCount = 1;
+    mockUseCart.cartTotal = 45000;
+    const user = userEvent.setup();
+    render(<MemoryRouter><POSPage /></MemoryRouter>);
+    await user.click(screen.getByRole('button', { name: /pay/i }));
+    expect(screen.getByText(/select payment method/i)).toBeInTheDocument();
   });
 });

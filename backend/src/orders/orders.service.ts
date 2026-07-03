@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Order } from './order.entity';
+import { OrderStatus } from './order-status.enum';
 import { OrderItem } from './order-item.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CreateOrderItemDto } from './dto/create-order-item.dto';
@@ -97,6 +98,20 @@ export class OrdersService {
       order: { createdAt: 'DESC' },
       relations: { table: true, user: true, items: { menuItem: true } },
     });
+  }
+
+  async findActive(): Promise<Order[]> {
+    return this.ordersRepository
+      .createQueryBuilder('order')
+      .innerJoinAndSelect('order.table', 'table')
+      .leftJoinAndSelect('order.user', 'user')
+      .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.menuItem', 'menuItem')
+      .where('order.status IN (:...statuses)', {
+        statuses: [OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING],
+      })
+      .orderBy('order.createdAt', 'DESC')
+      .getMany();
   }
 
   async findOne(id: string): Promise<Order> {

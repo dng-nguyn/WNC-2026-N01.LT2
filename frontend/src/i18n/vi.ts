@@ -20,6 +20,7 @@ const vi = {
   'nav.pos': 'Bán hàng',
   'nav.categories': 'Danh mục',
   'nav.menuItems': 'Món',
+  'nav.tables': 'Bàn',
   'nav.logout': 'Đăng xuất',
 
   // ── Auth ──

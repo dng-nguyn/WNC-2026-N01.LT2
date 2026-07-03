@@ -10,6 +10,10 @@ export async function fetchOrders(): Promise<Order[]> {
   return get<Order[]>('/orders');
 }
 
+export async function fetchActiveOrders(): Promise<Order[]> {
+  return get<Order[]>('/orders/active');
+}
+
 export async function fetchOrder(id: string): Promise<Order> {
   return get<Order>(`/orders/${id}`);
 }
