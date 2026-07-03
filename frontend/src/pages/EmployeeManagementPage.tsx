@@ -422,13 +422,8 @@ export default function EmployeeManagementPage() {
                   <div style={{ fontSize: '0.8rem', color: '#16a34a', fontWeight: 600, marginBottom: 8 }}>✓ Password Reset Successful</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <code style={{ background: '#fff', padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: '0.9rem', flex: 1, userSelect: 'all' }}>{resetPwResult}</code>
-                    <button className="btn btn-sm btn-secondary" onClick={(e) => {
-                      const el = document.createElement('textarea');
-                      el.value = resetPwResult;
-                      document.body.appendChild(el);
-                      el.select();
-                      document.execCommand('copy');
-                      document.body.removeChild(el);
+                    <button className="btn btn-sm btn-secondary" onClick={async (e) => {
+                      await navigator.clipboard.writeText(resetPwResult);
                       const btn = e.currentTarget;
                       btn.textContent = 'Copied!';
                       setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
