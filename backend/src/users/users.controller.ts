@@ -27,8 +27,9 @@ export class UsersController {
   @UseGuards(RolesGuard)
   @Roles(UserRole.MANAGER)
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    const hashedPassword = await argon2.hash(createUserDto.password, { type: argon2.argon2id });
+    return this.usersService.create({ ...createUserDto, password: hashedPassword });
   }
 
   @UseGuards(RolesGuard)
