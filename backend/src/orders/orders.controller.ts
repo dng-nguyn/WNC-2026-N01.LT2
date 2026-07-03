@@ -28,6 +28,12 @@ export class OrdersController {
     return this.ordersService.findAll();
   }
 
+
+  @Get('active')
+  findActive(): Promise<Order[]> {
+    return this.ordersService.findActive();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Order> {
     return this.ordersService.findOne(id);

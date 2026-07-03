@@ -744,3 +744,214 @@ a:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #e2e8f0;
 }
+
+/* ===== Tables Page ===== */
+
+.tables-empty {
+  text-align: center;
+  padding: 48px 0;
+}
+
+.tables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.table-card {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  border: 2px solid transparent;
+}
+
+.table-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.table-card--selected {
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+}
+
+.table-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table-card-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.table-card-orders {
+  padding: 8px 0;
+}
+
+.table-order-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.table-order-row:hover {
+  background: #f8fafc;
+}
+
+.table-order-row--selected {
+  background: #eff6ff;
+  border-left: 3px solid #2563eb;
+}
+
+.table-order-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.table-order-count {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.table-order-amount {
+  font-weight: 600;
+}
+
+.table-order-status {
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table-order-status--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.table-order-status--confirmed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.table-order-status--preparing {
+  background: #e0e7ff;
+  color: #3730a3;
+}
+
+/* Order detail panel */
+
+.order-detail-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 380px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.order-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-detail-header h3 {
+  margin: 0;
+}
+
+.order-detail-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-detail-items {
+  flex: 1;
+  padding: 16px 24px;
+}
+
+.order-detail-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #f8fafc;
+}
+
+.order-detail-item:last-child {
+  border-bottom: none;
+}
+
+.order-detail-item-name {
+  font-size: 0.9rem;
+}
+
+.order-detail-item-price {
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.order-detail-total {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 2px solid #f1f5f9;
+  font-weight: 600;
+}
+
+.order-detail-total-amount {
+  font-size: 1.1rem;
+}
+
+.order-detail-actions {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.order-detail-controls {
+  padding: 12px 24px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.order-detail-orders {
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table-order-time {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  min-width: 48px;
+}
+
