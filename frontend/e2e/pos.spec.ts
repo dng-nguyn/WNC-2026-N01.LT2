@@ -98,8 +98,10 @@ test.describe('POS terminal', () => {
 
   test('can select a table', async ({ page }) => {
     await page.goto('/pos');
+    // Uncheck takeout to reveal table selector
+    const takeoutCheckbox = page.getByLabel(/takeout/i);
+    await takeoutCheckbox.uncheck();
     const tableSelect = page.locator('.cart-table-selector select');
-    // Takeaway option should be default
     await expect(tableSelect).toBeVisible();
   });
 
