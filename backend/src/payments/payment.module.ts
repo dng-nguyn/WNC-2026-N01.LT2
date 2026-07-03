@@ -5,7 +5,7 @@ import { Payment } from './payment.entity';
 import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
 import { Order } from '../orders/order.entity';
-
+import { TransactionsModule } from '../transactions/transactions.module';
 @Module({
   imports: [
     HttpModule.register({
@@ -13,6 +13,7 @@ import { Order } from '../orders/order.entity';
       maxRedirects: 5,
     }),
     TypeOrmModule.forFeature([Payment, Order]),
+    TransactionsModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService],
