@@ -24,7 +24,7 @@ module.exports = {
     },
     upload: {
       target: 'filesystem',
-      storageDir: '.lighthouseci',
+      storageDir: 'frontend/.lighthouseci',
     },
   },
 };
