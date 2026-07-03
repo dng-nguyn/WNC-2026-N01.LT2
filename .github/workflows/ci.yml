@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: [main, cafe-backend-expansion, frontend]
   pull_request:
     branches: [main]
 
