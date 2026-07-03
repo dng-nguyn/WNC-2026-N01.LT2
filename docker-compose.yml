@@ -16,11 +16,36 @@ services:
     # ports:
     #   - "3306:3306"
 
+  immudb:
+    image: codenotary/immudb:latest
+    restart: unless-stopped
+    # Use named volumes to avoid UID 3322 permission issues with bind mounts.
+    # Do NOT use bind mounts (e.g. /opt/immudb/data:/var/lib/immudb) — the
+    # immudb container runs as UID 3322 and the host directory ownership
+    # will cause "permission denied" on immudb.identifier.
+    volumes:
+      - immudb_data:/var/lib/immudb
+    environment:
+      IMMUDB_ADMIN_PASSWORD: ${IMMUDB_ADMIN_PASSWORD:-immudb}
+    healthcheck:
+      test: ["CMD", "immuadmin", "audit", "status"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    # Ports exposed for local development / direct access
+    ports:
+      - "${IMMUDB_GRPC_PORT:-3322}:3322"
+      - "${IMMUDB_WEB_PORT:-9497}:9497"
+      - "${IMMUDB_REST_PORT:-8080}:8080"
+
   app:
     image: ghcr.io/dng-nguyn/wnc-2026-n01.lt2:${TAG:-latest}
     restart: unless-stopped
     depends_on:
       db:
+        condition: service_healthy
+      immudb:
         condition: service_healthy
     environment:
       # DB_HOST is the Docker service DNS name — must stay "db"
@@ -39,6 +64,12 @@ services:
       SEPAY_BANK_NAME: ${SEPAY_BANK_NAME:-MBBank}
       INIT_DB_SEED: ${INIT_DB_SEED:-false}
       DB_SYNC: ${DB_SYNC:-true}
+      # immudb — accessible via Docker service DNS
+      IMMUDB_HOST: immudb
+      IMMUDB_PORT: ${IMMUDB_PORT:-3322}
+      IMMUDB_USER: ${IMMUDB_USER:-immudb}
+      IMMUDB_PASSWORD: ${IMMUDB_ADMIN_PASSWORD:-immudb}
+      IMMUDB_DATABASE: ${IMMUDB_DATABASE:-defaultdb}
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.js"]
       interval: 10s
@@ -51,3 +82,4 @@ services:
 
 volumes:
   mysql_data:
+  immudb_data:

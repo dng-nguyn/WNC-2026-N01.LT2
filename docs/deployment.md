@@ -77,10 +77,12 @@ docker compose -f docker-compose.standalone.yml up -d
 | --- | --- | --- | --- |
 | `app` | `ghcr.io/dng-nguyn/wnc-2026-n01.lt2:latest` | 80 (mapped to 3000) | NestJS backend |
 | `db` | `mysql:8.0` | 3306 (internal only by default) | MySQL database |
+| `immudb` | `codenotary/immudb:latest` | 3322 (gRPC), 9497 (web), 8080 (REST) | Immutable audit log (optional) |
 
 ### Volumes
 
 - `mysql_data` — persists MySQL data across container restarts.
+- `immudb_data` — persists immudb audit log. **Must be a named volume**, not a bind mount. Bind mounts cause `permission denied: open /var/lib/immudb/immudb.identifier` because immudb runs as UID 3322. If you must use bind mounts, run `sudo chown -R 3322:3322 /your/path` on the host.
 
 ### Key Details
 
@@ -137,12 +139,12 @@ gh workflow run deploy-aws.yml
 | --- | --- |
 | **AWS Region** | Set via `AWS_REGION` GitHub secret |
 | **ECR Repository** | Set via `ECR_REPOSITORY` GitHub secret |
-| **ECS Cluster** | Set via `ECS_CLUSTER` GitHub secret |
 | **ECS Service** | 1 Fargate Spot task, 1 vCPU, 2 GB RAM |
 | **RDS MySQL** | `coffee-shop-db` (endpoint in Secrets Manager) |
+| **immudb** | Sidecar container in same task (localhost:3322) |
 | **ALB** | HTTPS listener with Origin CA cert, HTTP→HTTPS redirect |
 | **SSL** | Cloudflare Origin CA certificate (Full Strict mode) |
-| **Secrets** | AWS Secrets Manager (7 secrets, see below) |
+| **Secrets** | AWS Secrets Manager (8 secrets, see below) |
 
 ### AWS Resources Required
 
@@ -190,6 +192,7 @@ The following secrets must exist in AWS Secrets Manager (same region as ECS). Cr
 | `coffee-shop-pos/jwt-secret` | `JWT_SECRET` | JWT signing key (generate with `openssl rand -base64 48`) |
 | `coffee-shop-pos/session-secret` | `SESSION_SECRET` | Express session key (generate with `openssl rand -base64 48`) |
 | `coffee-shop-pos/sepay-api-key` | `SEPAY_API_KEY` | Sepay payment API key |
+| `coffee-shop-pos/immudb-password` | `IMMUDB_PASSWORD` | immudb admin password |
 | `coffee-shop-pos/sepay-account-number` | `SEPAY_ACCOUNT_NUMBER` | Sepay bank account number |
 | `coffee-shop-pos/sepay-bank-name` | `SEPAY_BANK_NAME` | Sepay bank name |
 
