@@ -30,6 +30,9 @@ export async function clearNonUserTables(dataSource: DataSource) {
 }
 
 export async function setupApp(): Promise<E2ESetup> {
+  // Disable immudb in tests — not available in CI
+  delete process.env.IMMUDB_HOST;
+
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
   }).compile();

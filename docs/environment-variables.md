@@ -23,6 +23,11 @@ This document covers all environment variables used by the NestJS backend and Re
 | `SEPAY_API_KEY` | No | — | Sepay payment gateway API key |
 | `SEPAY_ACCOUNT_NUMBER` | No | — | Bank account number for Sepay transfers |
 | `SEPAY_BANK_NAME` | No | — | Bank name for Sepay transfers |
+| `IMMUDB_HOST` | No | — | immudb host (set to `localhost` for Docker Compose / sidecar) |
+| `IMMUDB_PORT` | No | `3322` | immudb gRPC port |
+| `IMMUDB_USER` | No | `immudb` | immudb username |
+| `IMMUDB_PASSWORD` | No | `immudb` | immudb password |
+| `IMMUDB_DATABASE` | No | `defaultdb` | immudb database name |
 
 ## Frontend (Vite)
 
@@ -58,6 +63,7 @@ On ECS Fargate, sensitive values are injected from AWS Secrets Manager at contai
 | `coffee-shop-pos/db-host` | `DB_HOST` | RDS endpoint address |
 | `coffee-shop-pos/db-password` | `DB_PASSWORD` | Database password |
 | `coffee-shop-pos/jwt-secret` | `JWT_SECRET` | JWT signing key |
+| `coffee-shop-pos/immudb-password` | `IMMUDB_PASSWORD` | immudb admin password |
 | `coffee-shop-pos/session-secret` | `SESSION_SECRET` | Express session key |
 | `coffee-shop-pos/sepay-api-key` | `SEPAY_API_KEY` | Sepay payment API key |
 | `coffee-shop-pos/sepay-account-number` | `SEPAY_ACCOUNT_NUMBER` | Sepay bank account number |
@@ -88,6 +94,13 @@ SESSION_SECRET=test-session-secret-change-me
 PORT=3000
 
 SEPAY_API_KEY=your_sepay_api_key
+
+# Immudb (immutable audit log — optional)
+IMMUDB_HOST=localhost
+IMMUDB_PORT=3322
+IMMUDB_USER=immudb
+IMMUDB_PASSWORD=immudb
+IMMUDB_DATABASE=defaultdb
 SEPAY_ACCOUNT_NUMBER=3669420000
 SEPAY_BANK_NAME=MBBank
 

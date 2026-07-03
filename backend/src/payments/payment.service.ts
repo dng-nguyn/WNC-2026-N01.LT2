@@ -9,6 +9,8 @@ import { Payment } from './payment.entity';
 import { PaymentStatus } from './payment-status.enum';
 import { Order } from '../orders/order.entity';
 import { OrderStatus } from '../orders/order-status.enum';
+import { TransactionsService } from '../transactions/transactions.service';
+import { VerificationType } from '../transactions/verification-type.enum';
 
 @Injectable()
 export class PaymentService {
@@ -19,6 +21,7 @@ export class PaymentService {
     private readonly orderRepository: Repository<Order>,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly transactionsService: TransactionsService,
   ) {}
 
   // ── QR Code Generation (public VietQR — no Sepay token needed) ──
@@ -129,6 +132,19 @@ export class PaymentService {
       await this.orderRepository.save(order);
     }
 
+    // Log transaction (non-blocking — audit enhancement)
+    try {
+      await this.transactionsService.logTransaction({
+        orderId: payment.order.id,
+        paymentId: payment.id,
+        amount: Number(payment.amount),
+        verificationType: VerificationType.AUTO,
+        sepayTransactionId: tx.id,
+      });
+    } catch {
+      // Transaction logging failure should not block payment verification
+    }
+
     const updatedPayment = await this.paymentRepository.findOne({
       where: { id: paymentId },
       relations: { order: true },
@@ -137,6 +153,32 @@ export class PaymentService {
       throw new NotFoundException(`Payment with id ${paymentId} not found after verification`);
     }
     return updatedPayment;
+  }
+
+  async markManual(paymentId: string): Promise<Payment> {
+    const payment = await this.findById(paymentId);
+    payment.status = PaymentStatus.COMPLETED;
+    await this.paymentRepository.save(payment);
+
+    const order = await this.orderRepository.findOne({
+      where: { id: payment.order.id },
+    });
+    if (order) {
+      order.status = OrderStatus.COMPLETED;
+      await this.orderRepository.save(order);
+    }
+    try {
+      await this.transactionsService.logTransaction({
+        orderId: payment.order.id,
+        paymentId: payment.id,
+        amount: Number(payment.amount),
+        verificationType: VerificationType.MANUAL,
+      });
+    } catch {
+      // Non-blocking
+    }
+
+    return this.findById(paymentId);
   }
 
   // ── Sepay API Helpers ──

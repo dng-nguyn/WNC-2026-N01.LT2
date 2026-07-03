@@ -115,6 +115,23 @@
 | created_at | timestamp | |
 | updated_at | timestamp | |
 
+### transactions
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | UUID | PK |
+| order_id | UUID | FK → orders |
+| payment_id | UUID | FK → payment_requests, nullable |
+| amount | decimal(12,0) | |
+| verification_type | enum | AUTO, MANUAL |
+| verified_at | timestamp | |
+| reverified_at | timestamp | nullable |
+| sepay_transaction_id | varchar(36) | nullable |
+| immudb_tx_id | bigint | nullable — immudb ledger index |
+| created_at | timestamp | |
+| updated_at | timestamp | |
+
+
 ## Relationships
 
 - **Menu (1) → MenuItem (many):** Each menu category contains multiple menu items.
@@ -124,6 +141,9 @@
 - **Table (1) → Order (many):** Each table can be associated with multiple orders over time.
 - **User (1) → Order (many):** Each user can place multiple orders.
 - **Order (1) → Payment (many):** Each order can have multiple payment requests.
+- **Order (1) → Transaction (many):** Each order generates a transaction record on payment verification.
+- **Payment (1) → Transaction (0..1):** Each payment can be linked to a transaction.
+- **immudb (external):** Transaction history is primarily stored in immudb (immutable). MySQL stores `reverifiedAt` updates as a secondary cache.
 
 ## Entity-to-Table Mapping Note
 

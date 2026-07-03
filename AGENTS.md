@@ -2,9 +2,8 @@
 
 ## Project Overview
 
-Full-stack coffee shop POS/management system. NestJS backend with MySQL, React/Vite frontend, deployed on AWS ECS Fargate + RDS. Production domain: configured via environment.
+**Stack:** NestJS 11 · React 19 · Vite 6 · MySQL 8 · TypeORM 0.3 · TypeScript · JWT auth · Sepay payments · immudb (optional)
 
-**Stack:** NestJS 11 · React 19 · Vite 6 · MySQL 8 · TypeORM 0.3 · TypeScript · JWT auth · Sepay payments
 
 ## Architecture
 
@@ -12,6 +11,8 @@ Full-stack coffee shop POS/management system. NestJS backend with MySQL, React/V
 Browser → React SPA (Vite) → NestJS API (:3000) → MySQL
                                      ↓
                               Sepay Payment API
+                                     ↓
+                              immudb (immutable audit log, optional)
 ```
 
 **Monorepo layout:**
@@ -34,7 +35,8 @@ AppModule
 ├── OrderModule ────────── imports MenuItemModule, UsersModule, TableModule
 ├── UsersModule ────────── exports UsersService + TypeOrmModule
 ├── AuthModule ─────────── imports UsersModule, exports AuthService
-└── PaymentModule ──────── imports HttpModule, registers Payment + Order entities
+├── PaymentModule ──────── imports HttpModule, TransactionsModule
+└── TransactionsModule ── imports HttpModule, TypeORM(Transaction), ImmudbService, SePayService
 ```
 
 Modules consumed by `OrderModule` MUST export `TypeOrmModule` so the consuming module can `@InjectRepository()` cross-module entities.
@@ -182,8 +184,27 @@ export class ThingService {
 | `OrderItem` | `order_items` | `order_items` |
 | `Employee` | `employees` | `employees` |
 | `Payment` | `payment_requests` | `payment_requests` |
+| `Transaction` | `transactions` | `transactions` |
 
 **Note:** `Menu` → `categories` and `MenuItem` → `products` is deliberate. SQL schema uses category/product names; API uses menu/menu-item routes.
+
+## Transaction History & immudb
+
+**immudb** is the primary data source for transaction history (immutable audit log). MySQL is a secondary cache for `reverifiedAt` and `sepayTransactionId` updates (which can't be written to immudb since it's append-only).
+
+**Data flow:**
+1. Payment verified (auto or manual) → write to MySQL first (get UUID) → write to immudb with same UUID as key
+2. `findAll` → read from immudb (primary) → merge MySQL `reverifiedAt`/`sepayTransactionId` updates
+3. `findById` → direct key lookup in immudb (`client.get({ key: 'txn:{id}' })`) → fallback to MySQL
+
+**immudb key structure:**
+- `txn:{transactionId}` — primary key for transaction data
+- `order:{orderId}:{transactionId}` — secondary key for order-based lookups
+
+**Deployment:** immudb runs as a sidecar container in ECS Fargate (same task, `localhost:3322`). In Docker Compose, it's a separate service. Connection is optional — if `IMMUDB_HOST` is not set, the app degrades gracefully.
+
+**Docker permission note:** immudb runs as UID 3322. Named volumes work automatically. Bind mounts require `sudo chown -R 3322:3322 /path`.
+
 
 ## Runtime/Tooling
 

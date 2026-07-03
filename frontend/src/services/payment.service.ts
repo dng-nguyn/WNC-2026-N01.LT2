@@ -32,3 +32,11 @@ export async function getPaymentsByOrder(orderId: string): Promise<Payment[]> {
 export async function verifyPayment(id: string): Promise<Payment> {
   return post<Payment>(`/payments/${id}/verify`);
 }
+
+/**
+ * Mark a payment as manually verified.
+ * POST /payments/:id/mark-manual
+ */
+export async function markManualPayment(id: string): Promise<Payment> {
+  return post<Payment>(`/payments/${id}/mark-manual`);
+}

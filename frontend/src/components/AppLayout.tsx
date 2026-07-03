@@ -14,6 +14,7 @@ const navItems = [
   { path: '/manage-tables', labelKey: 'nav.manageTables' as const, icon: '⚙️' },
   { path: '/menus', labelKey: 'nav.categories' as const, icon: '📁' },
   { path: '/menu-items', labelKey: 'nav.menuItems' as const, icon: '☕' },
+  { path: '/transactions', labelKey: 'nav.transactions' as const, icon: '📋' },
 ];
 
 export default function AppLayout({ children }: AppLayoutProps) {
