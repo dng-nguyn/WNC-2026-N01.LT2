@@ -15,7 +15,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto & { role?: import('./user-role.enum').UserRole }): Promise<User> {
     const existing = await this.usersRepository.findOne({
       where: { username: createUserDto.username },
     });
@@ -62,5 +62,23 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find({
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async update(id: string, data: Partial<User>): Promise<User> {
+    const user = await this.findById(id);
+    Object.assign(user, data);
+    return this.usersRepository.save(user);
+  }
+
+  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    const user = await this.findById(id);
+    user.password = hashedPassword;
+    await this.usersRepository.save(user);
   }
 }

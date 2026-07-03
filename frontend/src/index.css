@@ -377,6 +377,11 @@ a:hover {
   color: #991b1b;
 }
 
+.badge-warning {
+  background: #fef3c7;
+  color: #92400e;
+}
+
 /* ===== Modal ===== */
 .modal-overlay {
   position: fixed;
@@ -632,6 +637,18 @@ a:hover {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--color-text-muted);
+}
+
+.sidebar-settings {
+  margin-left: auto;
+  font-size: 1rem;
+  text-decoration: none;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.sidebar-settings:hover {
+  opacity: 1;
 }
 
 .sidebar-logout {

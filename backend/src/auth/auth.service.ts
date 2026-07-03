@@ -4,6 +4,7 @@ import * as argon2 from 'argon2';
 import { UsersService } from '../users/users.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UserRole } from '../users/user-role.enum';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +14,6 @@ export class AuthService {
   ) {}
 
   async register(registerDto: RegisterDto) {
-    // Hash password using argon2id
     const hashedPassword = await argon2.hash(registerDto.password, {
       type: argon2.argon2id,
     });
@@ -23,6 +23,7 @@ export class AuthService {
       password: hashedPassword,
       fullName: registerDto.fullName,
       phone: registerDto.phone,
+      role: UserRole.STAFF,
     });
 
     // Generate JWT access and refresh tokens
@@ -98,5 +99,27 @@ export class AuthService {
 
   async validateUser(userId: string) {
     return this.usersService.findById(userId);
+  }
+
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const user = await this.usersService.findByUsernameWithPassword(
+      (await this.usersService.findById(userId)).username,
+    );
+
+    const isPasswordValid = await argon2.verify(user.password, currentPassword);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const hashedPassword = await argon2.hash(newPassword, {
+      type: argon2.argon2id,
+    });
+    await this.usersService.updatePassword(userId, hashedPassword);
+
+    return { message: 'Password changed successfully' };
   }
 }

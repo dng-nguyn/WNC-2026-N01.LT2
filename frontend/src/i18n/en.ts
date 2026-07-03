@@ -24,6 +24,8 @@ const en = {
   'nav.manageTables': 'Manage Tables',
   'nav.transactions': 'Transaction History',
   'nav.logout': 'Logout',
+  'nav.employees': 'Manage Employees',
+  'nav.settings': 'Settings',
 
   // ── Auth ──
   'auth.login': 'Login',
