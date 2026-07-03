@@ -1,45 +1,82 @@
-import { get, post, patch } from './api';
-import type { User, UserRole } from '../types';
+import { get, post, patch, del } from './api';
+import type { Employee, User } from '../types';
 
-export interface CreateUserPayload {
+// ===== Employee CRUD (via /employees — MANAGER role required) =====
+
+export async function fetchEmployees(): Promise<Employee[]> {
+  return get<Employee[]>('/employees');
+}
+
+export async function fetchEmployee(id: string): Promise<Employee> {
+  return get<Employee>(`/employees/${id}`);
+}
+
+export async function createEmployee(data: {
+  userId?: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  position?: string;
+  department?: string;
+  salary?: number;
+}): Promise<Employee> {
+  return post<Employee>('/employees', data);
+}
+
+export async function updateEmployee(
+  id: string,
+  data: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    position?: string;
+    department?: string;
+    salary?: number;
+    isActive?: boolean;
+  },
+): Promise<Employee> {
+  return patch<Employee>(`/employees/${id}`, data);
+}
+
+export async function deleteEmployee(id: string): Promise<void> {
+  return del<void>(`/employees/${id}`);
+}
+
+export async function resetEmployeePassword(
+  id: string,
+  newPassword?: string,
+): Promise<{ message: string; newPassword: string }> {
+  return post<{ message: string; newPassword: string }>(
+    `/employees/${id}/reset-password`,
+    newPassword ? { newPassword } : {},
+  );
+}
+
+// ===== User account creation (via /users — also MANAGER guarded) =====
+
+export async function createUserAccount(data: {
   username: string;
   password: string;
   fullName?: string;
   phone?: string;
-  role?: UserRole;
+  role?: string;
+}): Promise<User> {
+  return post<User>('/users', data);
 }
 
-export interface UpdateUserPayload {
-  fullName?: string;
-  phone?: string;
-  role?: UserRole;
-  isActive?: boolean;
-}
-
-export async function fetchUsers(): Promise<User[]> {
-  return get<User[]>('/users');
-}
-
-export async function fetchUser(id: string): Promise<User> {
-  return get<User>(`/users/${id}`);
-}
-
-export async function createUser(dto: CreateUserPayload): Promise<User> {
-  return post<User>('/users', dto);
-}
-
-export async function updateUser(
+export async function updateUserAccount(
   id: string,
-  dto: UpdateUserPayload,
+  data: { fullName?: string; phone?: string; role?: string; isActive?: boolean },
 ): Promise<User> {
-  return patch<User>(`/users/${id}`, dto);
+  return patch<User>(`/users/${id}`, data);
 }
 
-export async function resetPassword(
+export async function resetUserPassword(
   id: string,
   password?: string,
-): Promise<{ message: string }> {
-  return post<{ message: string }>(`/users/${id}/reset-password`, {
-    password,
-  });
+): Promise<{ message: string; newPassword: string }> {
+  return post<{ message: string; newPassword: string }>(
+    `/users/${id}/reset-password`,
+    password ? { password } : {},
+  );
 }
