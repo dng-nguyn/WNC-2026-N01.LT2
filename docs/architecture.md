@@ -14,6 +14,7 @@ Coffee shop POS/management system.
 | Auth | JWT + argon2id | — |
 | Payment | Sepay API + VietQR | — |
 | Hosting | AWS ECS Fargate + RDS | — |
+| Audit Log | immudb | 1.9 |
 
 ## Architecture Diagram
 
@@ -25,6 +26,7 @@ graph TD
     ECS --> NestJS[NestJS :3000]
     NestJS --> RDS[RDS MySQL 8]
     NestJS --> Sepay[Sepay Payment API]
+    NestJS --> Immudb[immudb<br/>Audit Log]
     Browser -->|POST /payments/:id/verify| NestJS
 ```
 
@@ -57,6 +59,7 @@ All inbound requests pass through a global `ValidationPipe` configured with `whi
 | `EmployeeModule` | `src/employees/` | Employee CRUD, FK → User |
 | `OrderModule` | `src/orders/` | Order and order-item management |
 | `PaymentModule` | `src/payments/` | Payment creation, QR generation, Sepay verification |
+| `TransactionsModule` | `src/transactions/` | Transaction history, immudb logging, SePay reverify |
 
 ### Entity-to-Table Mapping
 
@@ -72,6 +75,7 @@ TypeORM entities do not always map 1:1 by name. The actual table names are:
 | `OrderItem` | `orders/order-item.entity.ts` | `order_items` |
 | `Employee` | `employees/employee.entity.ts` | `employees` |
 | `Payment` | `payments/payment.entity.ts` | `payment_requests` |
+| `Transaction` | `transactions/transaction.entity.ts` | `transactions` |
 
 All entities use UUID primary keys (`@PrimaryGeneratedColumn('uuid')`).
 
@@ -87,6 +91,7 @@ All entities use UUID primary keys (`@PrimaryGeneratedColumn('uuid')`).
 - `@nestjs/swagger` — OpenAPI documentation
 - `@nestjs/axios` — HTTP client for Sepay API calls
 - `typeorm` + `mysql2` — database access
+- `immudb-node` — immudb gRPC client for immutable audit logging
 
 ## Frontend Architecture
 
@@ -102,6 +107,9 @@ React Router v7 handles client-side routing. Protected routes wrap pages in `<Pr
 | `/pos` | `POSPage` | Yes |
 | `/menus` | `MenuManagementPage` | Yes |
 | `/menu-items` | `MenuItemManagementPage` | Yes |
+| `/tables` | `TablesPage` | Yes |
+| `/manage-tables` | `TableManagementPage` | Yes |
+| `/transactions` | `TransactionHistoryPage` | Yes |
 | `*` | Redirects to `/dashboard` | — |
 
 ### Services
@@ -117,6 +125,7 @@ All services live in `frontend/src/services/` and delegate to the core `api.ts` 
 | `order.service.ts` | Order creation and listing |
 | `payment.service.ts` | QR payment initiation and status polling |
 | `table.service.ts` | Table CRUD |
+| `transaction.service.ts` | Fetch transactions, reverify via SePay |
 
 ### Custom Hooks
 
@@ -225,6 +234,7 @@ sequenceDiagram
     alt Match found
         NestJS->>NestJS: UPDATE payment_requests SET status=COMPLETED
         NestJS->>NestJS: UPDATE orders SET status=paid
+        NestJS->>NestJS: INSERT INTO transactions + immudb SET
     end
     NestJS-->>POS: 200 { status }
 ```
@@ -263,7 +273,8 @@ graph LR
 - **Container**: Single Docker image containing the NestJS backend (static frontend build served separately or via CDN)
 - **ECS Fargate**: 1024 CPU / 2048 MB memory, container port 3000
 - **Logs**: CloudWatch Logs group `/ecs/coffee-shop-pos`
-- **Secrets**: AWS Secrets Manager for `DB_HOST`, `DB_PASSWORD`, `JWT_SECRET`, `SESSION_SECRET`, `SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, `SEPAY_BANK_NAME`
+- **Secrets**: AWS Secrets Manager for `DB_HOST`, `DB_PASSWORD`, `JWT_SECRET`, `SESSION_SECRET`, `SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, `SEPAY_BANK_NAME`, `IMMUDB_PASSWORD`
+- **immudb Sidecar**: immudb runs as a sidecar container in the same ECS task, accessible on `localhost:3322`
 - **Domain**: `<YOUR_DOMAIN>` via Cloudflare → ALB → ECS
 
 ### Environment Variables
@@ -285,3 +296,8 @@ graph LR
 | `SEPAY_ACCOUNT_NUMBER` | Bank account number for payment verification |
 | `SEPAY_BANK_NAME` | Bank name (e.g. `MBBank`) |
 | `INIT_DB_SEED` | Run database seed script on startup |
+| `IMMUDB_HOST` | immudb host (default `localhost`) |
+| `IMMUDB_PORT` | immudb gRPC port (default `3322`) |
+| `IMMUDB_USER` | immudb authentication user |
+| `IMMUDB_PASSWORD` | immudb password (from Secrets Manager in production) |
+| `IMMUDB_DATABASE` | immudb database name |

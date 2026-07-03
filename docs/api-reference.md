@@ -90,12 +90,13 @@ On successful login or registration the server sets access and refresh tokens as
 |--------|----------|-------------|
 | `POST` | `/orders` | Create an order. Body: `tableId`, `userId`, `items[]`. |
 | `GET` | `/orders` | List all orders. |
+| `GET` | `/orders/active` | List active orders only (status: `PENDING`, `CONFIRMED`, or `PREPARING`). Uses an inner join on `table` to exclude orders without an assigned table. Returns each order with its `table`, `user`, and `items` (including `menuItem`) relations. |
 | `GET` | `/orders/:id` | Get an order by ID. |
 | `PATCH` | `/orders/:id` | Update an order. |
 | `DELETE` | `/orders/:id` | Delete an order. |
 | `POST` | `/orders/:id/items` | Add an item to an existing order. |
 
-**Status enum:** `PENDING` · `PREPARING` · `SERVED` · `COMPLETED` · `CANCELLED`
+**Status enum:** `PENDING` · `CONFIRMED` · `PREPARING` · `COMPLETED` · `CANCELLED`
 
 ---
 
@@ -107,9 +108,21 @@ On successful login or registration the server sets access and refresh tokens as
 | `GET` | `/payments/:id` | Get a payment by ID. |
 | `GET` | `/payments/order/:orderId` | Get all payments for a given order. |
 | `POST` | `/payments/:id/verify` | Verify a payment via Sepay. |
+| `POST` | `/payments/:id/mark-manual` | Mark a payment as manually verified. Sets payment status to `COMPLETED`, updates the associated order status to `COMPLETED`, and logs a transaction with `verificationType: MANUAL`. |
 
 ---
 
+### Transactions (`/transactions`)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/transactions` | List transactions. Query params: `limit` (default 50), `dateFrom` (`YYYY-MM-DD`), `dateTo` (`YYYY-MM-DD`). Primary source: immudb; falls back to MySQL if immudb is unavailable. |
+| `GET` | `/transactions/:id` | Get a transaction by ID. Direct key lookup in immudb; falls back to MySQL. |
+| `POST` | `/transactions/:id/reverify` | Re-verify a transaction against SePay. Searches for a matching bank transaction by payment code + amount (falls back to amount-only match). Updates `reverifiedAt` and `sepayTransactionId` if a match is found. |
+
+**VerificationType enum:** `AUTO` · `MANUAL`
+
+---
 ### Health Check
 
 | Method | Endpoint | Description |
