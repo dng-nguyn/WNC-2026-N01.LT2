@@ -170,6 +170,118 @@ aws cloudwatch get-metric-statistics \
 
 ---
 
+### immudb Connection Issues
+
+**Symptom:** Logs show `immudb logging failed` or similar immudb-related errors.
+
+**Cause:** immudb is not running, or the app cannot reach it over the network.
+
+**Fix:**
+1. Verify `IMMUDB_HOST` and `IMMUDB_PORT` are set correctly in `.env` (or Secrets Manager for ECS).
+2. Check the immudb container is running:
+
+```bash
+# Docker Compose
+docker compose ps immudb
+
+# ECS — check sidecar or separate container logs
+aws logs tail /ecs/coffee-shop-pos --follow | grep immudb
+```
+
+3. Test network connectivity from the app container:
+
+```bash
+docker compose exec backend curl -s http://${IMMUDB_HOST}:${IMMUDB_PORT}/v1/immudb/ping
+```
+
+**Note:** The application continues to function normally without immudb — MySQL is the fallback data store. Immudb provides tamper-proof audit logging; missing entries do not affect order processing or transaction writes.
+
+---
+
+### immudb Permission Denied
+
+**Symptom:** Container logs show `permission denied: open /var/lib/immudb/immudb.identifier`.
+
+**Cause:** The immudb data directory is bind-mounted with incorrect ownership. immudb runs as **UID 3322**.
+
+**Fix:**
+- **Recommended — use a named volume instead of a bind mount:**
+
+```yaml
+# docker-compose.yml
+services:
+  immudb:
+    image: codenotary/immudb:latest
+    volumes:
+      - immudb-data:/var/lib/immudb
+
+volumes:
+  immudb-data:
+```
+
+- **If you must use a bind mount**, fix ownership:
+
+```bash
+sudo chown -R 3322:3322 /path/to/immudb/data
+```
+
+---
+
+### Transaction History Empty
+
+**Cause:** The `transactions` table does not exist in MySQL. This happens when `DB_SYNC=false` (the default in production) and the table has not been created manually.
+
+**Fix:**
+1. **Option A — Create the table manually:**
+
+```sql
+CREATE TABLE IF NOT EXISTS transactions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  table_id INT NOT NULL,
+  total DECIMAL(10,2) NOT NULL,
+  payment_method VARCHAR(50),
+  status VARCHAR(50) DEFAULT 'completed',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+2. **Option B — Temporarily enable schema sync:**
+
+```bash
+# In .env
+DB_SYNC=true
+```
+
+Then restart the application to auto-create the table. Set `DB_SYNC=false` again afterward to avoid unexpected migrations in production.
+
+---
+
+### Reverify Not Working
+
+**Cause:** The `SEPAY_API_KEY` environment variable is not configured. Reverification requires calling the external SePay API to confirm transaction status.
+
+**Fix:**
+1. Set `SEPAY_API_KEY` in your `.env` file (local development):
+
+```bash
+SEPAY_API_KEY=your-api-key-here
+```
+
+2. **For production (ECS):** Update the secret in Secrets Manager:
+
+```bash
+aws secretsmanager update-secret \
+  --secret-id coffee-shop-pos/credentials \
+  --secret-string '{"SEPAY_API_KEY": "your-api-key-here"}'
+```
+
+3. Verify the key is present at runtime:
+
+```bash
+docker compose exec backend env | grep SEPAY_API_KEY
+```
+---
+
 ## Scaling
 
 **Current:** 1 Fargate task (desired-count: 1). Auto-scaling is **not configured** (manual only).
