@@ -11,6 +11,7 @@ const navItems = [
   { path: '/dashboard', labelKey: 'nav.dashboard' as const, icon: '📊' },
   { path: '/pos', labelKey: 'nav.pos' as const, icon: '🛒' },
   { path: '/tables', labelKey: 'nav.tables' as const, icon: '🪑' },
+  { path: '/manage-tables', labelKey: 'nav.manageTables' as const, icon: '⚙️' },
   { path: '/menus', labelKey: 'nav.categories' as const, icon: '📁' },
   { path: '/menu-items', labelKey: 'nav.menuItems' as const, icon: '☕' },
 ];

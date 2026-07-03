@@ -21,6 +21,7 @@ const vi = {
   'nav.categories': 'Danh mục',
   'nav.menuItems': 'Món',
   'nav.tables': 'Bàn',
+  'nav.manageTables': 'Quản lý bàn',
   'nav.logout': 'Đăng xuất',
 
   // ── Auth ──
