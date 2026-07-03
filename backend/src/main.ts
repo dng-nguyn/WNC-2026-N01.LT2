@@ -68,11 +68,16 @@ async function bootstrap() {
   const publicPath = join(__dirname, '..', 'public');
   if (existsSync(publicPath)) {
     app.use(express.static(publicPath));
+  }
 
-    // SPA catch-all: serve index.html for browser navigations to frontend routes.
-    // Browsers send Accept: text/html; API clients (fetch/axios) send Accept: application/json.
-    // Must be BEFORE app.init() so it runs before NestJS controllers claim the route.
-    app.use((req: any, res: any, next: any) => {
+  await app.init();
+
+  // SPA catch-all: serve index.html for browser navigations to frontend routes.
+  // Uses raw Express instance AFTER app.init() so it runs AFTER NestJS controllers.
+  // Browsers send Accept: text/html; API clients (fetch/axios) send Accept: application/json.
+  if (existsSync(publicPath)) {
+    const expressApp = app.getHttpAdapter().getInstance();
+    expressApp.use((req: any, res: any, next: any) => {
       if (req.method !== 'GET') return next();
       if (req.path.startsWith('/api')) return next();
       if (req.path === '/health') return next();
@@ -84,8 +89,6 @@ async function bootstrap() {
       next();
     });
   }
-
-  await app.init();
 
   await app.listen(process.env.PORT ?? 3000);
 
