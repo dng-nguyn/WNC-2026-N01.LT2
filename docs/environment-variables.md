@@ -28,6 +28,8 @@ This document covers all environment variables used by the NestJS backend and Re
 | `IMMUDB_USER` | No | `immudb` | immudb username |
 | `IMMUDB_PASSWORD` | No | `immudb` | immudb password |
 | `IMMUDB_DATABASE` | No | `defaultdb` | immudb database name |
+| `ADMIN_USERNAME` | No | — | Username for the admin (MANAGER) user. On first boot, if no admin user exists in the database, one is auto-created using this username and `ADMIN_PASSWORD`. |
+| `ADMIN_PASSWORD` | No | — | Password for the admin (MANAGER) user. On first boot, if no admin user exists in the database, one is auto-created using `ADMIN_USERNAME` and this password. |
 
 ## Frontend (Vite)
 
@@ -68,6 +70,8 @@ On ECS Fargate, sensitive values are injected from AWS Secrets Manager at contai
 | `coffee-shop-pos/sepay-api-key` | `SEPAY_API_KEY` | Sepay payment API key |
 | `coffee-shop-pos/sepay-account-number` | `SEPAY_ACCOUNT_NUMBER` | Sepay bank account number |
 | `coffee-shop-pos/sepay-bank-name` | `SEPAY_BANK_NAME` | Sepay bank name |
+| `coffee-shop-pos/admin-username` | `ADMIN_USERNAME` | Admin user username (MANAGER role, auto-created on first boot) |
+| `coffee-shop-pos/admin-password` | `ADMIN_PASSWORD` | Admin user password (MANAGER role, auto-created on first boot) |
 
 Other environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_SYNC`, `FRONTEND_URL`) are set directly in the task definition as plain environment variables.
 
@@ -94,6 +98,9 @@ SESSION_SECRET=test-session-secret-change-me
 PORT=3000
 
 SEPAY_API_KEY=your_sepay_api_key
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your_admin_password
 
 # Immudb (immutable audit log — optional)
 IMMUDB_HOST=localhost
