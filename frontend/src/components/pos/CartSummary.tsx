@@ -9,6 +9,8 @@ interface CartSummaryProps {
   onSetQuantity?: (itemId: string, quantity: number) => void;
   onClear: () => void;
   onCheckout: () => void;
+  buttonLabel?: string;
+  checkoutDisabled?: boolean;
   children?: React.ReactNode;
 }
 
@@ -27,11 +29,13 @@ export default function CartSummary({
   onSetQuantity,
   onClear,
   onCheckout,
+  buttonLabel,
+  checkoutDisabled,
   children,
 }: CartSummaryProps) {
   return (
     <>
-      {/* ── Header Area: title + table selector ── */}
+      {/* ── Header Area ── */}
       <div className="cart-header">
         <h2 className="cart-heading">
           Current Order
@@ -39,7 +43,6 @@ export default function CartSummary({
             <span className="cart-count-badge">{cartItemCount}</span>
           )}
         </h2>
-        {children && <div className="cart-table-selector">{children}</div>}
       </div>
 
       {/* ── Middle Area: scrollable items ── */}
@@ -100,8 +103,10 @@ export default function CartSummary({
         )}
       </div>
 
-      {/* ── Footer Area: totals + pay button (sticky at bottom) ── */}
+      {/* ── Footer Area: controls + totals + pay button ── */}
       <div className="cart-checkout">
+        {children && <div className="cart-controls">{children}</div>}
+
         <div className="cart-total-card">
           <div className="cart-total-line">
             <span className="cart-total-label">
@@ -116,11 +121,11 @@ export default function CartSummary({
         <button
           className="cart-pay-btn"
           onClick={onCheckout}
-          disabled={submitting || cart.length === 0}
+          disabled={submitting || cart.length === 0 || checkoutDisabled}
         >
           {submitting
-            ? 'Placing Order…'
-            : `Pay ${formatCurrency(cartTotal)}`}
+            ? 'Processing…'
+            : `${buttonLabel ?? 'Pay'} ${formatCurrency(cartTotal)}`}
         </button>
 
         <button
