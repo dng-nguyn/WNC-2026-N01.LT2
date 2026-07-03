@@ -9,6 +9,7 @@ import POSPage from './pages/POSPage';
 import TablesPage from './pages/TablesPage';
 import MenuManagementPage from './pages/MenuManagementPage';
 import MenuItemManagementPage from './pages/MenuItemManagementPage';
+import TableManagementPage from './pages/TableManagementPage';
 export default function App() {
   return (
     <I18nProvider>
@@ -67,6 +68,17 @@ export default function App() {
           <ProtectedRoute>
             <AppLayout>
               <TablesPage />
+            </AppLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/manage-tables"
+        element={
+          <ProtectedRoute>
+            <AppLayout>
+              <TableManagementPage />
             </AppLayout>
           </ProtectedRoute>
         }
