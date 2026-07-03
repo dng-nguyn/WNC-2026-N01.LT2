@@ -7,13 +7,17 @@ import { SePayService } from './sepay.service';
 export class TransactionsController {
   constructor(
     private readonly transactionsService: TransactionsService,
-    private readonly sepayService: SePayService,
+    private readonly sePayService: SePayService,
   ) {}
 
   @Get()
-  findAll(@Query('limit') limit?: string): Promise<Transaction[]> {
+  findAll(
+    @Query('limit') limit?: string,
+    @Query('dateFrom') dateFrom?: string,
+    @Query('dateTo') dateTo?: string,
+  ): Promise<Transaction[]> {
     const n = limit ? parseInt(limit, 10) : 50;
-    return this.transactionsService.findAll(n);
+    return this.transactionsService.findAll(n, dateFrom, dateTo);
   }
 
   @Get(':id')
@@ -24,7 +28,16 @@ export class TransactionsController {
   @Post(':id/reverify')
   async reverify(@Param('id') id: string): Promise<Transaction> {
     const tx = await this.transactionsService.findById(id);
-    const sepayMatch = await this.sepayService.findTransactionForAmount(tx.amount);
+
+    // Try to match by payment code first, fall back to amount
+    let sepayMatch: { id: string } | null = null;
+    if (tx.payment?.code) {
+      sepayMatch = await this.sePayService.findTransactionByCode(tx.payment.code, Number(tx.amount));
+    }
+    if (!sepayMatch) {
+      sepayMatch = await this.sePayService.findTransactionForAmount(Number(tx.amount));
+    }
+
     return this.transactionsService.updateReverified(id, sepayMatch?.id ?? null);
   }
 }

@@ -2,9 +2,8 @@
 
 ## Project Overview
 
-Full-stack coffee shop POS/management system. NestJS backend with MySQL, React/Vite frontend, deployed on AWS ECS Fargate + RDS. Production domain: configured via environment.
+**Stack:** NestJS 11 · React 19 · Vite 6 · MySQL 8 · TypeORM 0.3 · TypeScript · JWT auth · Sepay payments · immudb (optional)
 
-**Stack:** NestJS 11 · React 19 · Vite 6 · MySQL 8 · TypeORM 0.3 · TypeScript · JWT auth · Sepay payments
 
 ## Architecture
 
@@ -12,6 +11,8 @@ Full-stack coffee shop POS/management system. NestJS backend with MySQL, React/V
 Browser → React SPA (Vite) → NestJS API (:3000) → MySQL
                                      ↓
                               Sepay Payment API
+                                     ↓
+                              immudb (immutable audit log, optional)
 ```
 
 **Monorepo layout:**
@@ -34,7 +35,8 @@ AppModule
 ├── OrderModule ────────── imports MenuItemModule, UsersModule, TableModule
 ├── UsersModule ────────── exports UsersService + TypeOrmModule
 ├── AuthModule ─────────── imports UsersModule, exports AuthService
-└── PaymentModule ──────── imports HttpModule, registers Payment + Order entities
+├── PaymentModule ──────── imports HttpModule, TransactionsModule
+└── TransactionsModule ── imports HttpModule, TypeORM(Transaction), ImmudbService, SePayService
 ```
 
 Modules consumed by `OrderModule` MUST export `TypeOrmModule` so the consuming module can `@InjectRepository()` cross-module entities.
@@ -182,6 +184,7 @@ export class ThingService {
 | `OrderItem` | `order_items` | `order_items` |
 | `Employee` | `employees` | `employees` |
 | `Payment` | `payment_requests` | `payment_requests` |
+| `Transaction` | `transactions` | `transactions` |
 
 **Note:** `Menu` → `categories` and `MenuItem` → `products` is deliberate. SQL schema uses category/product names; API uses menu/menu-item routes.
 

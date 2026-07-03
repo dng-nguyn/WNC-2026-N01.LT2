@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 import { Transaction } from './transaction.entity';
 import { VerificationType } from './verification-type.enum';
 import { ImmudbService } from './immudb.service';
@@ -33,7 +33,7 @@ export class TransactionsService {
 
     const saved = await this.transactionRepository.save(transaction);
 
-    // Log to immudb
+    // Log to immudb (optional — non-blocking)
     try {
       const txId = await this.immudbService.logTransaction({
         transactionId: saved.id,
@@ -43,8 +43,10 @@ export class TransactionsService {
         sepayTransactionId: params.sepayTransactionId,
         verifiedAt: saved.verifiedAt.toISOString(),
       });
-      saved.immudbTxId = String(txId);
-      await this.transactionRepository.save(saved);
+      if (txId != null) {
+        saved.immudbTxId = String(txId);
+        await this.transactionRepository.save(saved);
+      }
     } catch (err: unknown) {
       this.logger.warn(`Immudb logging failed: ${err instanceof Error ? err.message : err}`);
     }
@@ -52,8 +54,17 @@ export class TransactionsService {
     return saved;
   }
 
-  async findAll(limit = 50): Promise<Transaction[]> {
+  async findAll(limit = 50, dateFrom?: string, dateTo?: string): Promise<Transaction[]> {
+    const where: Record<string, unknown> = {};
+
+    if (dateFrom || dateTo) {
+      const from = dateFrom ? new Date(dateFrom + 'T00:00:00') : new Date('2000-01-01');
+      const to = dateTo ? new Date(dateTo + 'T23:59:59') : new Date();
+      where.verifiedAt = Between(from, to);
+    }
+
     return this.transactionRepository.find({
+      where,
       relations: { order: true, payment: true },
       order: { createdAt: 'DESC' },
       take: limit,
