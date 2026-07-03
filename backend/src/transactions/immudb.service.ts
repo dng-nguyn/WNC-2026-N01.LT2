@@ -22,11 +22,11 @@ export class ImmudbService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      const ImmudbClient = require('immudb-node');
-      this.client = ImmudbClient({ address: `${host}:${port}` });
+      const ImmudbClient = require('immudb-node').default;
+      this.client = new ImmudbClient({ address: `${host}:${port}` });
 
       await this.client.login({ user, password });
-      await this.client.useDatabase({ database });
+      await this.client.useDatabase({ databasename: database });
       this.connected = true;
       this.logger.log(`Connected to immudb at ${host}:${port}/${database}`);
     } catch (err: unknown) {
@@ -57,8 +57,8 @@ export class ImmudbService implements OnModuleInit, OnModuleDestroy {
       const key = `txn:${data.transactionId}`;
       const value = JSON.stringify(data);
       const res = await this.client.set({ key, value });
-      this.logger.debug(`Immudb logged: ${key} -> index ${res.index}`);
-      return res.index;
+      this.logger.debug(`Immudb logged: ${key} -> id ${res.id}`);
+      return res.id;
     } catch (err: unknown) {
       this.logger.warn(`Immudb set failed: ${err instanceof Error ? err.message : err}`);
       return null;
