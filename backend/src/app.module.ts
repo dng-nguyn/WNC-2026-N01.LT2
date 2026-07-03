@@ -12,6 +12,7 @@ import { OrderModule } from './orders/order.module';
 import { TableModule } from './tables/table.module';
 import { PaymentModule } from './payments/payment.module';
 import { UsersModule } from './users/users.module';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   controllers: [AppController],
@@ -54,6 +55,7 @@ import { UsersModule } from './users/users.module';
     MenuItemModule,
     AuthModule,
     TableModule,
+    TransactionsModule,
   ],
 })
 export class AppModule {}

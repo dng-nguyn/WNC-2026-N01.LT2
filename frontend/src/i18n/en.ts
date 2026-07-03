@@ -22,6 +22,7 @@ const en = {
   'nav.menuItems': 'Menu Items',
   'nav.tables': 'Tables',
   'nav.manageTables': 'Manage Tables',
+  'nav.transactions': 'Transaction History',
   'nav.logout': 'Logout',
 
   // ── Auth ──

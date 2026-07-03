@@ -229,3 +229,24 @@ export interface DashboardStats {
     revenue: number;
   }[];
 }
+
+// ===== Transaction =====
+
+export enum VerificationType {
+  AUTO = 'AUTO',
+  MANUAL = 'MANUAL',
+}
+
+export interface Transaction {
+  id: string;
+  order: Order;
+  payment: Payment | null;
+  amount: number;
+  verificationType: VerificationType;
+  verifiedAt: string;
+  reverifiedAt: string | null;
+  sepayTransactionId: string | null;
+  immudbTxId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

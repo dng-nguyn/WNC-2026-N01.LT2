@@ -26,4 +26,9 @@ export class PaymentController {
   verify(@Param('id') id: string): Promise<Payment> {
     return this.paymentService.verify(id);
   }
+
+  @Post(':id/mark-manual')
+  markManual(@Param('id') id: string): Promise<Payment> {
+    return this.paymentService.markManual(id);
+  }
 }

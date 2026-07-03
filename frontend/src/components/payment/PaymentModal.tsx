@@ -3,6 +3,7 @@ import { createOrder } from '../../services/order.service';
 import {
   createPayment,
   verifyPayment,
+  markManualPayment,
 } from '../../services/payment.service';
 import { getLoggedInUser } from '../../services/auth.service';
 import { Modal, Alert } from '../../components/ui';
@@ -198,8 +199,14 @@ export default function PaymentModal({
   function handleMarkAsPaid() {
     setStep('confirm-mark-paid');
   }
-
-  function confirmMarkAsPaid() {
+  async function confirmMarkAsPaid() {
+    if (payment) {
+      try {
+        await markManualPayment(payment.id);
+      } catch {
+        // logged on backend, non-blocking
+      }
+    }
     stopPolling();
     setStep('success');
   }
