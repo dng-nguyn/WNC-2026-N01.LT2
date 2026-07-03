@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { Order } from './order.entity';
 import { OrderStatus } from './order-status.enum';
 import { OrderItem } from './order-item.entity';
@@ -144,7 +144,27 @@ export class OrdersService {
       order.status = updateOrderDto.status;
     }
 
-    return this.ordersRepository.save(order);
+    const saved = await this.ordersRepository.save(order);
+
+    // Release table if order is terminal and no other active orders remain
+    if (
+      saved.table &&
+      (saved.status === OrderStatus.COMPLETED ||
+        saved.status === OrderStatus.CANCELLED)
+    ) {
+      const activeCount = await this.ordersRepository.count({
+        where: {
+          table: { id: saved.table.id },
+          status: In([OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING]),
+        },
+      });
+      if (activeCount === 0) {
+        saved.table.status = TableStatus.EMPTY;
+        await this.tablesRepository.save(saved.table);
+      }
+    }
+
+    return saved;
   }
 
   async addItem(
