@@ -191,7 +191,7 @@ export default function EmployeeManagementPage() {
     try {
       const updated = await updateEmployee(selectedEmp.id, { isActive: !selectedEmp.isActive });
       setSelectedEmp(updated);
-      await loadEmployees();
+      setEmployees((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to update status');
     }
@@ -418,9 +418,13 @@ export default function EmployeeManagementPage() {
 
             {resetPwResult && (
               <div style={{ padding: '0 24px 12px' }}>
-                <div className="alert alert-success">
-                  New password: <strong><code>{resetPwResult}</code></strong>
-                  <br /><small>Copy this — it won't be shown again.</small>
+                <div style={{ background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 8, padding: '12px 16px' }}>
+                  <div style={{ fontSize: '0.8rem', color: '#16a34a', fontWeight: 600, marginBottom: 8 }}>✓ Password Reset Successful</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <code style={{ background: '#fff', padding: '6px 12px', borderRadius: 4, border: '1px solid #d1d5db', fontSize: '0.9rem', flex: 1, userSelect: 'all' }}>{resetPwResult}</code>
+                    <button className="btn btn-sm btn-secondary" onClick={() => navigator.clipboard.writeText(resetPwResult)}>Copy</button>
+                  </div>
+                  <small style={{ color: '#64748b', marginTop: 6, display: 'block' }}>Save this password — it won't be shown again.</small>
                 </div>
               </div>
             )}
