@@ -19,6 +19,41 @@ export class EmployeeService {
   ) {}
 
   async create(createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
+    // Validate: if username/password provided, check username is available
+    if (createEmployeeDto.username && createEmployeeDto.password) {
+      const existing = await this.usersRepository.findOne({
+        where: { username: createEmployeeDto.username },
+      });
+      if (existing) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
+
+    // Validate: check email is not already used
+    const existingEmail = await this.employeeRepository.findOne({
+      where: { email: createEmployeeDto.email },
+    });
+    if (existingEmail) {
+      throw new BadRequestException('Email already exists');
+    }
+
+    // Create user account if username/password provided
+    let user: User | null = null;
+    if (createEmployeeDto.username && createEmployeeDto.password) {
+      const hashedPassword = await argon2.hash(createEmployeeDto.password, {
+        type: argon2.argon2id,
+      });
+      user = this.usersRepository.create({
+        username: createEmployeeDto.username,
+        password: hashedPassword,
+        fullName: createEmployeeDto.fullName,
+        phone: createEmployeeDto.phone,
+        role: createEmployeeDto.role,
+      });
+      await this.usersRepository.save(user);
+    }
+
+    // Create employee
     const employee = this.employeeRepository.create({
       fullName: createEmployeeDto.fullName,
       email: createEmployeeDto.email,
@@ -27,17 +62,8 @@ export class EmployeeService {
       department: createEmployeeDto.department ?? null,
       salary: createEmployeeDto.salary ?? null,
       isActive: createEmployeeDto.isActive ?? true,
+      user,
     });
-
-    if (createEmployeeDto.userId) {
-      const user = await this.usersRepository.findOne({
-        where: { id: createEmployeeDto.userId },
-      });
-      if (!user) {
-        throw new NotFoundException(`User with id ${createEmployeeDto.userId} not found`);
-      }
-      employee.user = user;
-    }
 
     return this.employeeRepository.save(employee);
   }
@@ -114,7 +140,6 @@ export class EmployeeService {
     for (let i = 0; i < 12; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    // Ensure it meets complexity requirements
     return 'A1' + password;
   }
 }

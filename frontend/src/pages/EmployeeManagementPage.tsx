@@ -1,12 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import {
-  deleteUserAccount,
   fetchEmployees,
   fetchEmployee,
   createEmployee,
   updateEmployee,
   resetEmployeePassword,
-  createUserAccount,
   updateUserAccount,
 } from '../services/employee.service';
 import { UserRole, type Employee } from '../types';
@@ -118,20 +116,11 @@ export default function EmployeeManagementPage() {
 
     setSaving(true);
     setCreateError('');
-    let userId: string | null = null;
     try {
-      // 1. Create user account
-      const user = await createUserAccount({
+      await createEmployee({
         username: cUsername,
         password: cPassword,
-        fullName: cFullName,
-        phone: cPhone || undefined,
         role: cRole,
-      });
-      userId = user.id;
-      // 2. Create employee linked to user
-      await createEmployee({
-        userId: user.id,
         fullName: cFullName,
         email: cEmail,
         phone: cPhone || undefined,
@@ -142,10 +131,6 @@ export default function EmployeeManagementPage() {
       await loadEmployees();
       setShowCreate(false);
     } catch (err: unknown) {
-      // Clean up ghost user if employee creation failed
-      if (userId) {
-        try { await deleteUserAccount(userId); } catch { /* cleanup failed */ }
-      }
       setCreateError(err instanceof Error ? err.message : 'Failed to create employee');
     } finally {
       setSaving(false);
