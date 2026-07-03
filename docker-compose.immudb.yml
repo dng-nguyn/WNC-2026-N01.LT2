@@ -1,0 +1,17 @@
+services:
+  immudb:
+    container_name: immudb
+    image: codenotary/immudb:latest
+    ports:
+      - "30842:3322"
+      - "30077:9497"
+      - "32641:8080"
+    volumes:
+      - immudb-data:/var/lib/immudb
+      - immudb-config:/etc/immudb
+      - immudb-logs:/var/log/immudb
+
+volumes:
+  immudb-data:
+  immudb-config:
+  immudb-logs:
