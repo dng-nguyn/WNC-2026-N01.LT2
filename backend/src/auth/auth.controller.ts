@@ -157,7 +157,7 @@ export class AuthController {
     @Body() changePasswordDto: ChangePasswordDto,
   ) {
     return this.authService.changePassword(
-      (req.user as { sub: string }).sub,
+      (req.user as { id: string }).id,
       changePasswordDto.currentPassword,
       changePasswordDto.newPassword,
     );
