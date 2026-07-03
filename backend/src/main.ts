@@ -71,7 +71,7 @@ async function bootstrap() {
 
     // SPA catch-all: serve index.html for browser navigations to frontend routes.
     // Browsers send Accept: text/html; API clients (fetch/axios) send Accept: application/json.
-    // Must be BEFORE app.init() so it runs before NestJS controllers claim the route.
+    // Registered via app.use() BEFORE app.init() so it runs before NestJS controllers.
     app.use((req: any, res: any, next: any) => {
       if (req.method !== 'GET') return next();
       if (req.path.startsWith('/api')) return next();
