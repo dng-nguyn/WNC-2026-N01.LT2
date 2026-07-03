@@ -78,11 +78,15 @@ Copy `.env.example` to `.env` at the project root and configure:
 | `IMMUDB_USER` | immudb username (optional) | `immudb` |
 | `IMMUDB_PASSWORD` | immudb password (optional) | `immudb` |
 | `IMMUDB_DATABASE` | immudb database name (optional) | `defaultdb` |
+| `ADMIN_USERNAME` | Admin user username (auto-created on first boot) | `admin` |
+| `ADMIN_PASSWORD` | Admin user password (auto-created on first boot) | `your_admin_password` |
 | `FRONTEND_URL` | Frontend origin for CORS | `http://localhost:5173` |
 | `VITE_PORT` | Vite dev server port | `5173` |
 | `VITE_API_BASE_URL` | API base URL for frontend | `http://localhost:3000` |
 
 For full details, see [environment-variables.md](./environment-variables.md).
+
+> **Note:** On first boot, if no users exist in the database, the application automatically creates an admin (MANAGER) user using the `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables. All other registered users are assigned the STAFF role.
 
 ## Running Tests
 

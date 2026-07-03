@@ -64,6 +64,9 @@ services:
       IMMUDB_USER: ${IMMUDB_USER:-immudb}
       IMMUDB_PASSWORD: ${IMMUDB_ADMIN_PASSWORD:-immudb}
       IMMUDB_DATABASE: ${IMMUDB_DATABASE:-defaultdb}
+      # Admin auto-create (created on startup if no MANAGER user exists)
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-change-me-in-production}
     healthcheck:
       test: ["CMD", "node", "scripts/healthcheck.js"]
       interval: 10s

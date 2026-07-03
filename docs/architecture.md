@@ -110,6 +110,8 @@ React Router v7 handles client-side routing. Protected routes wrap pages in `<Pr
 | `/tables` | `TablesPage` | Yes |
 | `/manage-tables` | `TableManagementPage` | Yes |
 | `/transactions` | `TransactionHistoryPage` | Yes |
+| `/settings` | `SettingsPage` | Yes (MANAGER only) |
+| `/employees` | `EmployeeManagementPage` | Yes (MANAGER only) |
 | `*` | Redirects to `/dashboard` | — |
 
 ### Services
@@ -206,6 +208,19 @@ The frontend sends the access token via the `Authorization: Bearer` header. The 
 - **`JwtAuthGuard`** — extends Passport's `AuthGuard('jwt')`. Validates the JWT on protected routes.
 - **`RolesGuard`** — reads `@Roles()` metadata via `Reflector`. Denies access when the authenticated user's role is not in the required list.
 
+## Role-Based Access Control
+
+The system uses two roles stored in the `users.role` column:
+
+| Role | Access Scope |
+|------|-------------|
+| `MANAGER` | Full access — all nav items visible (Dashboard, POS, Tables, Menus, Menu Items, Transactions, Settings, Employees) |
+| `STAFF` | Limited access — Dashboard, POS, Tables, and Transactions only |
+
+**Frontend routing enforcement:** The `<ProtectedRoute>` component checks the user's role from the profile and conditionally renders nav items. `SettingsPage` and `EmployeeManagementPage` are only accessible to `MANAGER` users; all other authenticated routes are available to both roles.
+
+**Admin account creation:** On first boot, if no users exist in the database, a `MANAGER` user is auto-created from the `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables. User registration (`POST /auth/register`) always creates `STAFF` users — there is no way to self-register as a `MANAGER`. Promoting a `STAFF` user to `MANAGER` requires direct database access or an admin panel action.
+
 ## Payment Flow
 
 ```mermaid
@@ -301,3 +316,5 @@ graph LR
 | `IMMUDB_USER` | immudb authentication user |
 | `IMMUDB_PASSWORD` | immudb password (from Secrets Manager in production) |
 | `IMMUDB_DATABASE` | immudb database name |
+| `ADMIN_USERNAME` | Admin user username (auto-created on first boot with MANAGER role) |
+| `ADMIN_PASSWORD` | Admin user password (auto-created on first boot with MANAGER role) |
