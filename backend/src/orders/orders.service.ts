@@ -254,6 +254,23 @@ export class OrdersService {
 
   async remove(id: string): Promise<void> {
     const order = await this.findOne(id);
+    const tableId = order.table?.id;
     await this.ordersRepository.remove(order);
+
+    if (tableId) {
+      const activeCount = await this.ordersRepository.count({
+        where: {
+          table: { id: tableId },
+          status: In([OrderStatus.PENDING, OrderStatus.CONFIRMED, OrderStatus.PREPARING]),
+        },
+      });
+      if (activeCount === 0) {
+        const table = await this.tablesRepository.findOne({ where: { id: tableId } });
+        if (table) {
+          table.status = TableStatus.EMPTY;
+          await this.tablesRepository.save(table);
+        }
+      }
+    }
   }
 }
