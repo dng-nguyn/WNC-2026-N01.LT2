@@ -52,6 +52,12 @@ export async function resetEmployeePassword(
   );
 }
 
+// ===== User account deletion (cleanup for failed employee creation) =====
+
+export async function deleteUserAccount(id: string): Promise<void> {
+  return del<void>(`/users/${id}`);
+}
+
 // ===== User account creation (via /users — also MANAGER guarded) =====
 
 export async function createUserAccount(data: {

@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import {
+  deleteUserAccount,
   fetchEmployees,
   fetchEmployee,
   createEmployee,
@@ -21,6 +22,7 @@ export default function EmployeeManagementPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [resetPwResult, setResetPwResult] = useState<string | null>(null);
+  const [createError, setCreateError] = useState('');
 
   // Create form
   const [cUsername, setCUsername] = useState('');
@@ -60,7 +62,7 @@ export default function EmployeeManagementPage() {
 
   async function handleSelect(id: string) {
     setSelectedId(id);
-    setError('');
+    setCreateError('');
     setResetPwResult(null);
     setShowEdit(false);
     try {
@@ -111,11 +113,12 @@ export default function EmployeeManagementPage() {
     e.preventDefault();
     const pwValidation = validatePassword(cPassword);
     if (pwValidation.length > 0) { setPwErrors(pwValidation); return; }
-    if (!cFullName.trim()) { setError('Full name is required'); return; }
-    if (!cEmail.trim() || !cEmail.includes('@')) { setError('Valid email is required'); return; }
+    if (!cFullName.trim()) { setCreateError('Full name is required'); return; }
+    if (!cEmail.trim() || !cEmail.includes('@')) { setCreateError('Valid email is required'); return; }
 
     setSaving(true);
-    setError('');
+    setCreateError('');
+    let userId: string | null = null;
     try {
       // 1. Create user account
       const user = await createUserAccount({
@@ -125,6 +128,7 @@ export default function EmployeeManagementPage() {
         phone: cPhone || undefined,
         role: cRole,
       });
+      userId = user.id;
       // 2. Create employee linked to user
       await createEmployee({
         userId: user.id,
@@ -138,7 +142,11 @@ export default function EmployeeManagementPage() {
       await loadEmployees();
       setShowCreate(false);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to create employee');
+      // Clean up ghost user if employee creation failed
+      if (userId) {
+        try { await deleteUserAccount(userId); } catch { /* cleanup failed */ }
+      }
+      setCreateError(err instanceof Error ? err.message : 'Failed to create employee');
     } finally {
       setSaving(false);
     }
@@ -210,6 +218,7 @@ export default function EmployeeManagementPage() {
 
       {/* Create Modal */}
       <Modal open={showCreate} onClose={() => setShowCreate(false)} title="New Employee">
+        {createError && <div className="alert alert-error" onClick={() => setCreateError('')}>{createError}</div>}
         <form onSubmit={handleCreate}>
           <h4 style={{ margin: '0 0 12px', color: '#475569' }}>User Account</h4>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
