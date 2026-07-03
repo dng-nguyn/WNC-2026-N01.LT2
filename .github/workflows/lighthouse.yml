@@ -44,5 +44,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: lighthouse-report
-          path: frontend/.lighthouseci/
+          path: .lighthouseci/
           retention-days: 14
