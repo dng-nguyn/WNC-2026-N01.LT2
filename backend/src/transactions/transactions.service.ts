@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 import { Transaction } from './transaction.entity';
 import { VerificationType } from './verification-type.enum';
 import { ImmudbService, ImmudbTransactionData } from './immudb.service';
@@ -105,10 +105,31 @@ export class TransactionsService {
       });
     }
 
+    // Merge MySQL reverify data (reverifiedAt, sepayTransactionId updates)
+    let mysqlMap = new Map<string, Transaction>();
+    try {
+      const ids = filtered.map((d) => d.transactionId).filter(Boolean);
+      if (ids.length > 0) {
+        const mysqlRows = await this.transactionRepository.findBy({ id: In(ids) });
+        mysqlMap = new Map(mysqlRows.map((r) => [r.id, r]));
+      }
+    } catch {
+      // MySQL unavailable — immudb-only is fine
+    }
+
     return filtered
       .sort((a, b) => new Date(b.verifiedAt).getTime() - new Date(a.verifiedAt).getTime())
       .slice(0, limit)
-      .map((d) => this.immudbDataToTransaction(d));
+      .map((d) => {
+        const tx = this.immudbDataToTransaction(d);
+        const mysql = mysqlMap.get(d.transactionId);
+        if (mysql) {
+          tx.reverifiedAt = mysql.reverifiedAt;
+          if (mysql.sepayTransactionId) tx.sepayTransactionId = mysql.sepayTransactionId;
+          if (mysql.payment) tx.payment = mysql.payment;
+        }
+        return tx;
+      });
   }
 
   async findById(id: string): Promise<Transaction> {
@@ -139,7 +160,10 @@ export class TransactionsService {
 
     // Update in MySQL if it exists there
     try {
-      const existing = await this.transactionRepository.findOne({ where: { id } });
+      const existing = await this.transactionRepository.findOne({
+        where: { id },
+        relations: { order: true, payment: true },
+      });
       if (existing) {
         existing.reverifiedAt = tx.reverifiedAt;
         existing.sepayTransactionId = tx.sepayTransactionId;
