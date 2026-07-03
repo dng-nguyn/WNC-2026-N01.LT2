@@ -7,14 +7,15 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-const navItems = [
-  { path: '/dashboard', labelKey: 'nav.dashboard' as const, icon: '📊' },
-  { path: '/pos', labelKey: 'nav.pos' as const, icon: '🛒' },
-  { path: '/tables', labelKey: 'nav.tables' as const, icon: '🪑' },
-  { path: '/manage-tables', labelKey: 'nav.manageTables' as const, icon: '⚙️' },
-  { path: '/menus', labelKey: 'nav.categories' as const, icon: '📁' },
-  { path: '/menu-items', labelKey: 'nav.menuItems' as const, icon: '☕' },
-  { path: '/transactions', labelKey: 'nav.transactions' as const, icon: '📋' },
+const allNavItems = [
+  { path: '/dashboard', labelKey: 'nav.dashboard' as const, icon: '📊', roles: ['MANAGER', 'STAFF'] },
+  { path: '/pos', labelKey: 'nav.pos' as const, icon: '🛒', roles: ['MANAGER', 'STAFF'] },
+  { path: '/tables', labelKey: 'nav.tables' as const, icon: '🪑', roles: ['MANAGER', 'STAFF'] },
+  { path: '/manage-tables', labelKey: 'nav.manageTables' as const, icon: '🪑', roles: ['MANAGER'] },
+  { path: '/menus', labelKey: 'nav.categories' as const, icon: '📁', roles: ['MANAGER'] },
+  { path: '/menu-items', labelKey: 'nav.menuItems' as const, icon: '☕', roles: ['MANAGER'] },
+  { path: '/transactions', labelKey: 'nav.transactions' as const, icon: '📋', roles: ['MANAGER', 'STAFF'] },
+  { path: '/employees', labelKey: 'nav.employees' as const, icon: '👥', roles: ['MANAGER'] },
 ];
 
 export default function AppLayout({ children }: AppLayoutProps) {
@@ -22,6 +23,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const user = getLoggedInUser();
   const { t, locale, setLocale } = useTranslation();
+  const navItems = allNavItems.filter(
+    (item) => !user?.role || item.roles.includes(user.role),
+  );
 
   function handleLogout() {
     logout();
@@ -80,6 +84,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 {user.username.charAt(0).toUpperCase()}
               </span>
               <span className="sidebar-user-name">{user.username}</span>
+              <NavLink
+                to="/settings"
+                className="sidebar-settings"
+                title="Settings"
+                onClick={() => setSidebarOpen(false)}
+              >
+                ⚙️
+              </NavLink>
             </div>
           )}
           <button

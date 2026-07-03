@@ -282,6 +282,35 @@ docker compose exec backend env | grep SEPAY_API_KEY
 ```
 ---
 
+### Admin User Not Created
+
+**Symptom:** No MANAGER user exists in the database after startup; no admin can log in.
+
+**Fix:**
+1. Check that `ADMIN_USERNAME` and `ADMIN_PASSWORD` are set in your `.env` file (or injected via Secrets Manager in production):
+
+```bash
+docker compose exec backend env | grep ADMIN_
+```
+
+2. Check the application logs for one of these messages:
+
+```bash
+# Docker Compose
+docker compose logs backend | grep -i "admin"
+
+# ECS
+aws logs tail /ecs/coffee-shop-pos --follow | grep -i "admin"
+```
+
+Expected log messages:
+- `Admin user created: <username>` — admin was successfully created on first boot.
+- `Admin user already exists` — an admin user was already present, no action taken.
+
+3. If neither message appears, verify the database is reachable and `DB_SYNC=true` is set (required for the users table to be auto-created in development).
+
+---
+
 ## Scaling
 
 **Current:** 1 Fargate task (desired-count: 1). Auto-scaling is **not configured** (manual only).

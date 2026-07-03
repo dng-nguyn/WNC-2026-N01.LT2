@@ -144,7 +144,7 @@ gh workflow run deploy-aws.yml
 | **immudb** | Sidecar container in same task (localhost:3322) |
 | **ALB** | HTTPS listener with Origin CA cert, HTTP→HTTPS redirect |
 | **SSL** | Cloudflare Origin CA certificate (Full Strict mode) |
-| **Secrets** | AWS Secrets Manager (8 secrets, see below) |
+| **Secrets** | AWS Secrets Manager (10 secrets, see below) |
 
 ### AWS Resources Required
 
@@ -195,6 +195,8 @@ The following secrets must exist in AWS Secrets Manager (same region as ECS). Cr
 | `coffee-shop-pos/immudb-password` | `IMMUDB_PASSWORD` | immudb admin password |
 | `coffee-shop-pos/sepay-account-number` | `SEPAY_ACCOUNT_NUMBER` | Sepay bank account number |
 | `coffee-shop-pos/sepay-bank-name` | `SEPAY_BANK_NAME` | Sepay bank name |
+| `coffee-shop-pos/admin-username` | `ADMIN_USERNAME` | Admin user username (auto-created on first boot with MANAGER role) |
+| `coffee-shop-pos/admin-password` | `ADMIN_PASSWORD` | Admin user password (auto-created on first boot with MANAGER role) |
 
 > **Important:** Secrets Manager appends a random suffix to each secret's ARN (e.g. `jwt-secret-3CMEXn`). The task definition must reference the **full ARN** including this suffix.
 

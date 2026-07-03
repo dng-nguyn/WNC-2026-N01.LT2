@@ -1,4 +1,5 @@
-import { IsOptional, IsString, Length } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { UserRole } from '../user-role.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -6,7 +7,9 @@ export class CreateUserDto {
   username!: string;
 
   @IsString()
-  @Length(6, 100)
+  @Length(8, 100, { message: 'Password must be between 8 and 100 characters' })
+  @Matches(/(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
+  @Matches(/(?=.*\d)/, { message: 'Password must contain at least one number' })
   password!: string;
 
   @IsOptional()
@@ -18,4 +21,8 @@ export class CreateUserDto {
   @IsString()
   @Length(0, 15)
   phone?: string;
+
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
 }

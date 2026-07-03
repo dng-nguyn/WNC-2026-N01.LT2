@@ -46,6 +46,7 @@ export interface AuthResponse {
 export interface LoginDto {
   username: string;
   password: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterDto {
@@ -165,6 +166,7 @@ export interface UpdateOrderDto {
 
 export interface Employee {
   id: string;
+  user: User | null;
   fullName: string;
   email: string;
   phone: string | null;

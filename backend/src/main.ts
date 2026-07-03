@@ -10,6 +10,10 @@ import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import express from 'express';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import * as argon2 from 'argon2';
+import { UsersModule } from './users/users.module';
+import { UsersService } from './users/users.service';
+import { UserRole } from './users/user-role.enum';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -100,6 +104,34 @@ async function bootstrap() {
     seed.on('exit', (code) => {
       if (code !== 0) console.warn(`Seed exited with code ${code} (items may already exist)`);
     });
+  }
+
+  // Auto-create admin user from env vars if no MANAGER exists
+  const adminUsername = process.env.ADMIN_USERNAME;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (adminUsername && adminPassword) {
+    try {
+      const usersService = app.select(UsersModule).get(UsersService);
+      const allUsers = await usersService.findAll();
+      const hasManager = allUsers.some((u) => u.role === UserRole.MANAGER);
+
+      if (!hasManager) {
+        const hashedPassword = await argon2.hash(adminPassword, {
+          type: argon2.argon2id,
+        });
+        await usersService.create({
+          username: adminUsername,
+          password: hashedPassword,
+          fullName: adminUsername,
+          role: UserRole.MANAGER,
+        });
+        console.log('Admin user created with MANAGER role');
+      } else {
+        console.log('Admin auto-create skipped — MANAGER user exists');
+      }
+    } catch (err) {
+      console.error('Admin auto-create failed:', err instanceof Error ? err.message : 'unknown');
+    }
   }
 }
 
