@@ -151,12 +151,10 @@ export class TransactionsService {
     throw new Error(`Transaction ${id} not found`);
   }
 
-  async updateReverified(id: string, sepayTransactionId: string | null): Promise<Transaction> {
+  async updateReverified(id: string, sepayTransactionId: string): Promise<Transaction> {
     const tx = await this.findById(id);
     tx.reverifiedAt = new Date();
-    if (sepayTransactionId) {
-      tx.sepayTransactionId = sepayTransactionId;
-    }
+    tx.sepayTransactionId = sepayTransactionId;
 
     // Update in MySQL if it exists there
     try {

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './transaction.entity';
 import { SePayService } from './sepay.service';
@@ -38,6 +38,12 @@ export class TransactionsController {
       sepayMatch = await this.sePayService.findTransactionForAmount(Number(tx.amount));
     }
 
-    return this.transactionsService.updateReverified(id, sepayMatch?.id ?? null);
+    if (!sepayMatch) {
+      throw new NotFoundException(
+        `No matching SePay transaction found for transaction ${id}`,
+      );
+    }
+
+    return this.transactionsService.updateReverified(id, sepayMatch.id);
   }
 }
