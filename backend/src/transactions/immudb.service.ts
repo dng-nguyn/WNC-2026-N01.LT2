@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 export interface ImmudbTransactionData {
   transactionId: string;
   orderId: string;
+  paymentCode?: string;
   amount: number;
   verificationType: string;
   sepayTransactionId?: string;
