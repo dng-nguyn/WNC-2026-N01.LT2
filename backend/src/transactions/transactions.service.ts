@@ -18,6 +18,7 @@ export class TransactionsService {
   async logTransaction(params: {
     orderId: string;
     paymentId?: string;
+    paymentCode?: string;
     amount: number;
     verificationType: VerificationType;
     sepayTransactionId?: string;
@@ -41,6 +42,7 @@ export class TransactionsService {
       return this.immudbDataToTransaction({
         transactionId: '',
         orderId: params.orderId,
+        paymentCode: params.paymentCode,
         amount: params.amount,
         verificationType: params.verificationType,
         sepayTransactionId: params.sepayTransactionId,
@@ -53,6 +55,7 @@ export class TransactionsService {
       const txId = await this.immudbService.logTransaction({
         transactionId: saved.id,
         orderId: params.orderId,
+        paymentCode: params.paymentCode,
         amount: params.amount,
         verificationType: params.verificationType,
         sepayTransactionId: params.sepayTransactionId,
@@ -178,7 +181,7 @@ export class TransactionsService {
     const tx = new Transaction();
     tx.id = d.transactionId;
     tx.order = d.orderId ? ({ id: d.orderId } as any) : null as any;
-    tx.payment = null;
+    tx.payment = d.paymentCode ? ({ code: d.paymentCode } as any) : null;
     tx.amount = d.amount;
     tx.verificationType = d.verificationType as VerificationType;
     tx.verifiedAt = new Date(d.verifiedAt);
