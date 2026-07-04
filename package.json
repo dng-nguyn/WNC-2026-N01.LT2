@@ -67,6 +67,7 @@
   },
   "overrides": {
     "multer": "2.2.0",
-    "js-yaml": "4.2.0"
+    "js-yaml": "4.2.0",
+    "@grpc/grpc-js": ">=1.14.0"
   }
 }
