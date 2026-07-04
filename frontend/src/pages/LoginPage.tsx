@@ -1,4 +1,5 @@
 import { useState, FormEvent } from 'react';
+import { FlutedGlass } from '@paper-design/shaders-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { login } from '../services/auth.service';
 
@@ -32,6 +33,30 @@ export default function LoginPage() {
 
   return (
     <div className="auth-container">
+      <FlutedGlass
+        className="auth-bg"
+        width={1920}
+        height={1140}
+        image="/login-bg.jpg"
+        colorBack="#00000000"
+        colorShadow="#000000"
+        colorHighlight="#ffffff"
+        size={0.52}
+        shadows={0.4}
+        highlights={0}
+        shape="lines"
+        angle={0}
+        distortionShape="cascade"
+        distortion={0.51}
+        shift={0}
+        stretch={0}
+        blur={0.25}
+        edges={0}
+        margin={0.2}
+        grainMixer={0.1}
+        grainOverlay={0.09}
+        fit="cover"
+      />
       <div className="auth-card">
         <h1>Coffee Shop POS</h1>
         <h2>Sign In</h2>

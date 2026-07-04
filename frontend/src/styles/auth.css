@@ -5,15 +5,29 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
+  position: relative;
+}
+
+/* FlutedGlass background layer */
+.auth-bg {
+  position: fixed !important;
+  inset: 0;
+  z-index: 0;
+  width: 100vw !important;
+  height: 100vh !important;
 }
 
 .auth-card {
-  background: var(--color-surface);
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.92);
   border-radius: var(--radius);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   width: 100%;
   max-width: 420px;
   padding: 40px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .auth-card h1 {
