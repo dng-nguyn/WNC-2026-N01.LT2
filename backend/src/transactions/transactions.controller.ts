@@ -29,14 +29,16 @@ export class TransactionsController {
   async reverify(@Param('id') id: string): Promise<Transaction> {
     const tx = await this.transactionsService.findById(id);
 
-    // Try to match by payment code first, fall back to amount
-    let sepayMatch: { id: string } | null = null;
-    if (tx.payment?.code) {
-      sepayMatch = await this.sePayService.findTransactionByCode(tx.payment.code, Number(tx.amount));
+    if (!tx.payment?.code) {
+      throw new NotFoundException(
+        `Transaction ${id} has no payment code — cannot reverify`,
+      );
     }
-    if (!sepayMatch) {
-      sepayMatch = await this.sePayService.findTransactionForAmount(Number(tx.amount));
-    }
+
+    const sepayMatch = await this.sePayService.findTransactionByCode(
+      tx.payment.code,
+      Number(tx.amount),
+    );
 
     if (!sepayMatch) {
       throw new NotFoundException(
