@@ -132,7 +132,7 @@ On successful login or registration the server sets access and refresh tokens as
 |--------|----------|-------------|
 | `GET` | `/transactions` | List transactions. Query params: `limit` (default 50), `dateFrom` (`YYYY-MM-DD`), `dateTo` (`YYYY-MM-DD`). Primary source: immudb; falls back to MySQL if immudb is unavailable. |
 | `GET` | `/transactions/:id` | Get a transaction by ID. Direct key lookup in immudb; falls back to MySQL. |
-| `POST` | `/transactions/:id/reverify` | Re-verify a transaction against SePay. Searches for a matching bank transaction by payment code + amount (falls back to amount-only match). Updates `reverifiedAt` and `sepayTransactionId` if a match is found. |
+| `POST` | `/transactions/:id/reverify` | Re-verify a transaction against SePay by payment code. Returns 404 if no matching SePay transaction is found or if the transaction has no payment code. |
 
 **VerificationType enum:** `AUTO` · `MANUAL`
 
