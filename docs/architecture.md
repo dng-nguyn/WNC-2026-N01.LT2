@@ -270,7 +270,7 @@ sequenceDiagram
 
 ### Sepay Integration
 
-The backend calls the Sepay API at `https://my.sepay.vn/userapi/transactions/list` with the configured bank account number and amount to verify that a bank transfer has been received. The account number and bank name are configured via `SEPAY_ACCOUNT_NUMBER` and `SEPAY_BANK_NAME` environment variables.
+The backend calls the Sepay API at `https://my.sepay.vn/userapi/transactions/list` to verify bank transfers. Verification matches by payment code — the backend scans recent SePay transactions for one whose `transaction_content` contains the payment code AND whose `amount_in` matches the order amount. The account number and bank name are configured via `SEPAY_ACCOUNT_NUMBER` and `SEPAY_BANK_NAME` environment variables.
 
 ## Deployment
 
