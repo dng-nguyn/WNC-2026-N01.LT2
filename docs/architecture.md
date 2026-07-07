@@ -8,7 +8,7 @@ Coffee shop POS/management system.
 |-------|-----------|---------|
 | Backend | NestJS (TypeScript, CommonJS) | 11 |
 | Frontend | React (TypeScript, ES modules) | 19 |
-| Build | Vite | 6 |
+| Build | Vite | 8 |
 | Database | MySQL | 8 |
 | ORM | TypeORM | 0.3 |
 | Auth | JWT + argon2id | — |

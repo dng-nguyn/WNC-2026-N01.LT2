@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { Transaction } from './transaction.entity';
 import { SePayService } from './sepay.service';
@@ -29,15 +29,23 @@ export class TransactionsController {
   async reverify(@Param('id') id: string): Promise<Transaction> {
     const tx = await this.transactionsService.findById(id);
 
-    // Try to match by payment code first, fall back to amount
-    let sepayMatch: { id: string } | null = null;
-    if (tx.payment?.code) {
-      sepayMatch = await this.sePayService.findTransactionByCode(tx.payment.code, Number(tx.amount));
-    }
-    if (!sepayMatch) {
-      sepayMatch = await this.sePayService.findTransactionForAmount(Number(tx.amount));
+    if (!tx.payment?.code) {
+      throw new NotFoundException(
+        `Transaction ${id} has no payment code — cannot reverify`,
+      );
     }
 
-    return this.transactionsService.updateReverified(id, sepayMatch?.id ?? null);
+    const sepayMatch = await this.sePayService.findTransactionByCode(
+      tx.payment.code,
+      Number(tx.amount),
+    );
+
+    if (!sepayMatch) {
+      throw new NotFoundException(
+        `No matching SePay transaction found for transaction ${id}`,
+      );
+    }
+
+    return this.transactionsService.updateReverified(id, sepayMatch.id);
   }
 }

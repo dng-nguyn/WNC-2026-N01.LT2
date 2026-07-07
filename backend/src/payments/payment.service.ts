@@ -137,6 +137,7 @@ export class PaymentService {
       await this.transactionsService.logTransaction({
         orderId: payment.order.id,
         paymentId: payment.id,
+        paymentCode: payment.code,
         amount: Number(payment.amount),
         verificationType: VerificationType.AUTO,
         sepayTransactionId: tx.id,
@@ -171,6 +172,7 @@ export class PaymentService {
       await this.transactionsService.logTransaction({
         orderId: payment.order.id,
         paymentId: payment.id,
+        paymentCode: payment.code,
         amount: Number(payment.amount),
         verificationType: VerificationType.MANUAL,
       });
