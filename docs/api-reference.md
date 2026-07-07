@@ -31,6 +31,8 @@ On successful login or registration the server sets access and refresh tokens as
 |--------|----------|------|-------------|
 | `POST` | `/auth/register` | No | Register a new user. Body: `username`, `password`, optional `fullName`, `phone`. |
 | `POST` | `/auth/login` | No | Login. Returns tokens in HTTP-only cookies. Body: `username`, `password`. |
+| `POST` | `/auth/refresh` | No | Refresh access token. Body: optional `refreshToken`. |
+| `POST` | `/auth/logout` | No | Logout. Clears authentication cookies. |
 | `GET` | `/auth/profile` | Yes | Get the current authenticated user's profile. |
 | `POST` | `/auth/change-password` | Yes | Change the authenticated user's password. Body: `currentPassword`, `newPassword`. |
 
@@ -44,7 +46,6 @@ On successful login or registration the server sets access and refresh tokens as
 | `GET` | `/users` | Yes | List all users. |
 | `GET` | `/users/:id` | Yes | Get a user by ID. |
 | `PATCH` | `/users/:id` | Yes (MANAGER) | Update a user. Requires MANAGER role. |
-| `DELETE` | `/users/:id` | Yes | Delete a user. |
 | `POST` | `/users/:id/reset-password` | Yes (MANAGER) | Reset a user's password. Body: optional `password` (if omitted, a random password is generated). Requires MANAGER role. |
 
 ---
@@ -65,7 +66,7 @@ On successful login or registration the server sets access and refresh tokens as
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/menu-items` | Create a menu item. Body: `name`, `price`, `menuId`, optional `description`, `imageUrl`. |
+| `POST` | `/menu-items` | Create a menu item. Body: `name`, `price`, `menuId`, optional `isAvailable`. |
 | `GET` | `/menu-items` | List all menu items. Supports `?menuId=` query parameter to filter by menu. |
 | `GET` | `/menu-items/:id` | Get a menu item by ID. |
 | `PATCH` | `/menu-items/:id` | Update a menu item. |
@@ -77,38 +78,41 @@ On successful login or registration the server sets access and refresh tokens as
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/tables` | Create a table. Body: `name`, `capacity`, optional `status`. |
+| `POST` | `/tables` | Create a table. Body: `tableNumber`, optional `status`. |
 | `GET` | `/tables` | List all tables. |
 | `GET` | `/tables/:id` | Get a table by ID. |
 | `PATCH` | `/tables/:id` | Update a table. |
 | `DELETE` | `/tables/:id` | Delete a table. |
 
-**Status enum:** `AVAILABLE` · `OCCUPIED` · `RESERVED` · `MAINTENANCE`
+**Status enum:** `EMPTY` · `OCCUPIED` · `RESERVED`
 
 ---
 
 ### Employees (`/employees`)
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/employees` | Create an employee. Body: `fullName`, `email`, optional `userId` (UUID), `phone`, `position`, `department`, `salary`. |
-| `GET` | `/employees` | List all employees (includes linked user). |
-| `GET` | `/employees/:id` | Get an employee by ID (includes linked user). |
-| `PATCH` | `/employees/:id` | Update an employee. All fields optional; set `userId: null` to unlink user. |
-| `DELETE` | `/employees/:id` | Delete an employee. |
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `POST` | `/employees` | Yes (MANAGER) | Create an employee. Body: `fullName`, `email`, optional `username`, `password`, `role`, `phone`, `position`, `department`, `salary`, `isActive`. Requires MANAGER role. |
+| `GET` | `/employees` | No | List all employees (includes linked user). |
+| `GET` | `/employees/:id` | No | Get an employee by ID (includes linked user). |
+| `PATCH` | `/employees/:id` | Yes (MANAGER) | Update an employee. All fields optional; set `userId: null` to unlink user. Requires MANAGER role. |
+| `DELETE` | `/employees/:id` | Yes (MANAGER) | Delete an employee. Requires MANAGER role. |
+| `POST` | `/employees/:id/reset-password` | Yes (MANAGER) | Reset an employee's password. Body: optional `newPassword` (if omitted, a random password is generated). Requires MANAGER role. |
 ---
 
 ### Orders (`/orders`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/orders` | Create an order. Body: `tableId`, `userId`, `items[]`. |
+| `POST` | `/orders` | Create an order. Body: optional `tableId`, `userId`, `items[]`. |
 | `GET` | `/orders` | List all orders. |
 | `GET` | `/orders/active` | List active orders only (status: `PENDING`, `CONFIRMED`, or `PREPARING`). Uses an inner join on `table` to exclude orders without an assigned table. Returns each order with its `table`, `user`, and `items` (including `menuItem`) relations. |
 | `GET` | `/orders/:id` | Get an order by ID. |
 | `PATCH` | `/orders/:id` | Update an order. |
 | `DELETE` | `/orders/:id` | Delete an order. |
-| `POST` | `/orders/:id/items` | Add an item to an existing order. |
+| `POST` | `/orders/:id/items` | Add an item to an existing order. Body: `menuItemId`, `quantity`, optional `note`. |
+| `PATCH` | `/orders/:id/items/:itemId` | Update an item in an order. Body: optional `quantity`, `note`. |
+| `DELETE` | `/orders/:id/items/:itemId` | Remove an item from an order. |
 
 **Status enum:** `PENDING` · `CONFIRMED` · `PREPARING` · `COMPLETED` · `CANCELLED`
 
@@ -118,7 +122,7 @@ On successful login or registration the server sets access and refresh tokens as
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/payments/qr` | Create a QR payment for an order. |
+| `POST` | `/payments/qr` | Create a QR payment for an order. Body: `orderId`. |
 | `GET` | `/payments/:id` | Get a payment by ID. |
 | `GET` | `/payments/order/:orderId` | Get all payments for a given order. |
 | `POST` | `/payments/:id/verify` | Verify a payment via Sepay. |

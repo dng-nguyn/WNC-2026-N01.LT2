@@ -236,12 +236,19 @@ sudo chown -R 3322:3322 /path/to/immudb/data
 
 ```sql
 CREATE TABLE IF NOT EXISTS transactions (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  table_id INT NOT NULL,
-  total DECIMAL(10,2) NOT NULL,
-  payment_method VARCHAR(50),
-  status VARCHAR(50) DEFAULT 'completed',
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  id UUID PRIMARY KEY,
+  order_id UUID NOT NULL,
+  payment_id UUID NULL,
+  amount DECIMAL(12,0) NOT NULL,
+  verification_type ENUM('AUTO','MANUAL') NOT NULL,
+  verified_at TIMESTAMP NOT NULL,
+  reverified_at TIMESTAMP NULL,
+  sepay_transaction_id VARCHAR(36) NULL,
+  immudb_tx_id BIGINT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_txn_order FOREIGN KEY (order_id) REFERENCES orders(id),
+  CONSTRAINT fk_txn_payment FOREIGN KEY (payment_id) REFERENCES payment_requests(id)
 );
 ```
 
@@ -271,8 +278,8 @@ SEPAY_API_KEY=your-api-key-here
 
 ```bash
 aws secretsmanager update-secret \
-  --secret-id coffee-shop-pos/credentials \
-  --secret-string '{"SEPAY_API_KEY": "your-api-key-here"}'
+  --secret-id coffee-shop-pos/sepay-api-key \
+  --secret-string 'your-api-key-here'
 ```
 
 3. Verify the key is present at runtime:
@@ -304,8 +311,8 @@ aws logs tail /ecs/coffee-shop-pos --follow | grep -i "admin"
 ```
 
 Expected log messages:
-- `Admin user created: <username>` — admin was successfully created on first boot.
-- `Admin user already exists` — an admin user was already present, no action taken.
+- `Admin user created with MANAGER role` — admin was successfully created on first boot.
+- `Admin auto-create skipped — MANAGER user exists` — an admin user was already present, no action taken.
 
 3. If neither message appears, verify the database is reachable and `DB_SYNC=true` is set (required for the users table to be auto-created in development).
 
