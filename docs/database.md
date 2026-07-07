@@ -111,7 +111,7 @@
 | amount | decimal(10,2) | |
 | status | enum | PENDING, COMPLETED, FAILED, EXPIRED |
 | qr_code | text | nullable |
-| sepay_id | varchar | nullable |
+| sepay_transaction_id | varchar | nullable |
 | created_at | timestamp | |
 | updated_at | timestamp | |
 
@@ -144,6 +144,24 @@
 - **Order (1) → Transaction (many):** Each order generates a transaction record on payment verification.
 - **Payment (1) → Transaction (0..1):** Each payment can be linked to a transaction.
 - **immudb (external):** Transaction history is primarily stored in immudb (immutable). MySQL stores `reverifiedAt` updates as a secondary cache.
+
+## immudb Data Structure
+
+Transaction records in immudb use key format `txn:{transactionId}` (MySQL PK) with a secondary index `order:{orderId}:{transactionId}` for order-based lookups. The immudb record stores the following fields:
+
+| Field | Type | Description |
+| --- | --- | --- |
+| transactionId | string | MySQL transaction PK (`immudb_tx_id` in MySQL) |
+| orderId | string | Linked order UUID |
+| paymentCode | string | Payment code used for SePay matching (nullable for legacy records) |
+| amount | number | Transaction amount in VND |
+| verificationType | string | `AUTO` or `MANUAL` |
+| sepayTransactionId | string | SePay transaction ID (set on auto-verify or reverify) |
+| verifiedAt | ISO 8601 | When the transaction was first verified |
+| reverifiedAt | ISO 8601 | When the transaction was last reverified (nullable) |
+| sepayReverifiedAt | ISO 8601 | When the SePay transaction itself was verified (nullable) |
+
+When `reverifiedAt` is updated, the existing record is rewritten immutably — the previous version remains in the audit log.
 
 ## Entity-to-Table Mapping Note
 
