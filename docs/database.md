@@ -55,11 +55,9 @@
 | Column | Type | Notes |
 | --- | --- | --- |
 | id | UUID | PK |
-| name | varchar | |
-| capacity | int | |
-| status | enum | AVAILABLE, OCCUPIED, RESERVED, MAINTENANCE |
+| table_number | varchar(20) | unique |
+| status | enum | EMPTY, OCCUPIED, RESERVED |
 | created_at | timestamp | |
-| updated_at | timestamp | |
 
 ### employees
 
@@ -83,10 +81,9 @@
 | --- | --- | --- |
 | id | UUID | PK |
 | table_id | UUID | FK → tables, nullable |
-| user_id | UUID | FK → users, nullable |
-| status | enum | PENDING, PREPARING, SERVED, COMPLETED, CANCELLED |
-| total_amount | decimal(10,2) | |
-| notes | text | nullable |
+| user_id | UUID | FK → users, NOT NULL, ON DELETE CASCADE |
+| status | enum | PENDING, CONFIRMED, PREPARING, COMPLETED, CANCELLED |
+| total_amount | decimal(10,2) | default 0 |
 | created_at | timestamp | |
 | updated_at | timestamp | |
 
@@ -107,11 +104,12 @@
 | Column | Type | Notes |
 | --- | --- | --- |
 | id | UUID | PK |
-| order_id | UUID | FK → orders |
-| amount | decimal(10,2) | |
+| order_id | UUID | FK → orders, NOT NULL, ON DELETE CASCADE |
+| code | varchar(12) | unique — payment code for SePay matching |
+| amount | decimal(12,0) | |
 | status | enum | PENDING, COMPLETED, FAILED, EXPIRED |
-| qr_code | text | nullable |
-| sepay_transaction_id | varchar | nullable |
+| qr_url | text | VietQR image URL |
+| sepay_transaction_id | varchar(36) | nullable |
 | created_at | timestamp | |
 | updated_at | timestamp | |
 
