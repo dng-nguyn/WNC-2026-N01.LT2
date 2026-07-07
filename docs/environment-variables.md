@@ -18,11 +18,15 @@ This document covers all environment variables used by the NestJS backend and Re
 | `NODE_ENV` | Yes | `development` | Runtime environment (`development` / `production`) |
 | `FRONTEND_URL` | Yes | `http://localhost:5173` | Allowed CORS origin — must match the actual frontend domain |
 | `JWT_SECRET` | Yes | — | Secret used to sign and verify JSON Web Tokens |
+| `JWT_ACCESS_EXPIRES` | No | `15m` | Access token lifetime (e.g. `15m`, `1h`) |
+| `JWT_REFRESH_EXPIRES` | No | `7d` | Refresh token lifetime (e.g. `7d`, `30d`) |
+| `JWT_REMEMBER_ME_EXPIRES` | No | `30d` | Remember-me token lifetime (e.g. `30d`, `90d`) |
 | `SESSION_SECRET` | Yes | — | Secret used to sign Express session cookies |
 | `PORT` | No | `3000` | Port the backend server listens on |
 | `SEPAY_API_KEY` | No | — | Sepay payment gateway API key |
-| `SEPAY_ACCOUNT_NUMBER` | No | — | Bank account number for Sepay transfers |
-| `SEPAY_BANK_NAME` | No | — | Bank name for Sepay transfers |
+| `SEPAY_ACCOUNT_NUMBER` | No | `3669420000` | Bank account number for Sepay transfers |
+| `SEPAY_BANK_NAME` | No | `MBBank` | Bank name for Sepay transfers |
+| `INIT_DB_SEED` | No | `false` | Seed database on first boot |
 | `IMMUDB_HOST` | No | — | immudb host (set to `localhost` for Docker Compose / sidecar) |
 | `IMMUDB_PORT` | No | `3322` | immudb gRPC port |
 | `IMMUDB_USER` | No | `immudb` | immudb username |
@@ -94,13 +98,20 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 
 JWT_SECRET=test-jwt-secret-change-me
+JWT_ACCESS_EXPIRES=15m
+JWT_REFRESH_EXPIRES=7d
+JWT_REMEMBER_ME_EXPIRES=30d
 SESSION_SECRET=test-session-secret-change-me
 PORT=3000
 
 SEPAY_API_KEY=your_sepay_api_key
+SEPAY_ACCOUNT_NUMBER=3669420000
+SEPAY_BANK_NAME=MBBank
+
+INIT_DB_SEED=false
 
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=your_admin_password
+ADMIN_PASSWORD=Change-me-in-production
 
 # Immudb (immutable audit log — optional)
 IMMUDB_HOST=localhost
@@ -108,8 +119,6 @@ IMMUDB_PORT=3322
 IMMUDB_USER=immudb
 IMMUDB_PASSWORD=immudb
 IMMUDB_DATABASE=defaultdb
-SEPAY_ACCOUNT_NUMBER=3669420000
-SEPAY_BANK_NAME=MBBank
 
 # Frontend (Vite dev server)
 VITE_PORT=5173

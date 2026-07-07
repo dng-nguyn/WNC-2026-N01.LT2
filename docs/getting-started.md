@@ -67,9 +67,11 @@ Copy `.env.example` to `.env` at the project root and configure:
 | `DB_DATABASE` | Database name | `Quan_Ly_Quan_Cafe` |
 | `DB_SYNC` | Auto-sync schema (dev only) | `true` |
 | `NODE_ENV` | Environment mode | `development` |
-| `JWT_SECRET` | JWT signing secret | `your_jwt_secret` |
-| `SESSION_SECRET` | Session signing secret | `your_session_secret` |
-| `PORT` | Backend server port | `3000` |
+| `JWT_SECRET` | JWT signing secret | `test-jwt-secret-change-me` |
+| `JWT_ACCESS_EXPIRES` | Access token lifetime | `15m` |
+| `JWT_REFRESH_EXPIRES` | Refresh token lifetime | `7d` |
+| `JWT_REMEMBER_ME_EXPIRES` | Remember-me token lifetime | `30d` |
+| `SESSION_SECRET` | Session signing secret | `test-session-secret-change-me` |
 | `SEPAY_API_KEY` | Sepay API key for QR payments | `your_sepay_api_key` |
 | `SEPAY_ACCOUNT_NUMBER` | Sepay account number | `3669420000` |
 | `SEPAY_BANK_NAME` | Sepay bank name | `MBBank` |
@@ -79,7 +81,7 @@ Copy `.env.example` to `.env` at the project root and configure:
 | `IMMUDB_PASSWORD` | immudb password (optional) | `immudb` |
 | `IMMUDB_DATABASE` | immudb database name (optional) | `defaultdb` |
 | `ADMIN_USERNAME` | Admin user username (auto-created on first boot) | `admin` |
-| `ADMIN_PASSWORD` | Admin user password (auto-created on first boot) | `your_admin_password` |
+| `ADMIN_PASSWORD` | Admin user password (auto-created on first boot) | `Change-me-in-production` |
 | `FRONTEND_URL` | Frontend origin for CORS | `http://localhost:5173` |
 | `VITE_PORT` | Vite dev server port | `5173` |
 | `VITE_API_BASE_URL` | API base URL for frontend | `http://localhost:3000` |

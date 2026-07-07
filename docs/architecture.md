@@ -127,8 +127,8 @@ All services live in `frontend/src/services/` and delegate to the core `api.ts` 
 | `order.service.ts` | Order creation and listing |
 | `payment.service.ts` | QR payment initiation and status polling |
 | `table.service.ts` | Table CRUD |
+| `employee.service.ts` | Employee CRUD |
 | `transaction.service.ts` | Fetch transactions, reverify via SePay |
-
 ### Custom Hooks
 
 | Hook | Responsibility |
@@ -150,15 +150,12 @@ Reusable components are organized under `frontend/src/components/`:
 
 ### Styling
 
-CSS files in `frontend/src/styles/`:
-
-| File | Scope |
-|------|-------|
-| `index.css` | Global reset and typography |
-| `auth.css` | Login/register pages |
-| `dashboard.css` | Dashboard layout and stats |
-| `pos.css` | Point-of-sale interface |
-
+| File | Path | Scope |
+|------|------|-------|
+| `index.css` | `frontend/src/index.css` | Global reset and typography |
+| `auth.css` | `frontend/src/styles/auth.css` | Login/register pages |
+| `dashboard.css` | `frontend/src/styles/dashboard.css` | Dashboard layout and stats |
+| `pos.css` | `frontend/src/styles/pos.css` | Point-of-sale interface |
 ### Internationalization
 
 Two locales via `frontend/src/i18n/`:
@@ -304,6 +301,9 @@ graph LR
 | `DB_SYNC` | Enable TypeORM schema sync (`true` in development) |
 | `NODE_ENV` | `development` or `production` |
 | `JWT_SECRET` | Secret for JWT signing |
+| `JWT_ACCESS_EXPIRES` | Access token lifetime (default `15m`) |
+| `JWT_REFRESH_EXPIRES` | Refresh token lifetime (default `7d`) |
+| `JWT_REMEMBER_ME_EXPIRES` | Remember-me token lifetime (default `30d`) |
 | `SESSION_SECRET` | Secret for express-session |
 | `PORT` | NestJS listen port (default `3000`) |
 | `FRONTEND_URL` | Allowed CORS origin |
