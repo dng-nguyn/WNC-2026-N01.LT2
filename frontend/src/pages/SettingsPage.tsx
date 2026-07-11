@@ -3,7 +3,7 @@ import { changePassword } from '../services/auth.service';
 import {
   getSepayConfig,
   setSepayApiKey,
-  deleteSepayApiKey,
+  removeSepayApiKey,
   listSepayAccounts,
   setSepayAccount,
   getSepayStatus,
@@ -30,7 +30,7 @@ export default function SettingsPage() {
   const [sepayLoading, setSepayLoading] = useState(false);
   const [sepayMessage, setSepayMessage] = useState('');
   const [sepayError, setSepayError] = useState('');
-  const [showApiKey, setShowApiKey] = useState(false);
+  const [changingApiKey, setChangingApiKey] = useState(false);
 
   // ── Load SePay config ──
   const loadSepayConfig = useCallback(async () => {
@@ -93,6 +93,7 @@ export default function SettingsPage() {
     try {
       await setSepayApiKey(apiKeyInput.trim());
       setApiKeyInput('');
+      setChangingApiKey(false);
       setSepayMessage('API key saved');
       await loadSepayConfig();
     } catch (err: unknown) {
@@ -102,16 +103,16 @@ export default function SettingsPage() {
     }
   }
 
-  // ── SePay: Remove API key ──
-  async function handleRemoveApiKey() {
+  // ── SePay: Change API key (remove old, show input) ──
+  async function handleChangeApiKey() {
     setSepayMessage('');
     setSepayError('');
     setSepayLoading(true);
     try {
-      await deleteSepayApiKey();
-      setSepayMessage('API key removed');
+      await removeSepayApiKey();
       setAccounts([]);
       setSelectedAccount('');
+      setChangingApiKey(true);
       await loadSepayConfig();
     } catch (err: unknown) {
       setSepayError(err instanceof Error ? err.message : 'Failed to remove API key');
@@ -172,6 +173,10 @@ export default function SettingsPage() {
       ? 'var(--color-warning, #f59e0b)'
       : 'var(--color-error, #ef4444)';
 
+  const maskedApiKey = sepayConfig?.apiKeyPreview
+    ? sepayConfig.apiKeyPreview.slice(0, 5) + '••••••••••••'
+    : null;
+
   return (
     <div className="page-container">
       <header className="page-header">
@@ -228,46 +233,30 @@ export default function SettingsPage() {
           <label style={{ fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>
             API Key
           </label>
-          {sepayConfig?.apiKeySet ? (
+          {sepayConfig?.apiKeySet && !changingApiKey ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
               <span style={{ fontFamily: 'monospace', fontSize: '0.9rem' }}>
-                {showApiKey ? sepayConfig.apiKeyPreview : '••••••••••••'}
+                {maskedApiKey}
               </span>
               <button
                 type="button"
                 className="btn btn-secondary"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
-                onClick={() => setShowApiKey(!showApiKey)}
-              >
-                {showApiKey ? 'Hide' : 'Show'}
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
-                onClick={handleRemoveApiKey}
+                style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
+                onClick={handleChangeApiKey}
                 disabled={sepayLoading}
               >
-                Remove
+                Change
               </button>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               <input
-                type={showApiKey ? 'text' : 'password'}
+                type="password"
                 placeholder="Enter your SePay API key"
                 value={apiKeyInput}
                 onChange={(e) => setApiKeyInput(e.target.value)}
                 style={{ flex: 1, minWidth: '200px' }}
               />
-              <button
-                type="button"
-                className="btn btn-secondary"
-                style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
-                onClick={() => setShowApiKey(!showApiKey)}
-              >
-                {showApiKey ? 'Hide' : 'Show'}
-              </button>
               <button
                 type="button"
                 className="btn btn-primary"
@@ -276,12 +265,24 @@ export default function SettingsPage() {
               >
                 {sepayLoading ? 'Saving…' : 'Save Key'}
               </button>
+              {sepayConfig?.apiKeySet && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => {
+                    setChangingApiKey(false);
+                    setApiKeyInput('');
+                  }}
+                >
+                  Cancel
+                </button>
+              )}
             </div>
           )}
         </div>
 
         {/* Bank Account section */}
-        {sepayConfig?.apiKeySet && (
+        {sepayConfig?.apiKeySet && !changingApiKey && (
           <div>
             <label style={{ fontWeight: 600, marginBottom: '0.5rem', display: 'block' }}>
               Bank Account
@@ -295,7 +296,7 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   className="btn btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.25rem 0.5rem' }}
+                  style={{ fontSize: '0.8rem', padding: '0.25rem 0.75rem' }}
                   onClick={handleFetchAccounts}
                   disabled={sepayLoading}
                 >

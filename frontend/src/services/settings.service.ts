@@ -1,4 +1,4 @@
-import { get, put, del } from './api';
+import { get, put, post } from './api';
 
 export interface SepayConfig {
   apiKeySet: boolean;
@@ -36,9 +36,10 @@ export async function setSepayApiKey(apiKey: string): Promise<{ success: boolean
   return put<{ success: boolean }>('/settings/sepay/api-key', { apiKey });
 }
 
-export async function deleteSepayApiKey(): Promise<{ success: boolean }> {
-  return del<{ success: boolean }>('/settings/sepay/api-key');
+export async function removeSepayApiKey(): Promise<{ success: boolean }> {
+  return post<{ success: boolean }>('/settings/sepay/api-key/remove');
 }
+
 
 export async function listSepayAccounts(): Promise<SepayBankAccount[]> {
   return get<SepayBankAccount[]>('/settings/sepay/accounts');
