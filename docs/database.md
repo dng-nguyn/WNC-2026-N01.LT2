@@ -130,6 +130,17 @@
 | updated_at | timestamp | |
 
 
+### settings
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| id | int | PK, auto-increment |
+| key | varchar(100) | unique — setting key name |
+| value | text | setting value (API keys stored encrypted) |
+| created_at | timestamp | |
+| updated_at | timestamp | |
+
+
 ## Relationships
 
 - **Menu (1) → MenuItem (many):** Each menu category contains multiple menu items.
