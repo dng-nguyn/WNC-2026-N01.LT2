@@ -60,6 +60,7 @@ All inbound requests pass through a global `ValidationPipe` configured with `whi
 | `OrderModule` | `src/orders/` | Order and order-item management |
 | `PaymentModule` | `src/payments/` | Payment creation, QR generation, Sepay verification |
 | `TransactionsModule` | `src/transactions/` | Transaction history, immudb logging, SePay reverify |
+| `SettingsModule` | `src/settings/` | Key-value settings store, SePay configuration, encrypted API key storage |
 
 ### Entity-to-Table Mapping
 
@@ -76,8 +77,9 @@ TypeORM entities do not always map 1:1 by name. The actual table names are:
 | `Employee` | `employees/employee.entity.ts` | `employees` |
 | `Payment` | `payments/payment.entity.ts` | `payment_requests` |
 | `Transaction` | `transactions/transaction.entity.ts` | `transactions` |
+| `Setting` | `settings/setting.entity.ts` | `settings` |
 
-All entities use UUID primary keys (`@PrimaryGeneratedColumn('uuid')`).
+Most entities use UUID primary keys (`@PrimaryGeneratedColumn('uuid')`). The `Setting` entity uses an auto-increment integer PK.
 
 ### Key Dependencies
 
@@ -267,7 +269,7 @@ sequenceDiagram
 
 ### Sepay Integration
 
-The backend calls the Sepay API at `https://my.sepay.vn/userapi/transactions/list` to verify bank transfers. Verification matches by payment code — the backend scans recent SePay transactions for one whose `transaction_content` contains the payment code AND whose `amount_in` matches the order amount. The account number and bank name are configured via `SEPAY_ACCOUNT_NUMBER` and `SEPAY_BANK_NAME` environment variables.
+The backend calls the Sepay API at `https://my.sepay.vn/userapi/transactions/list` to verify bank transfers. Verification matches by payment code — the backend scans recent SePay transactions for one whose `transaction_content` contains the payment code AND whose `amount_in` matches the order amount. The API key, account number, and bank name are stored in the database `settings` table (configurable via the Settings page at `/settings`). Environment variables (`SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, `SEPAY_BANK_NAME`) serve as fallbacks when DB settings are not configured.
 
 ## Deployment
 

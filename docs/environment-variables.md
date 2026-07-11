@@ -23,9 +23,9 @@ This document covers all environment variables used by the NestJS backend and Re
 | `JWT_REMEMBER_ME_EXPIRES` | No | `30d` | Remember-me token lifetime (e.g. `30d`, `90d`) |
 | `SESSION_SECRET` | Yes | — | Secret used to sign Express session cookies |
 | `PORT` | No | `3000` | Port the backend server listens on |
-| `SEPAY_API_KEY` | No | — | Sepay payment gateway API key |
-| `SEPAY_ACCOUNT_NUMBER` | No | `3669420000` | Bank account number for Sepay transfers |
-| `SEPAY_BANK_NAME` | No | `MBBank` | Bank name for Sepay transfers |
+| `SEPAY_API_KEY` | No | — | Sepay payment gateway API key. **Fallback only** — DB settings take priority. Configure via Settings page in the app. |
+| `SEPAY_ACCOUNT_NUMBER` | No | `3669420000` | Bank account number for Sepay transfers. **Fallback only** — DB settings take priority. |
+| `SEPAY_BANK_NAME` | No | `MBBank` | Bank name for Sepay transfers. **Fallback only** — DB settings take priority. |
 | `INIT_DB_SEED` | No | `false` | Seed database on first boot |
 | `IMMUDB_HOST` | No | — | immudb host (set to `localhost` for Docker Compose / sidecar) |
 | `IMMUDB_PORT` | No | `3322` | immudb gRPC port |

@@ -181,6 +181,10 @@ The task definition template (`.aws/task-definition.json`) uses placeholders tha
 
 Container environment variables (`NODE_ENV`, `PORT`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_SYNC`, `FRONTEND_URL`) are set directly in the task definition. All sensitive values are injected from AWS Secrets Manager at container startup.
 
+> **Self-healing schema:** The `settings` table is auto-created on application startup via `CREATE TABLE IF NOT EXISTS`. No manual migration is needed — the table will be created on first boot or after any deployment, even with `DB_SYNC=false`.
+
+> **SePay configuration:** The `SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, and `SEPAY_BANK_NAME` Secrets Manager entries are optional. SePay can be configured via the **Settings page** (`/settings`) in the app after logging in as a MANAGER. DB-stored settings take priority over environment variables. The API key is encrypted at rest (AES-256-GCM).
+
 ### Secrets Manager Setup
 
 The following secrets must exist in AWS Secrets Manager (same region as ECS). Create them via the AWS Console or CLI:

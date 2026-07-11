@@ -90,6 +90,8 @@ For full details, see [environment-variables.md](./environment-variables.md).
 
 > **Note:** On first boot, if no users exist in the database, the application automatically creates an admin (MANAGER) user using the `ADMIN_USERNAME` and `ADMIN_PASSWORD` environment variables. All other registered users are assigned the STAFF role.
 
+> **SePay Configuration:** The `SEPAY_API_KEY`, `SEPAY_ACCOUNT_NUMBER`, and `SEPAY_BANK_NAME` environment variables are optional fallbacks. The recommended approach is to configure SePay via the **Settings page** (`/settings`) in the app after logging in as a MANAGER. The Settings page allows you to enter your API key, fetch bank accounts from SePay, and select the account to use for QR payments. Configuration is stored in the database (API key encrypted at rest).
+
 ## Running Tests
 
 ```bash
