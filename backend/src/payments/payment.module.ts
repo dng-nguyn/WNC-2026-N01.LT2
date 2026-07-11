@@ -6,6 +6,7 @@ import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
 import { Order } from '../orders/order.entity';
 import { TransactionsModule } from '../transactions/transactions.module';
+import { SettingsModule } from '../settings/settings.module';
 @Module({
   imports: [
     HttpModule.register({
@@ -14,6 +15,7 @@ import { TransactionsModule } from '../transactions/transactions.module';
     }),
     TypeOrmModule.forFeature([Payment, Order]),
     TransactionsModule,
+    SettingsModule,
   ],
   controllers: [PaymentController],
   providers: [PaymentService],
