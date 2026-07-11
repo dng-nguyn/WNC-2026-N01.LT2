@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
 import { Setting } from './setting.entity';
 
@@ -20,7 +20,7 @@ const ENV_FALLBACK: Record<string, string> = {
 };
 
 @Injectable()
-export class SettingsService {
+export class SettingsService implements OnModuleInit {
   private readonly logger = new Logger(SettingsService.name);
   private readonly encryptionKey: Buffer | null;
 
@@ -28,15 +28,32 @@ export class SettingsService {
     @InjectRepository(Setting)
     private readonly settingsRepository: Repository<Setting>,
     private readonly configService: ConfigService,
+    private readonly dataSource: DataSource,
   ) {
     const secret = this.configService.get<string>('SETTINGS_ENCRYPTION_KEY')
       ?? this.configService.get<string>('JWT_SECRET');
     if (secret) {
-      // Derive a 256-bit key from the secret using SHA-256
       this.encryptionKey = crypto.createHash('sha256').update(secret).digest();
     } else {
       this.encryptionKey = null;
       this.logger.warn('No SETTINGS_ENCRYPTION_KEY or JWT_SECRET — settings will be stored in plaintext');
+    }
+  }
+
+  async onModuleInit() {
+    try {
+      await this.dataSource.query(
+        'CREATE TABLE IF NOT EXISTS `settings` ('
+        + 'id INT AUTO_INCREMENT PRIMARY KEY,'
+        + '`key` VARCHAR(100) NOT NULL UNIQUE,'
+        + 'value TEXT NOT NULL,'
+        + 'created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,'
+        + 'updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'
+        + ')',
+      );
+      this.logger.log('settings table ready');
+    } catch (err) {
+      this.logger.warn(`Could not create settings table: ${err instanceof Error ? err.message : err}`);
     }
   }
 

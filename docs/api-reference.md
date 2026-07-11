@@ -140,7 +140,22 @@ On successful login or registration the server sets access and refresh tokens as
 
 **VerificationType enum:** `AUTO` · `MANUAL`
 
----
+### Settings (`/settings`)
+
+All settings endpoints require authentication. Configuration endpoints require the `MANAGER` role. The status endpoint is accessible to all authenticated users.
+
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| `GET` | `/settings/sepay` | MANAGER | Get SePay configuration (API key preview, account details). |
+| `PUT` | `/settings/sepay/api-key` | MANAGER | Save SePay API key. Body: `apiKey` (string). Key is encrypted at rest. |
+| `POST` | `/settings/sepay/api-key/remove` | MANAGER | Remove SePay API key and all associated account settings. |
+| `GET` | `/settings/sepay/accounts` | MANAGER | List bank accounts from SePay API. Requires a valid API key to be set. |
+| `PUT` | `/settings/sepay/account` | MANAGER | Save selected bank account. Body: `accountNumber`, `bankName`, `bankBin`, `accountHolder`. |
+| `GET` | `/settings/sepay/status` | Yes | Check SePay connection status. Returns `configured`, `valid`, and `message`. Accessible to all authenticated users. |
+| `PUT` | `/settings` | MANAGER | Set a generic setting. Body: `key`, `value`. |
+| `GET` | `/settings/:key` | MANAGER | Get a setting by key. |
+
+
 ### Health Check
 
 | Method | Endpoint | Description |
