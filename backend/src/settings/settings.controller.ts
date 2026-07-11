@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Put,
   Delete,
   Param,
@@ -9,7 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { SettingsService } from './settings.service';
-import { UpdateSettingDto } from './dto/update-setting.dto';
+import { UpdateSettingDto, SepayApiKeyDto, SepayAccountDto } from './dto/update-setting.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -57,7 +58,7 @@ export class SettingsController {
     return {
       apiKeySet: !!keys.sepay_api_key,
       apiKeyPreview: keys.sepay_api_key
-        ? `${keys.sepay_api_key.slice(0, 8)}...`
+        ? keys.sepay_api_key.slice(0, 5)
         : null,
       accountNumber: keys.sepay_account_number,
       bankName: keys.sepay_bank_name,
@@ -67,7 +68,7 @@ export class SettingsController {
   }
 
   @Put('sepay/api-key')
-  async setSepayApiKey(@Body() body: { apiKey: string }) {
+  async setSepayApiKey(@Body() body: SepayApiKeyDto) {
     if (!body.apiKey?.trim()) {
       throw new BadRequestException('API key is required');
     }
@@ -75,8 +76,8 @@ export class SettingsController {
     return { success: true };
   }
 
-  @Delete('sepay/api-key')
-  async deleteSepayApiKey() {
+  @Post('sepay/api-key/remove')
+  async removeSepayApiKey() {
     await this.settingsService.delete('sepay_api_key');
     await this.settingsService.delete('sepay_account_number');
     await this.settingsService.delete('sepay_bank_name');
@@ -114,15 +115,7 @@ export class SettingsController {
   }
 
   @Put('sepay/account')
-  async setSepayAccount(
-    @Body()
-    body: {
-      accountNumber: string;
-      bankName: string;
-      bankBin: string;
-      accountHolder: string;
-    },
-  ) {
+  async setSepayAccount(@Body() body: SepayAccountDto) {
     if (!body.accountNumber || !body.bankName) {
       throw new BadRequestException(
         'Account number and bank name are required',

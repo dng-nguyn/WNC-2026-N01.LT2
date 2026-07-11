@@ -103,7 +103,7 @@ export class SettingsService {
   }
 
   async delete(key: string): Promise<void> {
-    await this.settingsRepository.delete(key);
+    await this.settingsRepository.delete({ key });
   }
 
   async getMany(keys: string[]): Promise<Record<string, string | null>> {
