@@ -77,6 +77,10 @@ export function patch<T>(path: string, body?: unknown): Promise<T> {
   return apiRequest<T>('PATCH', path, body);
 }
 
+export function put<T>(path: string, body?: unknown): Promise<T> {
+  return apiRequest<T>('PUT', path, body);
+}
+
 export function del<T = void>(path: string): Promise<T> {
   return apiRequest<T>('DELETE', path);
 }

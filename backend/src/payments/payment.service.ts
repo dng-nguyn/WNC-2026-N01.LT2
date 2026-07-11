@@ -1,6 +1,5 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as crypto from 'node:crypto';
@@ -11,6 +10,7 @@ import { Order } from '../orders/order.entity';
 import { OrderStatus } from '../orders/order-status.enum';
 import { TransactionsService } from '../transactions/transactions.service';
 import { VerificationType } from '../transactions/verification-type.enum';
+import { SettingsService } from '../settings/settings.service';
 
 @Injectable()
 export class PaymentService {
@@ -19,7 +19,7 @@ export class PaymentService {
     private readonly paymentRepository: Repository<Payment>,
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-    private readonly configService: ConfigService,
+    private readonly settingsService: SettingsService,
     private readonly httpService: HttpService,
     private readonly transactionsService: TransactionsService,
   ) {}
@@ -42,8 +42,8 @@ export class PaymentService {
     const code = this.generateCode(12);
     const amountVnd = Math.round(Number(order.totalAmount));
 
-    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '3669420000';
-    const bankName = this.configService.get<string>('SEPAY_BANK_NAME') || 'MBBank';
+    const accountNumber = await this.settingsService.get('sepay_account_number') || '3669420000';
+    const bankName = await this.settingsService.get('sepay_bank_name') || 'MBBank';
 
     const qrUrl =
       `https://vietqr.app/img` +
@@ -101,9 +101,9 @@ export class PaymentService {
       return payment;
     }
 
-    const apiKey = this.configService.get<string>('SEPAY_API_KEY');
+    const apiKey = await this.settingsService.get('sepay_api_key');
     if (!apiKey) {
-      throw new BadRequestException('SEPAY_API_KEY not configured');
+      throw new BadRequestException('SePay API key not configured');
     }
 
     // Query Sepay for matching transaction
@@ -190,7 +190,7 @@ export class PaymentService {
     code: string,
     amount: number,
   ): Promise<{ id: string } | null> {
-    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '3669420000';
+    const accountNumber = await this.settingsService.get('sepay_account_number') || '3669420000';
     try {
       const response = await firstValueFrom(
         this.httpService.get<{

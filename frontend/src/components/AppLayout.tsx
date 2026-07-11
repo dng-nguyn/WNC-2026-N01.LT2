@@ -15,6 +15,7 @@ const allNavItems = [
   { path: '/menus', labelKey: 'nav.categories' as const, icon: '📁', roles: ['MANAGER'] },
   { path: '/menu-items', labelKey: 'nav.menuItems' as const, icon: '☕', roles: ['MANAGER'] },
   { path: '/transactions', labelKey: 'nav.transactions' as const, icon: '📋', roles: ['MANAGER', 'STAFF'] },
+  { path: '/settings', labelKey: 'nav.settings' as const, icon: '⚙️', roles: ['MANAGER'] },
   { path: '/employees', labelKey: 'nav.employees' as const, icon: '👥', roles: ['MANAGER'] },
 ];
 

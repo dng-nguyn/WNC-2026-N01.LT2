@@ -13,6 +13,7 @@ import { TableModule } from './tables/table.module';
 import { PaymentModule } from './payments/payment.module';
 import { UsersModule } from './users/users.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { SettingsModule } from './settings/settings.module';
 
 @Module({
   controllers: [AppController],
@@ -56,6 +57,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     AuthModule,
     TableModule,
     TransactionsModule,
+    SettingsModule,
   ],
 })
 export class AppModule {}

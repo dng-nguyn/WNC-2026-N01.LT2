@@ -1,9 +1,9 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { SettingsService } from '../settings/settings.service';
 
-interface SepayTransaction {
+export interface SepayTransaction {
   id: string;
   bank_brand_name: string;
   account_number: string;
@@ -31,16 +31,19 @@ export class SePayService {
 
   constructor(
     private readonly httpService: HttpService,
-    private readonly configService: ConfigService,
+    private readonly settingsService: SettingsService,
   ) {}
 
   async listTransactions(limit = 5000): Promise<SepayTransaction[]> {
-    const apiKey = this.configService.get<string>('SEPAY_API_KEY');
+    const apiKey = await this.settingsService.get('sepay_api_key');
     if (!apiKey) {
-      throw new BadRequestException('SEPAY_API_KEY not configured');
+      throw new BadRequestException('SePay API key not configured');
     }
 
-    const accountNumber = this.configService.get<string>('SEPAY_ACCOUNT_NUMBER') || '3669420000';
+    const accountNumber = await this.settingsService.get('sepay_account_number');
+    if (!accountNumber) {
+      throw new BadRequestException('SePay bank account not configured');
+    }
 
     try {
       const response = await firstValueFrom(
@@ -68,16 +71,23 @@ export class SePayService {
     }
   }
 
-  async findTransactionByCode(code: string, amount: number): Promise<SepayTransaction | null> {
+  async findTransactionByCode(
+    code: string,
+    amount: number,
+  ): Promise<SepayTransaction | null> {
     const txs = await this.listTransactions(100);
-    return txs.find(
-      (tx) =>
-        tx.transaction_content?.includes(code) &&
-        Number(tx.amount_in) === amount,
-    ) ?? null;
+    return (
+      txs.find(
+        (tx) =>
+          tx.transaction_content?.includes(code) &&
+          Number(tx.amount_in) === amount,
+      ) ?? null
+    );
   }
 
-  async findTransactionForAmount(amount: number): Promise<SepayTransaction | null> {
+  async findTransactionForAmount(
+    amount: number,
+  ): Promise<SepayTransaction | null> {
     const txs = await this.listTransactions(50);
     return txs.find((tx) => Number(tx.amount_in) === amount) ?? null;
   }

@@ -6,9 +6,10 @@ import { TransactionsService } from './transactions.service';
 import { TransactionsController } from './transactions.controller';
 import { ImmudbService } from './immudb.service';
 import { SePayService } from './sepay.service';
+import { SettingsModule } from '../settings/settings.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Transaction]), HttpModule],
+  imports: [TypeOrmModule.forFeature([Transaction]), HttpModule, SettingsModule],
   controllers: [TransactionsController],
   providers: [TransactionsService, ImmudbService, SePayService],
   exports: [TransactionsService],
