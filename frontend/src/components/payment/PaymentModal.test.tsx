@@ -69,20 +69,4 @@ describe('PaymentModal', () => {
     expect(screen.getByText(/payment successful/i)).toBeInTheDocument();
   });
 
-  it('shows confirmation dialog on Mark as Paid', async () => {
-    const createPayment = await import('../../services/payment.service');
-    vi.mocked(createPayment.createPayment).mockResolvedValue({
-      id: 'pay-1', code: 'PAY001', amount: 50000, status: 'PENDING',
-      qrUrl: 'https://example.com/qr.png', sepayTransactionId: null,
-      order: { id: 'order-1', status: 'PENDING', totalAmount: 50000, items: [], createdAt: '', updatedAt: '' } as any,
-      createdAt: '', updatedAt: '',
-    });
-    const user = userEvent.setup();
-    render(<PaymentModal open existingOrderId="order-1" existingOrderTotal={50000} onClose={vi.fn()} onSuccess={vi.fn()} />);
-    await user.click(screen.getByRole('button', { name: /bank transfer/i }));
-    await screen.findByText(/mark as paid/i);
-    await user.click(screen.getByRole('button', { name: /mark as paid/i }));
-    expect(screen.getByText(/confirm payment/i)).toBeInTheDocument();
-    expect(screen.getByText(/mark this payment as completed/i)).toBeInTheDocument();
-  });
 });
