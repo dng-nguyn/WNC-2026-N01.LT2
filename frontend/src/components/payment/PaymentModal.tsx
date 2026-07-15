@@ -3,6 +3,7 @@ import { createOrder } from '../../services/order.service';
 import {
   createPayment,
   verifyPayment,
+  markManualPayment,
 } from '../../services/payment.service';
 import { getLoggedInUser } from '../../services/auth.service';
 import { Modal, Alert } from '../../components/ui';
@@ -20,7 +21,8 @@ interface PaymentModalProps {
   onSuccess: () => void;
 }
 
-type Step = 'select-method' | 'creating-order' | 'show-qr' | 'success' | 'error';
+type Step = 'select-method' | 'creating-order' | 'show-qr' | 'confirm-mark-paid' | 'success' | 'error';
+
 const POLL_INTERVAL_MS = 3000;
 const POLL_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -193,6 +195,21 @@ export default function PaymentModal({
     }
   }
 
+  // Mark as Paid — show confirmation step
+  function handleMarkAsPaid() {
+    setStep('confirm-mark-paid');
+  }
+  async function confirmMarkAsPaid() {
+    if (payment) {
+      try {
+        await markManualPayment(payment.id);
+      } catch {
+        // logged on backend, non-blocking
+      }
+    }
+    stopPolling();
+    setStep('success');
+  }
 
   function handleRetry() {
     setStep('select-method');
@@ -272,6 +289,14 @@ export default function PaymentModal({
         </div>
 
         {error && <Alert variant="error">{error}</Alert>}
+
+        <button
+          className="btn btn-primary btn-block"
+          onClick={handleMarkAsPaid}
+          style={{ marginTop: 8 }}
+        >
+          Mark as Paid
+        </button>
       </div>
     );
   }
@@ -321,6 +346,35 @@ export default function PaymentModal({
     );
   }
 
+  function renderConfirmMarkPaid() {
+    return (
+      <div className="payment-confirm">
+        <p style={{ fontSize: '1.1rem', marginBottom: 16, textAlign: 'center' }}>
+          Mark this payment as completed?
+        </p>
+        <p className="text-muted" style={{ marginBottom: 24, textAlign: 'center' }}>
+          Only confirm if the customer has transferred the payment.
+        </p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => setStep('show-qr')}
+            style={{ flex: 1 }}
+          >
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={confirmMarkAsPaid}
+            style={{ flex: 1 }}
+          >
+            Confirm
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const modalTitle =
     step === 'select-method'
       ? 'Select Payment Method'
@@ -328,6 +382,8 @@ export default function PaymentModal({
       ? 'Processing…'
       : step === 'show-qr'
       ? 'Bank Transfer'
+      : step === 'confirm-mark-paid'
+      ? 'Confirm Payment'
       : step === 'success'
       ? 'Payment Complete'
       : 'Payment Failed';
@@ -337,6 +393,7 @@ export default function PaymentModal({
       {step === 'select-method' && renderMethodSelection()}
       {step === 'creating-order' && renderCreating()}
       {step === 'show-qr' && renderQR()}
+      {step === 'confirm-mark-paid' && renderConfirmMarkPaid()}
       {step === 'success' && renderSuccess()}
       {step === 'error' && renderError()}
     </Modal>
