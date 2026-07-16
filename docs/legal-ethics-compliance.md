@@ -170,10 +170,8 @@ This law protects intellectual property in Vietnam, including software. Key prov
 **Implementation:**
 - All original source code is protected by copyright upon creation
 - Dependencies used under their respective open-source licenses (MIT, Apache 2.0, BSD)
-- No proprietary code from third parties is used without proper licensing
-
-> **Full text (Vietnamese):** https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Suu-huu-tri-tue-2005-298865.aspx
-> **English translation:** https://www.wipo.int/wipolex/en/legislation/details/16315
+> **Full text (Vietnamese):** https://vanban.chinhphu.vn/?pageid=27160&docid=30015
+> **English translation:** https://www.wipo.int/wipolex/en/text/449011
 
 ---
 
@@ -322,7 +320,7 @@ Protecting user data and financial transactions is not just a technical requirem
 | Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân | https://thuvienphapluat.vn/van-ban/EN/Cong-nghe-thong-tin/Decree-No-13-2023-ND-CP-dated-April-17-2023-on-protection-of-personal-data/564343/tieng-anh.aspx |
 | Luật Giao dịch điện tử 2005 (51/2005/QH11) | https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=29675 |
 | Luật Công nghệ thông tin 2006 (67/2006/QH11) | https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Cong-nghe-thong-tin-2006-298865.aspx |
-| Luật Sở hữu trí tuệ 2005 (50/2005/QH11) | https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Suu-huu-tri-tue-2005-298865.aspx |
+| Luật Sở hữu trí tuệ 2005 (50/2005/QH11) | https://vanban.chinhphu.vn/?pageid=27160&docid=30015 |
 
 ### International Standards and Frameworks
 
@@ -332,7 +330,7 @@ Protecting user data and financial transactions is not just a technical requirem
 | IEEE Code of Ethics for Software Engineers | https://www.computer.org/education/code-of-ethics |
 | OWASP Top 10:2021 | https://owasp.org/Top10/ |
 | ISO/IEC 27001 Information Security | https://www.iso.org/isoiec-27001-information-security.html |
-| WIPO Lex (Vietnam IP Law English translation) | https://www.wipo.int/wipolex/en/legislation/details/16315 |
+| WIPO Lex (Vietnam IP Law English translation) | https://www.wipo.int/wipolex/en/text/449011 |
 
 ### Payment Integration Documentation
 
