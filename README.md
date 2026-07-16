@@ -77,14 +77,13 @@ See [docs/deployment.md](docs/deployment.md) for full setup instructions.
 | [Deployment](docs/deployment.md) | All three deploy methods |
 | [CI/CD](docs/ci-cd.md) | GitHub Actions pipelines |
 | [Runbook](docs/runbook.md) | Troubleshooting and operations |
-
+| [Legal, Ethics & Compliance](docs/legal-ethics-compliance.md) | Vietnamese laws, social ethics, professional ethics, security standards |
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Backend | NestJS 11, TypeScript, TypeORM 0.3 |
-| Frontend | React 19, Vite 6, TypeScript |
-| Database | MySQL 8 |
+| Frontend | React 19, Vite 8, TypeScript |
 | Audit Log | immudb (immutable, optional) |
 | Auth | JWT + argon2id, HTTP-only cookies |
 | Payment | Sepay API + VietQR |
