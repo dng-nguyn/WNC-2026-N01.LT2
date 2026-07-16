@@ -1,5 +1,7 @@
 # Legal, Social Ethics & Professional Ethics Compliance
 
+> 🇻🇳 **Phiên bản tiếng Việt:** [legal-ethics-compliance-vi.md](legal-ethics-compliance-vi.md)
+
 This document provides a comprehensive analysis of the legal, social ethics, and professional ethics considerations for the Coffee Shop POS & Management System. It maps each applicable law, ethical framework, and security standard to specific implementation decisions in the codebase.
 
 ---
