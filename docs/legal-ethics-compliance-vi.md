@@ -1,5 +1,7 @@
 # Tuân thủ Pháp luật, Đạo đức Xã hội & Đạo đức Nghề nghiệp
 
+> 🇬🇧 **English version:** [legal-ethics-compliance.md](legal-ethics-compliance.md)
+
 Tài liệu này cung cấp phân tích toàn diện về các yếu tố pháp luật, đạo đức xã hội và đạo đức nghề nghiệp áp dụng cho Hệ thống POS & Quản lý Quán cà phê. Mỗi luật, khung đạo đức và tiêu chuẩn bảo mật được ánh xạ cụ thể đến các quyết định triển khai trong mã nguồn.
 
 ---
