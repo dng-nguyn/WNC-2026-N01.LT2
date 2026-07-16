@@ -15,6 +15,8 @@ Documentation for the Coffee Shop POS/Management System.
 | [CI/CD](./ci-cd.md) | GitHub Actions workflows, secrets, triggers |
 | [Runbook](./runbook.md) | Operational troubleshooting, scaling, teardown |
 | [ADR: Entity Mapping](./adr/001-entity-table-mapping.md) | Why Menu→categories and MenuItem→products |
+| [Legal, Ethics & Compliance](./legal-ethics-compliance.md) | Vietnamese laws, social ethics, professional ethics, security standards |
+| [Pháp luật & Đạo đức (TV)](./legal-ethics-compliance-vi.md) | Phiên bản tiếng Việt — Luật VN, đạo đức xã hội, đạo đức nghề nghiệp |
 
 ## Key Concepts
 
