@@ -6,7 +6,7 @@ Tài liệu này cung cấp phân tích toàn diện về các yếu tố pháp 
 
 ## Mục lục
 
-- [1. Tuân thủ Pháp luật (Luật)](#1-tuân-thủ-pháp-luật-luật)
+- [1. Tuân thủ Pháp luật](#1-tuân-thủ-pháp-luật-luật)
   - [1.1 Luật An toàn thông tin mạng 2015](#11-luật-an-toàn-thông-tin-mạng-2015)
   - [1.2 Luật An ninh mạng 2018](#12-luật-an-ninh-mạng-2018)
   - [1.3 Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân](#13-nghị-định-132023nd-cp-về-bảo-vệ-dữ-liệu-cá-nhân)
