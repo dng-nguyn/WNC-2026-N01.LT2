@@ -78,6 +78,7 @@ See [docs/deployment.md](docs/deployment.md) for full setup instructions.
 | [CI/CD](docs/ci-cd.md) | GitHub Actions pipelines |
 | [Runbook](docs/runbook.md) | Troubleshooting and operations |
 | [Legal, Ethics & Compliance](docs/legal-ethics-compliance.md) | Vietnamese laws, social ethics, professional ethics, security standards |
+| [Pháp luật & Đạo đức (TV)](docs/legal-ethics-compliance-vi.md) | Phiên bản tiếng Việt — Luật VN, đạo đức xã hội, đạo đức nghề nghiệp |
 ## Tech Stack
 
 | Layer | Technology |
