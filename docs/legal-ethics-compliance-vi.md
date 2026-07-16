@@ -142,7 +142,7 @@ Luật này cung cấp khung pháp lý cho ứng dụng và phát triển công 
 | **Điều 51** | Quản lý an toàn thông tin | Bảo mật nhiều lớp: xác thực JWT, RBAC, rate limiting, kiểm tra đầu vào, mã hóa secrets |
 
 **Triển khai:**
-- Tất cả dependencies đều là mã nguồn mở với giấy phép宽松 (MIT, Apache 2.0, BSD)
+- Tất cả dependencies đều là mã nguồn mở với giấy phép (MIT, Apache 2.0, BSD)
 - Kiến trúc bảo mật tuân thủ nguyên tắc defense-in-depth
 
 > **Toàn văn (Tiếng Anh):** https://www.wipo.int/wipolex/en/legislation/details/16315
