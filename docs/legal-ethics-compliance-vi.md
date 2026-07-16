@@ -172,8 +172,8 @@ Luật này bảo vệ sở hữu trí tuệ tại Việt Nam, bao gồm phần 
 - Dependencies sử dụng theo giấy phép mã nguồn mở tương ứng (MIT, Apache 2.0, BSD)
 - Không sử dụng mã nguồn độc quyền từ bên thứ ba mà không có giấy phép phù hợp
 
-> **Toàn văn (Tiếng Việt):** https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Suu-huu-tri-tue-2005-298865.aspx
-> **Bản dịch tiếng Anh:** https://www.wipo.int/wipolex/en/legislation/details/16315
+> **Toàn văn (Tiếng Việt):** https://vanban.chinhphu.vn/?pageid=27160&docid=30015
+> **Bản dịch tiếng Anh:** https://www.wipo.int/wipolex/en/text/449011
 
 ---
 
@@ -322,7 +322,7 @@ Bảo vệ dữ liệu người dùng và giao dịch tài chính không chỉ l
 | Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân | https://thuvienphapluat.vn/van-ban/EN/Cong-nghe-thong-tin/Decree-No-13-2023-ND-CP-dated-April-17-2023-on-protection-of-personal-data/564343/tieng-anh.aspx |
 | Luật Giao dịch điện tử 2005 (51/2005/QH11) | https://vanban.chinhphu.vn/default.aspx?pageid=27160&docid=29675 |
 | Luật Công nghệ thông tin 2006 (67/2006/QH11) | https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Cong-nghe-thong-tin-2006-298865.aspx |
-| Luật Sở hữu trí tuệ 2005 (50/2005/QH11) | https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Suu-huu-tri-tue-2005-298865.aspx |
+| Luật Sở hữu trí tuệ 2005 (50/2005/QH11) | https://vanban.chinhphu.vn/?pageid=27160&docid=30015 |
 
 ### Tiêu chuẩn và khung quốc tế
 
@@ -332,7 +332,7 @@ Bảo vệ dữ liệu người dùng và giao dịch tài chính không chỉ l
 | IEEE Code of Ethics for Software Engineers | https://www.computer.org/education/code-of-ethics |
 | OWASP Top 10:2021 | https://owasp.org/Top10/ |
 | ISO/IEC 27001 An toàn thông tin | https://www.iso.org/isoiec-27001-information-security.html |
-| WIPO Lex (Bản dịch tiếng Anh Luật SHTT Việt Nam) | https://www.wipo.int/wipolex/en/legislation/details/16315 |
+| WIPO Lex (Bản dịch tiếng Anh Luật SHTT Việt Nam) | https://www.wipo.int/wipolex/en/text/449011 |
 
 ### Tài liệu tích hợp thanh toán
 
