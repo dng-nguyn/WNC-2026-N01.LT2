@@ -147,8 +147,8 @@ This law provides the legal framework for IT application and development in Viet
 - All dependencies are open-source with permissive licenses (MIT, Apache 2.0, BSD)
 - Security architecture follows defense-in-depth principle
 
-> **Full text (English):** https://www.wipo.int/wipolex/en/legislation/details/16315
 > **Full text (Vietnamese):** https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Cong-nghe-thong-tin-2006-298865.aspx
+> **Government Portal:** https://vanban.chinhphu.vn/?pageid=27160&docid=298865
 
 ---
 
