@@ -147,8 +147,8 @@ Luật này cung cấp khung pháp lý cho ứng dụng và phát triển công 
 - Tất cả dependencies đều là mã nguồn mở với giấy phép (MIT, Apache 2.0, BSD)
 - Kiến trúc bảo mật tuân thủ nguyên tắc defense-in-depth
 
-> **Toàn văn (Tiếng Anh):** https://www.wipo.int/wipolex/en/legislation/details/16315
 > **Toàn văn (Tiếng Việt):** https://thuvienphapluat.vn/van-ban/Cong-nghe-thong-tin/Luat-Cong-nghe-thong-tin-2006-298865.aspx
+> **Toàn văn (Cổng TTCP):** https://vanban.chinhphu.vn/?pageid=27160&docid=298865
 
 ---
 
