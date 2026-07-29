@@ -73,13 +73,7 @@ export class TransactionsService {
   }
 
   async findAll(limit = 50, dateFrom?: string, dateTo?: string): Promise<Transaction[]> {
-    // PRIMARY: Read from immudb
-    if (this.immudbService.isConnected) {
-      return this.findAllFromImmudb(limit, dateFrom, dateTo);
-    }
-
-    // FALLBACK: Read from MySQL
-    this.logger.log('Immudb unavailable — falling back to MySQL');
+    // PRIMARY: Read from MySQL (has proper order/payment relations)
     const where: Record<string, unknown> = {};
     if (dateFrom || dateTo) {
       const from = dateFrom ? new Date(dateFrom + 'T00:00:00') : new Date('2000-01-01');
@@ -87,12 +81,27 @@ export class TransactionsService {
       where.verifiedAt = Between(from, to);
     }
 
-    return this.transactionRepository.find({
-      where,
-      relations: { order: true, payment: true },
-      order: { createdAt: 'DESC' },
-      take: limit,
-    });
+    try {
+      const results = await this.transactionRepository.find({
+        where,
+        relations: { order: true, payment: true },
+        order: { createdAt: 'DESC' },
+        take: limit,
+      });
+      if (results.length > 0) {
+        return results;
+      }
+    } catch (err: unknown) {
+      this.logger.warn(`MySQL query failed: ${err instanceof Error ? err.message : err}`);
+    }
+
+    // FALLBACK: Read from immudb (no relations, but survives MySQL loss)
+    if (this.immudbService.isConnected) {
+      this.logger.log('MySQL empty — falling back to immudb');
+      return this.findAllFromImmudb(limit, dateFrom, dateTo);
+    }
+
+    return [];
   }
 
   async findAllFromImmudb(limit = 50, dateFrom?: string, dateTo?: string): Promise<Transaction[]> {
@@ -136,20 +145,20 @@ export class TransactionsService {
   }
 
   async findById(id: string): Promise<Transaction> {
-    // PRIMARY: Direct key lookup in immudb
+    // PRIMARY: Look up in MySQL (has proper relations)
+    const tx = await this.transactionRepository.findOne({
+      where: { id },
+      relations: { order: true, payment: true },
+    });
+    if (tx) return tx;
+
+    // FALLBACK: Direct key lookup in immudb
     if (this.immudbService.isConnected) {
       const match = await this.immudbService.getTransaction(id);
       if (match) {
         return this.immudbDataToTransaction(match);
       }
     }
-
-    // FALLBACK: Look up in MySQL
-    const tx = await this.transactionRepository.findOne({
-      where: { id },
-      relations: { order: true, payment: true },
-    });
-    if (tx) return tx;
 
     throw new Error(`Transaction ${id} not found`);
   }
